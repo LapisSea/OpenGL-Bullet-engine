@@ -1,0 +1,22 @@
+
+
+out vec3 normal;
+out vec3 toCamera;
+
+out vec3 vecToPointLight["<MAX_POINT_LIGHT>"];
+uniform vec3 pointLightPos["<MAX_POINT_LIGHT>"];
+uniform int numberOfPointLights;
+
+
+void lightingSetUp(mat4 transformMat, vec4 worldPos, vec3 rawNormal, vec3 cameraPos){
+	if(rawNormal.x!=0||rawNormal.y!=0||rawNormal.z!=0)normal=(transformMat*vec4(rawNormal,0)).xyz;
+	else normal=rawNormal;
+	
+	for(int i=0;i<numberOfPointLights;i++){
+		vecToPointLight[i]=pointLightPos[i]-worldPos.xyz;
+	}
+	
+	toCamera=cameraPos - worldPos.xyz;
+	
+}
+

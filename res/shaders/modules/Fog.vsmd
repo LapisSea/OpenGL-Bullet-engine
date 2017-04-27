@@ -1,0 +1,13 @@
+
+out float visibility;
+
+uniform float fogDensity;
+uniform float fogGradient;
+
+void applyFog(vec3 worldViewPos){
+	
+	float dist= length(worldViewPos);
+	
+	visibility=clamp(exp(-pow((dist*fogDensity),fogGradient)),0,1);
+
+}

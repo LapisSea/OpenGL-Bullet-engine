@@ -1,0 +1,143 @@
+package com.lapissea.opengl.program.util;
+
+import javax.vecmath.Matrix4f;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Tuple4d;
+import javax.vecmath.Tuple4f;
+
+public class Quat4M extends Quat4f{
+	
+	private static final long serialVersionUID=1217013901730370836L;
+	
+	public Quat4M(){
+		super();
+	}
+	
+	public Quat4M(float arg0, float arg1, float arg2, float arg3){
+		super(arg0, arg1, arg2, arg3);
+	}
+	
+	public Quat4M(float[] arg0){
+		super(arg0);
+	}
+	
+	public Quat4M(Quat4d arg0){
+		super(arg0);
+	}
+	
+	public Quat4M(Quat4f arg0){
+		super(arg0);
+	}
+	
+	public Quat4M(Tuple4d arg0){
+		super(arg0);
+	}
+	
+	public Quat4M(Tuple4f arg0){
+		super(arg0);
+	}
+	
+	public Quat4M mul(float f){
+		x*=f;
+		y*=f;
+		z*=f;
+		w*=f;
+		return this;
+	}
+	
+	@Override
+	public Quat4M clone(){
+		return new Quat4M(this);
+	}
+	
+	public Quat4M set(Quat4M src){
+		x=src.x;
+		y=src.y;
+		z=src.z;
+		w=src.w;
+		return this;
+	}
+	
+	public Matrix4f toRotationMatrix(Matrix4f dest){
+		final float xy=x*y;
+		final float xz=x*z;
+		final float xw=x*w;
+		final float yz=y*z;
+		final float yw=y*w;
+		final float zw=z*w;
+		final float xSquared=x*x;
+		final float ySquared=y*y;
+		final float zSquared=z*z;
+		dest.m00=1-2*(ySquared+zSquared);
+		dest.m01=2*(xy-zw);
+		dest.m02=2*(xz+yw);
+		dest.m03=0;
+		
+		dest.m10=2*(xy+zw);
+		dest.m11=1-2*(xSquared+zSquared);
+		dest.m12=2*(yz-xw);
+		dest.m13=0;
+		
+		dest.m20=2*(xz-yw);
+		dest.m21=2*(yz+xw);
+		dest.m22=1-2*(xSquared+ySquared);
+		dest.m23=0;
+		
+		dest.m30=0;
+		dest.m31=0;
+		dest.m32=0;
+		dest.m33=1;
+		return dest;
+	}
+	public org.lwjgl.util.vector.Matrix4f quatToMatrix4f(org.lwjgl.util.vector.Matrix4f dest){
+		dest.m00=1.0f-2.0f*(this.y*this.y+this.z*this.z);
+		dest.m01=2.0f*(this.x*this.y+this.z*this.w);
+		dest.m02=2.0f*(this.x*this.z-this.y*this.w);
+		dest.m03=0.0f;
+		
+		// Second row
+		dest.m10=2.0f*(this.x*this.y-this.z*this.w);
+		dest.m11=1.0f-2.0f*(this.x*this.x+this.z*this.z);
+		dest.m12=2.0f*(this.z*this.y+this.x*this.w);
+		dest.m13=0.0f;
+		
+		// Third row
+		dest.m20=2.0f*(this.x*this.z+this.y*this.w);
+		dest.m21=2.0f*(this.y*this.z-this.x*this.w);
+		dest.m22=1.0f-2.0f*(this.x*this.x+this.y*this.y);
+		dest.m23=0.0f;
+		
+		// Fourth row
+		dest.m30=0;
+		dest.m31=0;
+		dest.m32=0;
+		dest.m33=1.0f;
+		
+		return dest;
+	}
+	
+	public Quat4M interpolate(Quat4M a, Quat4M b, float blend){
+		return interpolate(this, a, b, blend);
+	}
+	
+	public static Quat4M interpolate(Quat4M dest, Quat4M a, Quat4M b, float blend){
+		Quat4M result=new Quat4M(0, 0, 0, 1);
+		float dot=a.w*b.w+a.x*b.x+a.y*b.y+a.z*b.z;
+		float blendI=1f-blend;
+		if(dot<0){
+			result.w=blendI*a.w+blend*-b.w;
+			result.x=blendI*a.x+blend*-b.x;
+			result.y=blendI*a.y+blend*-b.y;
+			result.z=blendI*a.z+blend*-b.z;
+		}
+		else{
+			result.w=blendI*a.w+blend*b.w;
+			result.x=blendI*a.x+blend*b.x;
+			result.y=blendI*a.y+blend*b.y;
+			result.z=blendI*a.z+blend*b.z;
+		}
+		result.normalize();
+		return result;
+	}
+}

@@ -1,0 +1,23 @@
+
+in float materialId;
+
+#ifndef ModelMaterial_STR
+#define ModelMaterial_STR
+
+struct ModelMaterial{
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float jelly;
+	float shineDamper;
+	float reflectivity;
+	float lightTroughput;
+};
+
+#endif
+
+uniform ModelMaterial materials["<MATERIAL_MAX_COUNT>"];
+
+ModelMaterial getMaterial(){
+	return materials[int(ceil(materialId))];
+}

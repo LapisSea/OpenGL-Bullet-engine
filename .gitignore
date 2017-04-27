@@ -1,0 +1,11 @@
+/*
+/*/
+!/src/
+!/res/
+!/libs/
+!/natives/
+!.gitignore
+!/LICENSE.md
+!/README.md
+!pom.xml
+!.editorconfig

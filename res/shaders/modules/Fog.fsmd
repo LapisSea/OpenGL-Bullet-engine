@@ -1,0 +1,14 @@
+
+in float visibility;
+
+uniform vec3 skyColor;
+
+void checkFogVisibility(){
+	if(visibility<1/255.0){
+		discard;
+	}
+}
+
+vec4 applyFog(vec4 initalColor){
+	return vec4(mix(skyColor,initalColor.rgb, visibility),initalColor.a);
+}
