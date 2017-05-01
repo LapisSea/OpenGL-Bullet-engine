@@ -2,6 +2,7 @@ package com.lapissea.opengl.program.rendering;
 
 import org.lwjgl.util.vector.Matrix4f;
 
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.Maths;
@@ -11,7 +12,7 @@ public interface ModelInWorld{
 	
 	Matrix4f mat=new Matrix4f();
 	
-	Model getModel();
+	IModel getModel();
 	
 	Vec3f getModelScale();
 	

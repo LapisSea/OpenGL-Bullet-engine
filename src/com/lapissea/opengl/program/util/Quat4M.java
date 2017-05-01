@@ -6,6 +6,8 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Tuple4d;
 import javax.vecmath.Tuple4f;
 
+import com.lapissea.opengl.program.util.math.vec.Vec3f;
+
 public class Quat4M extends Quat4f{
 	
 	private static final long serialVersionUID=1217013901730370836L;
@@ -90,6 +92,7 @@ public class Quat4M extends Quat4f{
 		dest.m33=1;
 		return dest;
 	}
+	
 	public org.lwjgl.util.vector.Matrix4f quatToMatrix4f(org.lwjgl.util.vector.Matrix4f dest){
 		dest.m00=1.0f-2.0f*(this.y*this.y+this.z*this.z);
 		dest.m01=2.0f*(this.x*this.y+this.z*this.w);
@@ -140,4 +143,20 @@ public class Quat4M extends Quat4f{
 		result.normalize();
 		return result;
 	}
+	
+	public void set(Vec3f euler){
+		double c1=Math.cos(euler.y()/2);
+		double s1=Math.sin(euler.y()/2);
+		double c2=Math.cos(euler.z()/2);
+		double s2=Math.sin(euler.z()/2);
+		double c3=Math.cos(euler.x()/2);
+		double s3=Math.sin(euler.x()/2);
+		double c1c2=c1*c2;
+		double s1s2=s1*s2;
+		w=(float)(c1c2*c3-s1s2*s3);
+		x=(float)(c1c2*s3+s1s2*c3);
+		y=(float)(s1*c2*c3+c1*s2*s3);
+		z=(float)(c1*s2*c3-s1*c2*s3);
+	}
+	
 }

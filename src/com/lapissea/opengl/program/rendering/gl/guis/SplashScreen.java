@@ -3,19 +3,17 @@ package com.lapissea.opengl.program.rendering.gl.guis;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.Window;
 import com.lapissea.opengl.program.rendering.gl.model.Model;
-import com.lapissea.opengl.program.rendering.gl.model.ModelAttribute;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.UtilM;
-import com.lapissea.opengl.program.util.WindowInput;
 import com.lapissea.opengl.program.util.math.Maths;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
@@ -101,11 +99,11 @@ public class SplashScreen{
 	}
 	
 	public void update(){
-		WindowInput.update();
+		Game.win().updateInput();
 	}
 	
 	public void render(){
-		if(Window.isClosed()){
+		if(Game.win().isClosed()){
 			System.exit(0);
 			return;
 		}
@@ -132,7 +130,7 @@ public class SplashScreen{
 				(float)Math.sin((tim/1500)%(Math.PI*2))*0.1F,
 				(float)Math.sin((tim/2000)%(Math.PI*2))*0.1F,1
 			), new Vec3f(scale,scale,scale)),model);
-		Window.swapBuffers(60);
+		Game.win().swapBuffers(60);
 		//Game.get().loadGLData();
 		GLUtil.checkError();
 	}

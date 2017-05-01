@@ -22,9 +22,12 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.bulletphysics.collision.shapes.IndexedMesh;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
-import com.lapissea.opengl.MainOGL;
+import com.lapissea.opengl.program.core.Globals;
 
 public class UtilM{
+
+	public static final double SQRT2D=Math.sqrt(2);
+	public static final float SQRT2F=(float)SQRT2D;
 	
 	public static String toString(Object...objs){
 		StringBuilder print=new StringBuilder();
@@ -197,7 +200,7 @@ public class UtilM{
 	}
 	
 	public static InputStream getResource(String name){
-		if(MainOGL.DEV_ENV) name="res/"+name;
+		if(Globals.DEV_ENV) name="res/"+name;
 		
 		InputStream src=UtilM.class.getResourceAsStream("/"+name);
 		if(src==null) try{

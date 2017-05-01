@@ -139,7 +139,6 @@ public class GLUtil{
 			LogUtil.println(id, last=name);
 			id++;
 		}
-		float[] a=new float[0];
 		LogUtil.println("uniform count", id);
 	}
 	

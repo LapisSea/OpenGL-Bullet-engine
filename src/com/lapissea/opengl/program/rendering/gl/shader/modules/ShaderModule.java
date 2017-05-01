@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
-import com.lapissea.opengl.program.rendering.gl.model.ModelAttribute;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
@@ -123,7 +123,7 @@ public abstract class ShaderModule{
 	
 	public interface ModelUniforms{
 		
-		void uploadUniformsModel(Model model);
+		void uploadUniformsModel(IModel model);
 	}
 	
 	public void setUpUniforms(){}

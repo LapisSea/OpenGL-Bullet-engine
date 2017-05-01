@@ -1,10 +1,12 @@
 package com.lapissea.opengl.program.game.entity;
 
 import com.bulletphysics.dynamics.RigidBody;
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.events.Updateable;
+import com.lapissea.opengl.abstr.opengl.frustrum.Frustum;
+import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.interfaces.Updateable;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.RigidBodyEntity;
@@ -18,7 +20,7 @@ public abstract class EntityUpd extends Entity implements Updateable{
 	
 	protected RigidBodyEntity physicsBody;
 	
-	public EntityUpd(World world, Model model, Vec3f pos){
+	public EntityUpd(World world, IModel model, Vec3f pos){
 		super(world, model, pos);
 	}
 	
@@ -46,9 +48,12 @@ public abstract class EntityUpd extends Entity implements Updateable{
 	@Override
 	public void render(){
 		Renderer r=getRenderer();
-		
+//		LogUtil.println(r);
+		Frustum fustr=r.frustrum;
 		r.notifyEntityRender();
-		if(!r.frustrum.sphere(pos, model.rad()*getModelScale().max())) return;
+		IFrustrumShape shape=model.getFrustrumShape();
+		if(!model.isLoaded()||
+				!shape.withScale(scale).isVisibleAt(pos, fustr)) return;
 		r.notifyEntityActualRender();
 		
 		Shaders.ENTITY.renderBatched(this);

@@ -68,11 +68,11 @@ struct DirectionalLight{
 in vec3 normal;
 in vec3 toCamera;
 
-uniform PointLight pointLights[25];
-in vec3 vecToPointLight[25];
+uniform PointLight pointLights[5];
+in vec3 vecToPointLight[5];
 uniform int numberOfPointLights;
 
-uniform DirectionalLight dirLights[5];
+uniform DirectionalLight dirLights[2];
 uniform int numberOfDirLights;
 
 uniform float minBrightness;
@@ -166,6 +166,7 @@ void main(void){
 	checkFogVisibility();
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a<1/256.0)discard;
-	pixelColor=applyFog(applyLighting(pixelColor, getMaterial()));
+	pixelColor=applyLighting(pixelColor, getMaterial());
+	pixelColor=applyFog(pixelColor);
 	
 }

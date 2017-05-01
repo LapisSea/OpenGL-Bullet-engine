@@ -6,14 +6,15 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
 
-import com.lapissea.opengl.program.rendering.gl.Window;
+import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.Maths;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
 public class Camera{
 	
-	private static final Vec3f EFF_POS=new Vec3f(),MOVE=new Vec3f(),VEC=new Vec3f();
+	private static final Vec3f EFF_POS=new Vec3f(),MOVE=new Vec3f();
 	
 	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f(),prevRot=new Vec3f();
 	public float	zoom=1,farPlane=1000,nearPlane=0.1F,fov=80,lastRenderFow;
@@ -21,6 +22,8 @@ public class Camera{
 	private final Matrix4f	projection		=new Matrix4f();
 	protected boolean		projectionDirty	=true;
 	public boolean			noMouseMode		=false;
+	public Vec3f			activeRotVec=new Vec3f();
+	public Quat4M			activeRotQuat=new Quat4M();
 	
 	public void update(){
 		
@@ -50,7 +53,7 @@ public class Camera{
 		
 		pos.add(MOVE.mul(1F));
 		
-		if(Window.active3d()){
+		if(Game.win().isFocused()){
 			if(noMouseMode){
 				if(Keyboard.isKeyDown(Keyboard.KEY_Q)) rot.y-=0.1;
 				if(Keyboard.isKeyDown(Keyboard.KEY_E)) rot.y+=0.1;
@@ -61,7 +64,7 @@ public class Camera{
 				float yAmmount=(Mouse.getX()-Display.getWidth()/2)/100F;
 				rot.y+=yAmmount;
 				rot.x-=(Mouse.getY()-Display.getHeight()/2)/100F;
-				Window.centerMouse();
+				Game.win().centerMouse();
 			}
 		}
 		
@@ -70,10 +73,12 @@ public class Camera{
 		
 	}
 	
-	public Matrix4f toMat(Matrix4f dest){
+	public Matrix4f createView(Matrix4f dest){
 		dest.setIdentity();
-		Maths.rotateZXY(dest, PartialTick.calc(VEC,prevRot, rot));
-		dest.translate(PartialTick.calc(EFF_POS,prevPos, pos).mul(-1F));
+		Maths.rotateZXY(dest, PartialTick.calc(activeRotVec, prevRot, rot));
+		dest.translate(PartialTick.calc(EFF_POS, prevPos, pos).mul(-1F));
+		activeRotQuat.set(activeRotVec.mul(-1));
+		activeRotVec.mul(-1);
 		return dest;
 	}
 	
@@ -94,14 +99,14 @@ public class Camera{
 		float aspectRatio=(float)Display.getWidth()/(float)Display.getHeight();
 		float y_scale=(float)((1f/Math.tan(Math.toRadians(this.fov/zoom/2f)))*aspectRatio);
 		float x_scale=y_scale/aspectRatio;
-		float frustum_length=farPlane-nearPlane;
+		float frustumLength=farPlane-nearPlane;
 		
 		projection.setIdentity();
 		projection.m00=x_scale;
 		projection.m11=y_scale;
-		projection.m22=-((farPlane+nearPlane)/frustum_length);
+		projection.m22=-((farPlane+nearPlane)/frustumLength);
 		projection.m23=-1;
-		projection.m32=-((2*nearPlane*farPlane)/frustum_length);
+		projection.m32=-((2*nearPlane*farPlane)/frustumLength);
 		projection.m33=0;
 	}
 	

@@ -9,7 +9,6 @@ import com.lapissea.opengl.program.rendering.gl.shader.Material;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.MathUtil;
 import com.lapissea.opengl.program.util.UtilM;
-import com.lapissea.opengl.program.util.color.ColorM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
@@ -82,6 +81,8 @@ public class ObjModelLoader{
 	}
 	
 	public static ModelData load(String name){
+		LogUtil.println("Loading model:", name);
+		
 		if(name.contains("\\")) name=name.replace('\\', '/');
 		name=name.replaceAll("/+", "/");
 		if(name.startsWith("/")) name=name.substring(1, name.length());
@@ -122,10 +123,9 @@ public class ObjModelLoader{
 				if(line.isEmpty()||line.charAt(0)=='#') continue;
 				
 				if(line.startsWith("newmtl ")){
-					material=new Material(line.substring("newmtl ".length()));
-					material.id=matId++;
+					material=new Material(matId++, line.substring("newmtl ".length()));
 					
-					materials.put(material.name, material);
+					materials.put(material.getName(), material);
 					continue;
 				}
 				if(material!=null){
@@ -135,12 +135,12 @@ public class ObjModelLoader{
 						numbers[j-1]=Float.parseFloat(segments[j]);
 					}
 					
-					if(line.startsWith("Ns ")) material.shineDamper=Float.parseFloat(line.split(" ")[1]);
-					else if(line.startsWith("Ka ")) material.ambient=new ColorM(numbers);
-					else if(line.startsWith("Kd ")) material.diffuse=new ColorM(numbers);
-					else if(line.startsWith("Ks ")) material.specular=new ColorM(numbers);
-					else if(line.startsWith("illum ")) material.illum=MathUtil.snap(2-numbers[0], 0, 1);
-					else if(line.startsWith("jelly ")) material.jelly=MathUtil.snap(numbers[0], 0, 1);
+					if(line.startsWith("Ns ")) material.setShineDamper(Float.parseFloat(line.split(" ")[1]));
+					else if(line.startsWith("Ka ")) material.getAmbient().load(numbers);
+					else if(line.startsWith("Kd ")) material.getDiffuse().load(numbers);
+					else if(line.startsWith("Ks ")) material.getSpecular().load(numbers);
+					else if(line.startsWith("illum ")) material.setIllum(MathUtil.snap(2-numbers[0], 0, 1));
+					else if(line.startsWith("jelly ")) material.setJelly(MathUtil.snap(numbers[0], 0, 1));
 					
 				}
 				

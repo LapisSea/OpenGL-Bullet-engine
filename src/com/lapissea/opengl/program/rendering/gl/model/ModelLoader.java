@@ -12,9 +12,13 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.assets.ITexture;
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
+import com.lapissea.opengl.abstr.opengl.frustrum.FrustrumSphere;
+import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
-import com.lapissea.opengl.program.rendering.gl.texture.ITexture;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.util.BufferUtil;
 import com.lapissea.opengl.program.util.LogUtil;
@@ -29,28 +33,36 @@ public class ModelLoader{
 	private static final List<Model>			MODELS			=new ArrayList<>();
 	private static final HashMap<String,Object>	MODEL_BUILD_DATA=new HashMap<>();
 	
-	public static final Model EMPTY_MODEL=new Model("EMPTY_MODEL"){
+	public static final IModel EMPTY_MODEL=new Model("EMPTY_MODEL"){
 		
 		@Override
-		public void load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, float rad){
+		public IModel load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape shape){
 			throw new UnsupportedOperationException();
 		}
 		
 		@Override
-		public void drawCall(){}
+		public IModel drawCall(){
+			return this;
+		}
 		
 		@Override
-		public void enableAttributes(){}
+		public IModel enableAttributes(){
+			return this;
+		}
 		
 		@Override
-		public void disableAttributes(){}
+		public IModel disableAttributes(){
+			return this;
+		}
 	};
 	
-	@SuppressWarnings("unchecked")
-	private static <T>T get(Object data, Class<T> type, int minSiz){
-		if(data==null)return null;
+	@SuppressWarnings({"unchecked","unused"})
+	private static <T> T get(Object data, Class<T> type, int minSiz){
+		if(data==null) return null;
 		
-//		if(data.equals(0))
+		//		if(data.equals(0))
+		
+		//TODO
 		
 		return (T)data;
 	}
@@ -60,10 +72,11 @@ public class ModelLoader{
 	public static Model buildModel(ModelData modelData){
 		return buildModel(Model.class, modelData);
 	}
+	
 	public static <T extends Model> T buildModel(Class<T> type, ModelData modelData){
 		return buildModel(type, modelData.name, modelData.usesQuads, "vertices", modelData.getVert(), "uvs", modelData.getUv(), "normals", modelData.getNorm(), "materialIds", modelData.getMat());
 	}
-
+	
 	/**
 	 * Use "0" on any array for minimal empty array<br>
 	 * Values:<br>
@@ -79,6 +92,7 @@ public class ModelLoader{
 	public synchronized static Model buildModel(String name, boolean usesQuads, Object...data){
 		return buildModel(Model.class, name, usesQuads, data);
 	}
+	
 	/**
 	 * Use "0" on any array for minimal empty array<br>
 	 * Values:<br>
@@ -104,7 +118,7 @@ public class ModelLoader{
 		MODEL_BUILD_DATA.clear();
 		return model;
 	}
-
+	
 	/**
 	 * Use "0" on any array for minimal empty array<br>
 	 * Values:<br>
@@ -125,7 +139,7 @@ public class ModelLoader{
 		//PROCESS DATA
 		int[] indices=(int[])data.get("indices");
 		boolean hasIds=indices!=null;
-		float[] vert=(float[])data.get("vertices");
+		float[] vert=(float[])Objects.requireNonNull(data.get("vertices"));
 		
 		Object killSmoothObj=data.get("killSmooth");
 		boolean killSmooth=hasIds&&(killSmoothObj==null||(boolean)killSmoothObj);
@@ -141,8 +155,8 @@ public class ModelLoader{
 			Constructor<T> ctr=type.getConstructor(String.class);
 			model=ctr.newInstance(Objects.requireNonNull(name));
 		}catch(NoSuchMethodException e){
-			throw new RuntimeException("Missing "+type.getName()+".<init>(String)",e);
-		}catch (Exception e){
+			throw new RuntimeException("Missing "+type.getName()+".<init>(String)", e);
+		}catch(Exception e){
 			throw new RuntimeException(e);
 		}
 		float rad=calcRad(vert);
@@ -371,7 +385,7 @@ public class ModelLoader{
 			putAttribute(vbos, attributes, ModelAttribute.PRIMITIVE_COLOR_ATTR, primitiveColorF);
 			unbindVao();
 			
-			model.load(vao, hasIdsF?indicesF.length:vertF.length, hasIdsF, usesQuads, vbos.toIntArray(), attributes.toArray(new ModelAttribute[attributes.size()]), rad);
+			model.load(vao, hasIdsF?indicesF.length:vertF.length, hasIdsF, usesQuads, vbos.toIntArray(), attributes.toArray(new ModelAttribute[attributes.size()]), new FrustrumSphere(rad));
 			if(!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 		});
 		return model;

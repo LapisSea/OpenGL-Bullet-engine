@@ -15,6 +15,10 @@ public class ColorM extends ColorMRead implements Calculateable<ColorM>{
 		this(color.r(), color.g(), color.b(), color.a());
 	}
 	
+	public ColorM(Color color){
+		super(color);
+	}
+	
 	public ColorM(float[] data){
 		load(data);
 	}
@@ -285,5 +289,8 @@ public class ColorM extends ColorMRead implements Calculateable<ColorM>{
 		b(src.b());
 		a(src.a());
 		return this;
+	}
+	public ColorM set(float r, float g, float b, float a){
+		return r(r).g(g).b(b).a(a);
 	}
 }

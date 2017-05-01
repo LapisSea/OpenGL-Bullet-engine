@@ -1,5 +1,7 @@
 package com.lapissea.opengl.program.util.color;
 
+import java.awt.Color;
+
 import com.lapissea.opengl.program.util.MathUtil;
 
 public class ColorMRead implements IColorM{
@@ -16,6 +18,10 @@ public class ColorMRead implements IColorM{
 	
 	public ColorMRead(double r, double g, double b){
 		this((float)r, (float)g, (float)b);
+	}
+
+	public ColorMRead(Color color){
+		this(color.getRed()/256F, color.getGreen()/256F, color.getBlue()/256F, color.getAlpha()/256F);
 	}
 	
 	public ColorMRead(double r, double g, double b, double a){

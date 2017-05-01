@@ -9,23 +9,29 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
+import com.lapissea.opengl.abstr.opengl.events.InputEvents;
+import com.lapissea.opengl.abstr.opengl.events.MouseKeyEvent;
+import com.lapissea.opengl.abstr.opengl.events.Renderable;
+import com.lapissea.opengl.abstr.opengl.events.ResizeEvent;
+import com.lapissea.opengl.abstr.opengl.events.Updateable;
+import com.lapissea.opengl.abstr.opengl.events.WindowEvents;
+import com.lapissea.opengl.abstr.opengl.frustrum.Frustum;
+import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.events.MouseKeyEvent;
 import com.lapissea.opengl.program.game.Camera;
 import com.lapissea.opengl.program.game.entity.Entity;
 import com.lapissea.opengl.program.game.entity.entitys.EntityStatic;
+import com.lapissea.opengl.program.game.particle.ParticleHandler;
+import com.lapissea.opengl.program.game.particle.particles.ParticleFoo;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.interfaces.InputEvents;
-import com.lapissea.opengl.program.interfaces.Renderable;
-import com.lapissea.opengl.program.interfaces.Updateable;
-import com.lapissea.opengl.program.interfaces.WindowEvents;
 import com.lapissea.opengl.program.rendering.FpsCounter;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.GLUtil.BlendFunc;
 import com.lapissea.opengl.program.rendering.GLUtil.CullFace;
 import com.lapissea.opengl.program.rendering.font.FontFamily;
 import com.lapissea.opengl.program.rendering.gl.model.DynamicModel;
-import com.lapissea.opengl.program.rendering.gl.model.ModelAttribute;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
@@ -61,6 +67,8 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	private int potentialRenders,actualRenders;
 	
+	public ParticleHandler<ParticleFoo> particleHandler;
+	
 	public static class Lined extends DynamicModel{
 		
 		public Lined(String name){
@@ -68,16 +76,19 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		}
 		
 		@Override
-		public void load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, float rad){
-			super.load(vao, vertexCount, usesIndicies, usesQuads, vbos, attributeIds, rad);
+		public IModel load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape shape){
+			super.load(vao, vertexCount, usesIndicies, usesQuads, vbos, attributeIds, shape);
 			glDrawId=GL11.GL_LINES;
+			return this;
+			
 		}
 		
 		@Override
-		public void drawCall(){
+		public IModel drawCall(){
 			//GLUtil.DEPTH_TEST.set(false);
 			super.drawCall();
 			//GLUtil.DEPTH_TEST.set(true);
+			return this;
 		}
 	}
 	
@@ -87,6 +98,16 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	public Renderer(){
 		fpsCounter.activate();
+		particleHandler=new ParticleHandler<>((parent, pos)->new ParticleFoo(parent, pos));
+		particleHandler.models.add(ModelLoader.buildModel("ParticleQuad", false, "genNormals", false, "vertices", new float[]{
+				-0.5F,-0.5F,0,
+				0.5F,-0.5F,0,
+				0.5F,0.5F,0,
+				
+				-0.5F,-0.5F,0,
+				0.5F,0.5F,0,
+				-0.5F,0.5F,0,
+		}));
 	}
 	
 	public Camera getCamera(){
@@ -107,32 +128,32 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	private void setView(){
-		camera.toMat(view);
+		camera.createView(view);
 		frustrum.extractFrustum(getProjection(), getView());
 	}
 	
 	@Override
-	public void onClick(MouseKeyEvent event){
-		if(Window.isFocused()){
-			Window.centerMouse();
-			Mouse.setGrabbed(true);
-		}
-		//Shaders.load();
+	public void onMouseKeyEvent(MouseKeyEvent event){
+		if(!event.source.isFocused()) return;
+		
+		event.source.centerMouse();
+		Mouse.setGrabbed(true);
 	}
 	
 	@Override
 	public void update(){
 		camera.update();
+		particleHandler.update();
+		particleHandler.spawn(new Vec3f(10, 10, 10));
 	}
 	
 	@Override
-	public void onResize(int width, int height){
+	public void onResizeEvent(ResizeEvent e){
 		getCamera().calcProjection();
 	}
 	
 	public void render(){
 		fpsCounter.frame();
-		potentialRenders=actualRenders=0;
 		World world=Game.get().world;
 		float pt=Game.getPartialTicks();
 		double sunPos=world.getSunPos(pt)*Math.PI*2;
@@ -143,32 +164,14 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		skyColor=moonCol.mix(sunCol, bright, 1-bright);
 		
-
-		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
-		GLUtil.CULL_FACE.set(CullFace.BACK);
-		GLUtil.DEPTH_TEST.set(true);
-		GLUtil.CULL_FACE.set(true);
-		GLUtil.BLEND.set(true);
-		
-		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-		
-		//TODO: remove when adding sky box
-		GLUtil.CLEAR_COLOR.set(skyColor);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		
-		getCamera().createProjection(projection);
-		setView();
-		
-		PairM<FloatList,FloatList> data=fontComfortaa.build(10, "0, 0, 0, 1\nDamn that's one \"thin matrix\"!\n                     ;)");
+		PairM<FloatList,FloatList> data=fontComfortaa.build(10, fpsCounter+"\nRendering: "+actualRenders+"/"+potentialRenders);
 		if(fontDynamicModel.getTextures().isEmpty()) fontDynamicModel.addTexture(fontComfortaa.letters);
 		
 		for(int i=0;i<data.obj1.size()/2;i++){
 			fontDynamicModel.add(ModelAttribute.VERTEX_ATTR, data.obj1.getFloat(i*2)/100, data.obj1.getFloat(i*2+1)/100, 0);
 			fontDynamicModel.add(ModelAttribute.UV_ATTR, data.obj2.getFloat(i*2), data.obj2.getFloat(i*2+1));
-			fontDynamicModel.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, 0, 1, 1, 1);
+			fontDynamicModel.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, 1, 1, 1, 1);
 		}
-		
-		Shaders.ENTITY.renderBatched(new EntityStatic(world, fontDynamicModel, new Vec3f(0, 2, 0)));
 		
 		List<Entity> entitys=Game.get().world.getAll();
 		
@@ -183,39 +186,45 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		cos=(float)Math.cos(sunPos);
 		dirLights.add(new DirectionalLight(new Vec3f(cos/3, (float)Math.sin(sunPos), cos), moonCol));
 		
-		GLUtil.checkError();
+		getCamera().createProjection(projection);
+		setView();
+		
+		potentialRenders=actualRenders=0;
+		
+		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
+		GLUtil.CULL_FACE.set(CullFace.BACK);
+		GLUtil.DEPTH_TEST.set(true);
+		GLUtil.CULL_FACE.set(true);
+		GLUtil.BLEND.set(true);
+		
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		GL11.glDepthMask(false);
+		Shaders.SKYBOX.render();
+		GL11.glDepthMask(true);
+		
+		//		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		
+		addShader(Shaders.TERRAIN);
+		
 		entitys.stream().forEach(Renderable::preRender);
 		entitys.stream().forEach(Renderable::render);
-		lines.defaultMaterial.ambient.r(1);
 		
-		lines.defaultMaterial.ambient=new ColorM();
-		GLUtil.checkError();
-//		GL11.glDisable(GL11.GL_ALPHA_TEST);
-//		GL11.glEnable(GL11.GL_BLEND);
-//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		addShader(Shaders.TERRAIN);
+		//		GL11.glDisable(GL11.GL_ALPHA_TEST);
+		//		GL11.glEnable(GL11.GL_BLEND);
+		//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		UtilM.doAndClear(toRender, ShaderRenderer::render);
-		
+		Shaders.ENTITY.renderSingle(new EntityStatic(world, fontDynamicModel, new Vec3f(0, 2, 0)));
+		particleHandler.render();
 		GL11.glLineWidth(GL11.GL_LINE_WIDTH_RANGE);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 		GL11.glEnable(GL11.GL_LINE_WIDTH);
 		
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-		Shaders.LINE.renderBatched(new EntityStatic(world, lines, new Vec3f()));
+		Shaders.LINE.renderSingle(new EntityStatic(world, lines, new Vec3f()));
 		Shaders.LINE.render();
 		
 		pointLights.clear();
 		dirLights.clear();
-		//		
-		//		long gcTim=0;
-		//		
-		//		for(GarbageCollectorMXBean i:ManagementFactory.getGarbageCollectorMXBeans()){
-		//			gcTim+=i.getCollectionTime();
-		//		}
-		//		MemoryUsage m=ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-		//		LogUtil.println("gc",gcTim,m.getUsed()/1024,"MB /",m.getCommitted()/1024,"MB");
-		//LogUtil.println(potentialRenders,"/",actualRenders);
-		//		LogUtil.println(fpsCounter.getFps());
 	}
 	
 	public void drawLine(Vector3f from, Vector3f to, Vector3f color){
@@ -238,4 +247,5 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void notifyEntityActualRender(){
 		actualRenders++;
 	}
+	
 }

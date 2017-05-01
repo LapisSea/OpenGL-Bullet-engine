@@ -1,10 +1,10 @@
 package com.lapissea.opengl.program.game.entity;
 
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.events.Renderable;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.interfaces.Renderable;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
@@ -14,13 +14,13 @@ public abstract class Entity implements Renderable,ModelInWorld{
 	protected static final Vec3f POS=new Vec3f(),SCAL=new Vec3f();
 	protected static final Quat4M ROT=new Quat4M();
 	
-	public Model		model;
+	public IModel		model;
 	public final Vec3f	pos,scale;
 	public final Quat4M rot;
 	private boolean		dead;
 	public final World	world;
 	
-	public Entity(World world, Model model, Vec3f pos){
+	public Entity(World world, IModel model, Vec3f pos){
 		this.model=model;
 		this.pos=initPos(pos);
 		this.world=world;
@@ -65,7 +65,7 @@ public abstract class Entity implements Renderable,ModelInWorld{
 	}
 	
 	@Override
-	public Model getModel(){
+	public IModel getModel(){
 		return model;
 	}
 	
@@ -74,7 +74,7 @@ public abstract class Entity implements Renderable,ModelInWorld{
 		Renderer r=getRenderer();
 		
 		r.notifyEntityRender();
-		if(!r.frustrum.sphere(pos, model.rad()*scale.max())) return;
+		if(!model.isLoaded()||!model.getFrustrumShape().withScale(scale).isVisibleAt(pos, r.frustrum)) return;
 		r.notifyEntityActualRender();
 		
 		Shaders.ENTITY.renderSingle(this);

@@ -36,5 +36,9 @@ public class FpsCounter{
 		active=false;
 		frames.clear();
 	}
+	@Override
+	public String toString(){
+		return "FPS: "+getFps();
+	}
 	
 }

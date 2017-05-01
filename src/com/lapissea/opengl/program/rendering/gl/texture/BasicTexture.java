@@ -1,5 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.texture;
 
+import com.lapissea.opengl.abstr.opengl.assets.ITexture;
+
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 

@@ -40,6 +40,7 @@ public class FontFamily{
 	private Font		font;
 	private FontMetrics	metrics;
 	
+	@SuppressWarnings("unused")
 	private float	xOrigin,yOrigin,x,y,xMargin,yMargin;
 	private boolean	quad=false;
 	
@@ -134,7 +135,7 @@ public class FontFamily{
 		//		for(int i=0;i<j;i++){
 		//			toBuild.append((char)i);
 		//		}
-		toBuild.append("?0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._,;:!(){}[]|7\\%'\"");
+		toBuild.append("?0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._,;:!(){}[]|7\\%'\"/\\");
 		
 		//		long start=System.currentTimeMillis();
 		

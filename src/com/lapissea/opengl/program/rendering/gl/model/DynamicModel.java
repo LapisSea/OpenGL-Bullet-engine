@@ -3,7 +3,10 @@ package com.lapissea.opengl.program.rendering.gl.model;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 
-import com.lapissea.opengl.program.rendering.gl.texture.ITexture;
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.assets.ITexture;
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
+import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.util.BufferUtil;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -30,14 +33,14 @@ public class DynamicModel extends Model{
 	}
 	
 	@Override
-	public void load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, float rad){
+	public IModel load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape shape){
 		data=new FloatList[vbos.length];
 		vtIds.clear();
 		for(int i=0;i<attributeIds.length;i++){
 			vtIds.put(attributeIds[i].id, i);
 			data[i]=new FloatArrayList();
 		}
-		super.load(vao, vertexCount, usesIndicies, usesQuads, vbos, attributeIds, rad);
+		return super.load(vao, vertexCount, usesIndicies, usesQuads, vbos, attributeIds, shape);
 	}
 	
 	public DynamicModel add(ModelAttribute type, float f1, float f2, float f3, float f4){
@@ -83,10 +86,11 @@ public class DynamicModel extends Model{
 	}
 	
 	@Override
-	public void drawCall(){
-		if(!isLoaded()) return;
+	public IModel drawCall(){
+		requireLoaded();
 		if(dirty) upload();
 		super.drawCall();
+		return this;
 	}
 	
 	public void clearIfEmpty(){
@@ -94,12 +98,12 @@ public class DynamicModel extends Model{
 	}
 	
 	private void upload(){
-		vertexCount=data[0].size()/attributeIds[0].size;
-		for(int i=1;i<attributeIds.length;i++){
-			if(data[i].size()/attributeIds[i].size!=vertexCount) throw new IllegalStateException("bad size on "+attributeIds[i]);
+		vertexCount=data[0].size()/getAttribute(0).size;
+		for(int i=1;i<getAttributeCount();i++){
+			if(data[i].size()/getAttribute(i).size!=vertexCount) throw new IllegalStateException("bad size on "+getAttribute(i));
 		}
 		GL30.glBindVertexArray(vao);
-		for(int i=0;i<attributeIds.length;i++){
+		for(int i=0;i<getAttributeCount();i++){
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbos[i]);
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, BufferUtil.store(data[i].toFloatArray()), GL15.GL_STREAM_DRAW);
 			data[i].clear();

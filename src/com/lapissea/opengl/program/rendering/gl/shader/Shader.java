@@ -2,6 +2,7 @@ package com.lapissea.opengl.program.rendering.gl.shader;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,10 +14,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.MainOGL;
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.core.Globals;
 import com.lapissea.opengl.program.rendering.GLUtil;
-import com.lapissea.opengl.program.rendering.gl.model.ModelAttribute;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ShaderModuleSrcLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
@@ -158,7 +159,9 @@ public abstract class Shader{
 			GLUtil.checkError();
 			//LogUtil.println(id, name);
 			if(id==-1) return null;
-			return uniformType.getDeclaredConstructor(Shader.class, int.class, String.class).newInstance(this, id, name);
+			Constructor<T> ctrs=uniformType.getDeclaredConstructor(Shader.class, int.class, String.class);
+			ctrs.setAccessible(true);
+			return ctrs.newInstance(this, id, name);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -235,7 +238,7 @@ public abstract class Shader{
 		
 		final String srcFinal=src;
 		
-		if(MainOGL.DEV_ENV) try{
+		if(Globals.DEV_ENV) try{
 			Files.write(new File("res/shaders/compiled output/compiled_"+name+(isFragment?".fs":".vs")).toPath(), srcFinal.getBytes());
 		}catch(IOException e){
 			e.printStackTrace();

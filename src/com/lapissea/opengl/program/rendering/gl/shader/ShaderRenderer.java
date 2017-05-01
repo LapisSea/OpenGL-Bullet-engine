@@ -1,24 +1,26 @@
 package com.lapissea.opengl.program.rendering.gl.shader;
 
+import java.util.List;
+
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.interfaces.Renderable;
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
+import com.lapissea.opengl.abstr.opengl.events.Renderable;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
-import com.lapissea.opengl.program.rendering.gl.model.ModelAttribute;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.util.MapOfLists;
 import com.lapissea.opengl.program.util.UtilM;
 
-public abstract class ShaderRenderer<RenderType extends ModelInWorld> extends Shader implements Renderable{
+public abstract class ShaderRenderer<RenderType extends ModelInWorld>extends Shader implements Renderable{
 	
 	private static final Matrix4f NULL_VIEW=new Matrix4f(),NULL_PROJECTION=new Matrix4f();
 	
-	private final MapOfLists<Model,RenderType>	toRender=new MapOfLists<>();
+	private final MapOfLists<IModel,RenderType>	toRender=new MapOfLists<>();
 	private boolean								added	=false;
 	
 	public ShaderRenderer(){
@@ -54,7 +56,7 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld> extends Sh
 		
 		UtilM.doAndClear(toRender, (model, entitysWithSameModel)->{
 			if(entitysWithSameModel.isEmpty()) return;
-			if(!model.isLoaded())return;
+			if(!model.isLoaded()) return;
 			prepareModel(model);
 			entitysWithSameModel.forEach(renderable->{
 				prepareInstance(renderable);
@@ -65,7 +67,26 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld> extends Sh
 		unbind();
 	}
 	
+	public void renderBatch(List<? extends RenderType> entitysWithSameModel){
+		if(!isLoaded()) return;
+		if(entitysWithSameModel.isEmpty()) return;
+		
+		prepareGlobal();
+		IModel model=entitysWithSameModel.get(0).getModel();
+		if(!model.isLoaded()) return;
+		prepareModel(model);
+		
+		entitysWithSameModel.forEach(renderable->{
+			prepareInstance(renderable);
+			model.drawCall();
+		});
+		unbindModel(model);
+		unbind();
+		
+	}
+	
 	public void renderBatched(RenderType renderable){
+		if(!isLoaded()) return;
 		if(!added){
 			getRenderer().addShader(this);
 			added=true;
@@ -75,15 +96,13 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld> extends Sh
 	
 	protected void prepareGlobal(){
 		bind();
-		GLUtil.checkError();
 		uploadProjectionAndViewMat(getProjection(), getView());
-		GLUtil.checkError();
 		modulesGlobal.forEach(ShaderModule.Global::uploadUniformsGlobal);
 	}
 	
-	protected void prepareModel(Model model){
+	protected void prepareModel(IModel model){
 		GLUtil.checkError();
-		GL30.glBindVertexArray(model.vao());
+		model.bindVao();
 		model.enableAttributes();
 		modulesModelUniforms.forEach(module->module.uploadUniformsModel(model));
 	}
@@ -93,7 +112,7 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld> extends Sh
 		modulesInstance.forEach(md->md.uploadUniformsInstance(renderable));
 	}
 	
-	protected void unbindModel(Model model){
+	protected void unbindModel(IModel model){
 		model.disableAttributes();
 		GL30.glBindVertexArray(0);
 	}
@@ -101,18 +120,22 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld> extends Sh
 	//----SINGLE----//
 	
 	public void renderSingle(RenderType renderable){
-		if(!isLoaded())	return;
-//		bind();
+		if(!isLoaded()) return;
+		if(!renderable.getModel().isLoaded()) return;
 		prepareGlobal();
+		
 		renderSingleBare(renderable);
+		unbind();
 	}
+	
 	public void renderSingleBare(RenderType renderable){
-		Model model=renderable.getModel();
+		IModel model=renderable.getModel();
 		
 		prepareModel(model);
 		prepareInstance(renderable);
 		model.drawCall();
 		unbindModel(model);
+		
 	}
 	
 	protected Matrix4f getProjection(){
@@ -144,7 +167,7 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld> extends Sh
 		return NULL_VIEW;
 	}
 	
-	public static class Basic3D<RenderType extends ModelInWorld> extends ShaderRenderer<RenderType>{
+	public static class Basic3D<RenderType extends ModelInWorld>extends ShaderRenderer<RenderType>{
 		
 		public Basic3D(){
 			super();

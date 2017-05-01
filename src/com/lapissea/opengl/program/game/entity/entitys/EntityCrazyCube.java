@@ -6,9 +6,9 @@ import javax.vecmath.Vector3f;
 
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.linearmath.Transform;
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.util.MotionStateM;
@@ -20,7 +20,7 @@ import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
 public class EntityCrazyCube extends EntityUpd{
 	
-	public static Model MODEL;
+	public static IModel MODEL;
 	private static float[] VERT={
 			-0.5f,0.5f,-0.5f,
 			-0.5f,-0.5f,-0.5f,
@@ -75,7 +75,7 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	};
 	
-	private static Model getModel0(){
+	private static IModel getModel0(){
 		if(MODEL==null){
 			
 			float[] uvs={
@@ -107,8 +107,7 @@ public class EntityCrazyCube extends EntityUpd{
 			
 			};
 			MODEL=ModelLoader.buildModel("BigCube", false, "vertices", VERT, "uvs", uvs, "indices", indices, "genNormals", true);
-			MODEL.defaultMaterial.diffuse=new ColorM(170, 200, 250);
-			MODEL.defaultMaterial.lightTroughput=0.2F;
+			MODEL.getMaterial(0).setDiffuse(170/256F, 200/256F, 250/256F, 1).setLightTroughput(0.2F);
 		}
 		return MODEL;
 	}
@@ -148,8 +147,9 @@ public class EntityCrazyCube extends EntityUpd{
 	@Override
 	public void preRender(){
 		if(lightColor!=null){
-//			if(light==null) 
-				light=new PointLight(new Vec3f(), lightColor, new Vec3f(0F, 0, 0.03F/(scale.max()*scale.max())));
+			MODEL.getMaterial(0).setLightTroughput(0.2F);
+			if(light==null) 
+				light=new PointLight(new Vec3f(), lightColor, new Vec3f(0.5F, 0, 0.03F/(scale.max()*scale.max())));
 			PartialTick.calc(light.pos, prevPos, pos);
 			getRenderer().pointLights.add(light);
 		}

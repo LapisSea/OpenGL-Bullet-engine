@@ -6,14 +6,12 @@ import javax.vecmath.Vector3f;
 
 import com.bulletphysics.collision.dispatch.CollisionWorld.ClosestRayResultCallback;
 import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
-import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
-import com.lapissea.opengl.program.rendering.gl.shader.Material;
 import com.lapissea.opengl.program.util.MotionStateM;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.RandUtil;
@@ -25,7 +23,6 @@ import com.lapissea.opengl.program.util.math.vec.Vec3f;
 public class EntityTree extends EntityUpd{
 	
 	public static Model						MODEL;
-	private static TriangleIndexVertexArray	TREE_MESH;
 	public static float[] VERT;
 	
 	private static Model getModel0(){
@@ -36,9 +33,8 @@ public class EntityTree extends EntityUpd{
 //			}
 			VERT=data.getVert();
 			MODEL=ModelLoader.buildModel(data);
-			MODEL.materials.add(new Material());
-			MODEL.materials.get(0).diffuse.set(0x452319);
-			MODEL.defaultMaterial.diffuse.set(0x0aCA0c);
+			MODEL.createMaterial().getDiffuse().set(0x452319);
+			MODEL.getMaterial(0).getDiffuse().set(0x0aCA0c);
 			
 //			for(int i=0;i<data.vertecies.size();i++){
 //				data.vertecies.get(i).mul(1/5F);
@@ -87,5 +83,6 @@ public class EntityTree extends EntityUpd{
 //		}
 		
 	}
+
 	
 }

@@ -1,8 +1,8 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
-import com.lapissea.opengl.program.rendering.gl.model.Model;
-import com.lapissea.opengl.program.rendering.gl.model.ModelAttribute;
-import com.lapissea.opengl.program.rendering.gl.shader.Material;
+import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelUniforms;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
@@ -41,23 +41,21 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 	}
 
 	@Override
-	public void uploadUniformsModel(Model model){
+	public void uploadUniformsModel(IModel model){
 		
-		uploadMaterial(0, model.defaultMaterial);
-		
-		for(int i=0, j=Math.min(model.materials.size(), ambient.length-1);i<j;i++){
-			uploadMaterial(i+1, model.materials.get(i));
+		for(int i=0, j=Math.min(model.getMaterialCount(), ambient.length-1);i<j;i++){
+			uploadMaterial(i, model.getMaterial(i));
 		}
 	}
 	
-	protected void uploadMaterial(int i, Material material){
-		ambient[i].upload(material.ambient);
-		diffuse[i].upload(material.diffuse);
-		specular[i].upload(material.specular);
-		jelly[i].upload(material.jelly);
-		shineDamper[i].upload(material.shineDamper);
-		reflectivity[i].upload(material.reflectivity);
-		lightTroughput[i].upload(material.lightTroughput);
+	protected void uploadMaterial(int i, IMaterial material){
+		ambient[i].upload(material.getAmbient());
+		diffuse[i].upload(material.getDiffuse());
+		specular[i].upload(material.getSpecular());
+		jelly[i].upload(material.getJelly());
+		shineDamper[i].upload(material.getShineDamper());
+		reflectivity[i].upload(material.getReflectivity());
+		lightTroughput[i].upload(material.getLightTroughput());
 	}
 	
 }

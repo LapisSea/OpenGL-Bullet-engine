@@ -117,7 +117,7 @@ public class EntityLight extends EntityUpd{
 		origin=pos.clone();
 		light=new PointLight(pos.clone(), color, new Vec3f(1, 0, 0.003F));
 		
-		model.defaultMaterial.lightTroughput=1;
+		model.getMaterial(0).setLightTroughput(1);
 	}
 	
 	@Override

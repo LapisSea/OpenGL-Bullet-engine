@@ -10,7 +10,7 @@ import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 public class TerrainShader extends ShaderRenderer.Basic3D<Terrain>{
 	
 	public TerrainShader(){
-		super("terrain");
+		super("entity");
 	}
 	
 	//	@Override
@@ -21,9 +21,17 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Terrain>{
 	//	protected String getVsSrc(){
 	//		return UtilM.getTxtResource("shaders/entity.vs");
 	//	}
+	@Override
+	@Deprecated
+	public void renderBatched(Terrain entity){}
 	
 	@Override
-	public void renderBatched(Terrain entity){}
+	@Deprecated
+	public void renderSingle(Terrain renderable){}
+	
+	@Override
+	@Deprecated
+	public void renderBatch(List<? extends Terrain> entitysWithSameModel){}
 	
 	@Override
 	public void render(){
@@ -40,12 +48,13 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Terrain>{
 		if(!ter.model.isLoaded()) return;
 		Renderer r=getRenderer();
 		r.notifyEntityRender();
-		if(!r.frustrum.sphere(ter.x, -2, ter.z, ter.model.rad())) return;
+		if(!ter.model.getFrustrumShape().isVisibleAt(ter.x, -2, ter.z, r.frustrum)) return;
 		r.notifyEntityActualRender();
 		
 		prepareModel(ter.model);
 		prepareInstance(ter);
 		ter.model.drawCall();
 		unbindModel(ter.model);
+		
 	}
 }

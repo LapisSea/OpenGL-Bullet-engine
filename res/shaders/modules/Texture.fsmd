@@ -1,7 +1,7 @@
 
 uniform bool MDL_TEXTURE_USED[<COUNT>];
 ////////////////////////////////////////////////
-<TEMPLATE>
+<SPLIT>
 uniform sampler2D MDL_TEXTURE<NUM>;
 
 vec4 <NAME>(vec2 uv){
@@ -9,4 +9,12 @@ vec4 <NAME>(vec2 uv){
 	return texture(MDL_TEXTURE<NUM>, uv);
 }
 
+////////////////////////////////////////////////
+<SPLIT>
+uniform samplerCube MDL_TEXTURE<NUM>;
+
+vec4 <NAME>(vec3 uv){
+	if(!MDL_TEXTURE_USED[<NUM>])return vec4(1);
+	return texture(MDL_TEXTURE<NUM>, uv);
+}
 ////////////////////////////////////////////////

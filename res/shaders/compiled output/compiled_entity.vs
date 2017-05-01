@@ -26,8 +26,8 @@ void setupModelMaterial(){
 out vec3 normal;
 out vec3 toCamera;
 
-out vec3 vecToPointLight[25];
-uniform vec3 pointLightPos[25];
+out vec3 vecToPointLight[5];
+uniform vec3 pointLightPos[5];
 uniform int numberOfPointLights;
 
 

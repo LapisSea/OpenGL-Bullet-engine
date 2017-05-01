@@ -1,9 +1,12 @@
 #version 400 core
 
-in vec4 vtColor;
+in vec3 uv;
 
 out vec4 pixelColor;
 
+#include "Texture: cubeTexture"
+
 void main(void){
-	pixelColor=vtColor;
+	pixelColor=cubeTexture(uv);
+	//pixelColor.rgb=uv;
 }

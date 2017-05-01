@@ -2,15 +2,14 @@ package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
-import com.lapissea.opengl.program.rendering.gl.model.Model;
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
+import com.lapissea.opengl.abstr.opengl.assets.ITexture;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelUniforms;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformBoolean;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints.UniformInt1;
-import com.lapissea.opengl.program.rendering.gl.texture.ITexture;
 
 public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 	
@@ -24,13 +23,13 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 		public String load(boolean isFragment, String[] args){
 			if(args==null) args=new String[]{"texture0"};
 			String src0=super.load(isFragment, args);
+			String[] parts=src0.split("<SPLIT>");
+			String template=parts[1],templateCube=parts[2];
 			
-			String template=src0.substring(src0.indexOf("<TEMPLATE>")+10);
-			
-			StringBuilder src=new StringBuilder(src0.substring(0, src0.indexOf("<TEMPLATE>")).replace("<COUNT>", String.valueOf(args.length)));
+			StringBuilder src=new StringBuilder(parts[0].replace("<COUNT>", String.valueOf(args.length)));
 			
 			for(int i=0;i<args.length;i++){
-				src.append(template.replace("<NAME>", args[i]).replaceAll("<NUM>", String.valueOf(i)));
+				src.append((args[i].startsWith("cube")?templateCube:template).replace("<NAME>", args[i]).replaceAll("<NUM>", String.valueOf(i)));
 			}
 			
 			return src.toString();
@@ -51,7 +50,7 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 	}
 	
 	@Override
-	public void uploadUniformsModel(Model model){
+	public void uploadUniformsModel(IModel model){
 		if(notInit){
 			notInit=false;
 			for(int i=0;i<texturesUsed.length;i++){
@@ -67,7 +66,7 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 			
 			texturesUsed[i].upload(valid);
 			GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, valid?texture.getId():0);
+			if(valid)texture.bind();
 		}
 	}
 	

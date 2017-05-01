@@ -19,6 +19,7 @@ public interface IColorM{
 	final IColorM RED       =ColorMFinal.convert(Color.RED);
 	final IColorM WHITE     =ColorMFinal.convert(Color.WHITE);
 	final IColorM YELLOW    =ColorMFinal.convert(Color.YELLOW);
+	final IColorM ZERO    =new ColorMFinal(Color.YELLOW);
 	
 	float r();
 	

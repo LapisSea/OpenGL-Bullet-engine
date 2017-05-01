@@ -11,7 +11,7 @@ import com.lapissea.opengl.program.util.math.Maths;
 
 public class UniformMat4 extends AbstractUniform{
 	
-	private static final FloatBuffer BUFF=BufferUtils.createFloatBuffer(16);
+	protected static final FloatBuffer BUFF=BufferUtils.createFloatBuffer(16);
 	
 	protected Matrix4f prev=new Matrix4f();
 	
@@ -32,7 +32,7 @@ public class UniformMat4 extends AbstractUniform{
 		checkError(this::retryUpload);
 	}
 	
-	private void retryUpload(){
+	protected void retryUpload(){
 		prev.m00=Float.NaN;
 		upload(prev);
 	}

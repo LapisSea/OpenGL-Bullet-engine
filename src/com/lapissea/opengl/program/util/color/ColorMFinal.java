@@ -6,11 +6,15 @@ import com.lapissea.opengl.program.util.MathUtil;
 
 public final class ColorMFinal implements IColorM{
 	
-	private final float r, g, b, a;
-	private final int rInt, gInt, bInt, aInt, hash;
+	private final float	r,g,b,a;
+	private final int	rInt,gInt,bInt,aInt,hash;
 	
 	public ColorMFinal(){
 		this(1, 1, 1);
+	}
+	
+	public ColorMFinal(Color color){
+		this(color.getRed()/256F, color.getGreen()/256F, color.getBlue()/256F, color.getAlpha()/256F);
 	}
 	
 	public ColorMFinal(IColorM color){
@@ -75,7 +79,7 @@ public final class ColorMFinal implements IColorM{
 	}
 	
 	public static ColorMFinal convert(Color color){
-		return new ColorMFinal(color.getRed()/256F, color.getGreen()/256F, color.getBlue()/256F, color.getAlpha()/256F);
+		return new ColorMFinal(color);
 	}
 	
 	@Override

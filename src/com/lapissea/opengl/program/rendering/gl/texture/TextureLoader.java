@@ -12,8 +12,12 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL30;
 
+import com.lapissea.opengl.abstr.opengl.assets.ITexture;
+import com.lapissea.opengl.abstr.opengl.assets.ITextureCube;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.util.LogUtil;
@@ -50,6 +54,7 @@ public class TextureLoader{
 		//		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_WRAP_S, GL13.GL_CLAMP_TO_BORDER);
 		//		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_WRAP_T, GL13.GL_CLAMP_TO_BORDER);
 		
+		//		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		
@@ -99,7 +104,7 @@ public class TextureLoader{
 	}
 	
 	private static void reloadTexture0(ITexture texture, TextureData image){
-		if(!Game.isThisOpenGLThread()){
+		if(!Game.get().glCtx.isGlThread()){
 			Game.glCtx(()->reloadTexture0(texture, image));
 			return;
 		}
@@ -136,19 +141,37 @@ public class TextureLoader{
 	}
 	
 	public synchronized static <T extends ITexture> T loadTexture(String path, Class<T> type, int...params){
-		if(UtilM.instanceOf(type, ITextureCube.class)){
-			
-		}
 		T result=getExisting(path, type);
 		if(result!=null) return result;
 		
 		return loadTexture0(path, type, params);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private static <T extends ITexture> T loadTexture0(String path, Class<T> type, int...params){
+		if(UtilM.instanceOf(type, ITextureCube.class)){
+			String[] names={
+					"/right",
+					"/left",
+					"/top",
+					"/bottom",
+					"/back",
+					"/front"
+			};
+			
+			TextureData[] data=new TextureData[6];
+			for(int i=0;i<names.length;i++){
+				data[i]=loadData(path+names[i]);
+				if(data[i]==null) return failTexture(alocate(path, type));
+			}
+			
+			return (T)alocateAndWrite(path, data, (Class<ITextureCube>)type, params);
+		}
 		
 		TextureData data=loadData(path);
-		return data==null?failTexture(alocate(path, type)):alocateAndWrite(path, data, type, params);
+		
+		if(data==null) return failTexture(alocate(path, type));
+		return alocateAndWrite(path, data, type, params);
 		
 	}
 	
@@ -163,6 +186,7 @@ public class TextureLoader{
 	}
 	
 	private static TextureData loadData(String path){
+		LogUtil.println("Loading texture:", path);
 		try{
 			try(InputStream str=UtilM.getResource("textures/"+path+".png", "textures/"+path+".jpg")){
 				
@@ -214,6 +238,43 @@ public class TextureLoader{
 			
 			texture.load(id, image.width, image.height);
 			LogUtil.println("Loaded texture:", texture.getPath());
+		});
+	}
+	
+	private static <T extends ITextureCube> T alocateAndWrite(String path, TextureData[] image, Class<T> type, int...params){
+		T result=alocate(path, type);
+		for(int i=0;i<params.length;i+=2){
+			result.params(params[i], params[i+1]);
+		}
+		writeToNewObj(result, image);
+		return result;
+	}
+	
+	private static void writeToNewObj(ITextureCube texture, TextureData[] data){
+		Object code=texture.notifyLoading();
+		
+		Game.glCtx(()->{
+			if(code!=texture.loadingKey()) return;//another loading process was called, this will have no effect hence it is pointless 
+			
+			int id=GL11.glGenTextures();
+			
+			GL13.glActiveTexture(GL13.GL_TEXTURE0);
+			GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, id);
+			
+			for(int i=0;i<data.length;i++){
+				TextureData image=data[i];
+				GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL11.GL_RGBA,
+						image.width, image.height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
+						image.data);
+			}
+			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+			//			mergeParams(texture.params()).forEach((k, v)->GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, k, v));
+			
+			texture.load(id, -1, -1);
+			LogUtil.println("Loaded cube texture:", texture.getPath());
 		});
 	}
 	

@@ -7,6 +7,7 @@ public class PointLight{
 	
 	public Vec3f	pos,attenuation;
 	public IColorM	color;
+	public float radiusSize;
 	
 	public PointLight(Vec3f pos, IColorM color, Vec3f attenuation){
 		this.pos=pos;

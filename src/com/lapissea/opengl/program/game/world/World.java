@@ -23,6 +23,8 @@ import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSo
 import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
+import com.lapissea.opengl.abstr.opengl.assets.ITexture;
+import com.lapissea.opengl.abstr.opengl.events.Updateable;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.Camera;
 import com.lapissea.opengl.program.game.entity.Entity;
@@ -30,9 +32,7 @@ import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.entity.entitys.EntityCrazyCube;
 import com.lapissea.opengl.program.game.entity.entitys.EntityTree;
 import com.lapissea.opengl.program.game.terrain.Terrain;
-import com.lapissea.opengl.program.interfaces.Updateable;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
-import com.lapissea.opengl.program.rendering.gl.texture.ITexture;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.color.IColorM;
@@ -192,7 +192,6 @@ public class World{
 			if(v.hasHit()){
 				if(v.collisionObject!=null&&v.collisionObject.getUserPointer() instanceof EntityCrazyCube){
 					v.collisionObject.activate();
-					Transform t=new Transform();
 					float siz=1;
 					((RigidBody)v.collisionObject).applyCentralForce(new Vector3f(vc.x*siz, vc.y*siz, vc.z*siz));
 				}

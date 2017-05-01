@@ -13,6 +13,7 @@ void main(void){
 	checkFogVisibility();
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a<1/256.0)discard;
-	pixelColor=applyFog(applyLighting(pixelColor, getMaterial()));
+	pixelColor=applyLighting(pixelColor, getMaterial());
+	pixelColor=applyFog(pixelColor);
 	
 }

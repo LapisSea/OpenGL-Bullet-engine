@@ -11,13 +11,12 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
+import com.lapissea.opengl.abstr.opengl.assets.ITexture;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
 import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
-import com.lapissea.opengl.program.rendering.gl.texture.ITexture;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.UtilM;
-import com.lapissea.opengl.program.util.color.ColorM;
 import com.lapissea.opengl.program.util.math.SimplexNoise;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
@@ -47,8 +46,7 @@ public class Terrain implements ModelInWorld{
 		z=gridZ*SIZE;
 		mat.translate(new Vec3f(x, -2, z));
 		model=generateModel(gridX, gridZ, texture);
-		model.defaultMaterial.shineDamper=50;
-		model.defaultMaterial.reflectivity=0.2F;
+		model.getMaterial(0).setShineDamper(50).setReflectivity(0.2F).setDiffuse(0.2F,1,0.25F,1).setSpecular(1, 1, 1, 1);
 	}
 	
 	private Model generateModel(int gridX, int gridZ, ITexture texture){
@@ -65,8 +63,8 @@ public class Terrain implements ModelInWorld{
 				vertices.add(x*mul);
 				float h=(float)SimplexNoise.noise((x+gridX*RESOLUTION)/div, (z+gridZ*RESOLUTION)/div);
 				h-=0.5;
-				vertices.add(h*4+(float)(SimplexNoise.noise(x+gridX*RESOLUTION, z+gridZ*RESOLUTION)*0.1));
-				vertices.add(z*mul);
+				vertices.add(h*4+(float)(SimplexNoise.noise(x+gridX*RESOLUTION, z+gridZ*RESOLUTION)*0.1)-SIZE/2F);
+				vertices.add(z*mul-SIZE/2F);
 				uvs.add(x/(float)RESOLUTION);
 				uvs.add(z/(float)RESOLUTION);
 			}
@@ -112,9 +110,8 @@ public class Terrain implements ModelInWorld{
 	
 	@Override
 	public Matrix4f getTransform(){
+		model.getMaterial(0).setReflectivity(10).setShineDamper(500);
 		
-		model.defaultMaterial.reflectivity=1;
-		model.defaultMaterial.diffuse=new ColorM(0.2,1,0.25);
 		TRANSFORM.setIdentity();
 		POS.x=x;
 		POS.y=0;

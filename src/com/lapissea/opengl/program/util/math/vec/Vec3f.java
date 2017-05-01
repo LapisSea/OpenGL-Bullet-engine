@@ -11,8 +11,6 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 	
 	private static final long serialVersionUID=8084946802516068121L;
 	
-	private static final Vec3f STATIC_SAFE=new Vec3f();
-	
 	public Vec3f(JSONObject json){
 		try{
 			set((float)json.getDouble("x"), (float)json.getDouble("y"), (float)json.getDouble("z"));
@@ -26,7 +24,7 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 	}
 	
 	public Vec3f(float[] data){
-		this(data[0],data[1],data[2]);
+		this(data[0], data[1], data[2]);
 	}
 	
 	public Vec3f(){
@@ -41,10 +39,18 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 		this(x, y, 0);
 	}
 	
+	public Vec3f(javax.vecmath.Vector3f src){
+		this(src.x, src.y, src.z);
+	}
+	
+	public Vec3f(Vec3f src){
+		this(src.x(), src.y(), src.z());
+	}
+	
 	public Vec3f(float x, float y, float z){
 		set(x, y, z);
-
-//		LogUtil.printStackTrace("");
+		
+		//		LogUtil.printStackTrace("");
 	}
 	
 	public Vec3f add(float x, float y, float z){
@@ -110,6 +116,13 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 		return this;
 	}
 	
+	public Vec3f mul(float x, float y, float z){
+		x(x()*x);
+		y(y()*y);
+		z(z()*z);
+		return this;
+	}
+	
 	@Override
 	public Vec3f mul(Vec3f c){
 		x(x()*c.x());
@@ -123,6 +136,12 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 		x(x()/c.x());
 		y(y()/c.y());
 		z(z()/c.z());
+		return this;
+	}
+	public Vec3f div(float x, float y, float z){
+		x(x()/x);
+		y(y()/y);
+		z(z()/z);
 		return this;
 	}
 	
@@ -178,24 +197,31 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 		return new Vec3f(x(), y(), z());
 	}
 	
-	public Vec3f crossProduct(Vec3f vec,Vec3f dest){
+	public Vec3f crossProduct(Vec3f vec, Vec3f dest){
 		dest.set(y()*vec.z()-z()*vec.y(), z()*vec.x()-x()*vec.z(), x()*vec.y()-y()*vec.x());
 		return dest;
 	}
-
+	
 	public float max(){
 		if(x>y){
-			if(x>z)return x;
+			if(x>z) return x;
 			else return z;
 		}
-		if(y>z)return y;
+		if(y>z) return y;
 		else return z;
 	}
+	
 	@Override
 	public Vec3f set(Vec3f src){
 		x(src.x());
 		y(src.y());
 		z(src.z());
+		return this;
+	}
+	public Vec3f set(javax.vecmath.Vector3f src){
+		x(src.x);
+		y(src.y);
+		z(src.z);
 		return this;
 	}
 }
