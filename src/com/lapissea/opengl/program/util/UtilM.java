@@ -1,23 +1,37 @@
 package com.lapissea.opengl.program.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.jar.JarFile;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.bulletphysics.collision.shapes.IndexedMesh;
@@ -25,9 +39,9 @@ import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.lapissea.opengl.program.core.Globals;
 
 public class UtilM{
-
-	public static final double SQRT2D=Math.sqrt(2);
-	public static final float SQRT2F=(float)SQRT2D;
+	
+	public static final double	SQRT2D	=Math.sqrt(2);
+	public static final float	SQRT2F	=(float)SQRT2D;
 	
 	public static String toString(Object...objs){
 		StringBuilder print=new StringBuilder();
@@ -156,18 +170,6 @@ public class UtilM{
 		}
 	}
 	
-	public static void forEach(JSONObject json, BiConsumer<String,Object> hook){
-		Iterator<?> i=json.keys();
-		while(i.hasNext()){
-			String key=(String)i.next();
-			try{
-				hook.accept(key, json.get(key));
-			}catch(JSONException e){
-				e.printStackTrace();
-			}
-		}
-	}
-	
 	public static String getTxtResource(String name){
 		try(InputStream is=getResource(name)){
 			
@@ -199,6 +201,70 @@ public class UtilM{
 		return null;
 	}
 	
+	private static final Map<String,String[]>	FOLDER_CASH	=new HashMap<>();
+	private static final List<String>			FOLDER_NULL	=new ArrayList<>();
+	
+	public static String[] getResourceFolderContent(String name, Predicate<String> filter){
+		String[] result=getResourceFolderContent(name);
+		if(result==null) return null;
+		return Arrays.stream(result).filter(filter).toArray(String[]::new);
+	}
+	
+	public static String[] getResourceFolderContent(String name){
+		String name0=name.replaceAll("[\\\\/ ]*$|[\\\\/]+", "/");
+		Optional<Entry<String,String[]>> a=FOLDER_CASH.entrySet().stream().filter(e->e.getKey().equals(name0)).findFirst();
+		if(a.isPresent()) return a.get().getValue();
+		if(FOLDER_NULL.contains(name0)) return null;
+		
+		if(Globals.DEV_ENV) return new File("res/"+name0).list();
+		
+		JarFile jar=Globals.getJarFile();
+		List<String> list=new ArrayList<>();
+		stream(jar.entries())
+				.filter(e->e.getName().length()>name0.length()&&e.getName().startsWith(name0))
+				.forEach(e->list.add(e.getName().substring(name0.length())));
+		closeSilenty(jar);
+		
+		if(list.isEmpty()){
+			FOLDER_NULL.add(name0);
+			return null;
+		}
+		String[] result=array(list);
+		FOLDER_CASH.put(name0, result);
+		
+		return result;
+	}
+	
+	public static <T> Stream<T> stream(Enumeration<T> e){
+		return StreamSupport.stream(
+				new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED){
+					
+					@Override
+					public boolean tryAdvance(Consumer<? super T> action){
+						if(e.hasMoreElements()){
+							action.accept(e.nextElement());
+							return true;
+						}
+						return false;
+					}
+					
+					@Override
+					public void forEachRemaining(Consumer<? super T> action){
+						while(e.hasMoreElements()){
+							action.accept(e.nextElement());
+						}
+					}
+				}, false);
+	}
+	
+	public static <T> T[] array(List<T> list){
+		if(list.isEmpty()) return null;
+		
+		@SuppressWarnings("unchecked")
+		T[] a=(T[])UtilM.array(list.get(0).getClass(), list.size());
+		return list.toArray(a);
+	}
+	
 	public static InputStream getResource(String name){
 		if(Globals.DEV_ENV) name="res/"+name;
 		
@@ -228,11 +294,12 @@ public class UtilM{
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T[] newArray(Class<T> componentType, int length){
+	public static <T> T[] array(Class<T> componentType, int length){
 		return (T[])Array.newInstance(componentType, length);
 	}
 	
 	public static boolean instanceOf(Class<?> left, Class<?> right){
+		if(left==right) return true;
 		try{
 			left.asSubclass(right);
 			return true;
@@ -261,6 +328,7 @@ public class UtilM{
 		
 		return verticesToPhysicsMesh(vts, ids);
 	}
+	
 	public static TriangleIndexVertexArray verticesToPhysicsMesh(float[] vts, int[] ids){
 		
 		IndexedMesh indexedMesh=new IndexedMesh();
@@ -276,5 +344,38 @@ public class UtilM{
 		TriangleIndexVertexArray vertArray=new TriangleIndexVertexArray();
 		vertArray.addIndexedMesh(indexedMesh);
 		return vertArray;
+	}
+	
+	public static Serializable fromString(String s){
+		//		byte[] data=Base64.getDecoder().decode(s);
+		byte[] data=s.getBytes();
+		Object o=null;
+		try{
+			ObjectInputStream ois=new ObjectInputStream(new ByteArrayInputStream(data));
+			try{
+				o=ois.readObject();
+			}catch(ClassNotFoundException e){
+				e.printStackTrace();
+			}
+			ois.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		return (Serializable)o;
+	}
+	
+	public static String toString(Serializable o) throws IOException{
+		ByteArrayOutputStream baos=new ByteArrayOutputStream();
+		ObjectOutputStream oos=new ObjectOutputStream(baos);
+		oos.writeObject(o);
+		oos.close();
+		//		return Base64.getEncoder().encodeToString(baos.toByteArray());
+		return new String(baos.toByteArray());
+	}
+	
+	public static void closeSilenty(Closeable closeable){
+		try{
+			closeable.close();
+		}catch(IOException e){}
 	}
 }

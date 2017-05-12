@@ -28,7 +28,7 @@ public class Model implements IModel{
 	private boolean				loaded;
 	private boolean				usesIndicies;
 	private IFrustrumShape		shape;
-	private String				name;
+	private final String		name;
 	private Consumer<IModel>	onload	=null;
 	
 	private final List<IMaterial>	materials	=new ArrayList<>();
@@ -51,7 +51,6 @@ public class Model implements IModel{
 	
 	public Model(String name){
 		this.name=name;
-		materials.add(new Material(0,"default"));
 	}
 	
 	@Override
@@ -229,9 +228,15 @@ public class Model implements IModel{
 	protected void requireNotLoaded(){
 		if(isLoaded()) throw new IllegalStateException("Model should not be loaded!");
 	}
+	
 	@Override
 	public IModel bindVao(){
 		GL30.glBindVertexArray(vao);
 		return this;
+	}
+	
+	@Override
+	public void addMaterial(IMaterial material){
+		materials.add(material);
 	}
 }

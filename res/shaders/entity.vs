@@ -17,13 +17,21 @@ uniform mat4 viewMat;
 #include "Fog"
 
 void main(void){
-	vec4 worldPos=transformMat*vec4(pos,1);
+	setupModelMaterial();
+	ModelMaterial m=getMaterial();
+	vec3 pos0=pos;
+	if(m.jelly>0){
+		float vt=length((transformMat*vec4(pos0,1)).xyz);
+		pos0.x+=m.jelly*sin(tim+vt);
+		pos0.z+=m.jelly*cos(tim+vt);
+	}
+	vec4 worldPos=transformMat*vec4(pos0,1);
 	vec4 posRelativeToCam=viewMat*worldPos;
 	
 	gl_Position=projectionMat*posRelativeToCam;
 	uv=uvIn;
 	
-	setupModelMaterial();
+	
 	
 	lightingSetUp(transformMat, worldPos, normalIn, (inverse(viewMat)*vec4(0,0,0,1)).xyz);
 	

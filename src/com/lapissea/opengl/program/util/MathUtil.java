@@ -49,5 +49,11 @@ public class MathUtil{
 	public static int max(int i1,int i2,int i3,int i4){
 		return Math.max(i1, max(i2, i3, i4));
 	}
+	public static float max(float i1,float i2,float i3){
+		return Math.max(i1, Math.max(i2, i3));
+	}
+	public static float max(float i1,float i2,float i3,float i4){
+		return Math.max(i1, max(i2, i3, i4));
+	}
 	
 }

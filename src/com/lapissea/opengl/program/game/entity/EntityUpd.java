@@ -3,11 +3,7 @@ package com.lapissea.opengl.program.game.entity;
 import com.bulletphysics.dynamics.RigidBody;
 import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.abstr.opengl.events.Updateable;
-import com.lapissea.opengl.abstr.opengl.frustrum.Frustum;
-import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.RigidBodyEntity;
 import com.lapissea.opengl.program.util.math.PartialTick;
@@ -15,8 +11,8 @@ import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
 public abstract class EntityUpd extends Entity implements Updateable{
 	
-	public final Vec3f prevPos=new Vec3f(),prevScale=new Vec3f(1, 1, 1);
-	public final Quat4M prevRot=new Quat4M();
+	public final Vec3f	prevPos	=new Vec3f(),prevScale=new Vec3f(1, 1, 1);
+	public final Quat4M	prevRot	=new Quat4M();
 	
 	protected RigidBodyEntity physicsBody;
 	
@@ -43,20 +39,6 @@ public abstract class EntityUpd extends Entity implements Updateable{
 	@Override
 	public Vec3f getModelScale(){
 		return PartialTick.calc(SCAL, prevScale, scale);
-	}
-	
-	@Override
-	public void render(){
-		Renderer r=getRenderer();
-//		LogUtil.println(r);
-		Frustum fustr=r.frustrum;
-		r.notifyEntityRender();
-		IFrustrumShape shape=model.getFrustrumShape();
-		if(!model.isLoaded()||
-				!shape.withScale(scale).isVisibleAt(pos, fustr)) return;
-		r.notifyEntityActualRender();
-		
-		Shaders.ENTITY.renderBatched(this);
 	}
 	
 	public RigidBody getPhysicsBody(){

@@ -25,7 +25,8 @@ public class RigidBodyEntity extends RigidBody{
 		NO_TRANS.setIdentity();
 		getCollisionShape().getAabb(NO_TRANS, AABB_MIN, AABB_MAX);
 		AABB_MAX.sub(AABB_MIN);
-		setCcdMotionThreshold(AABB_MAX.length()/3);
+//		setCcdMotionThreshold(1);
+//		setCcdSweptSphereRadius(AABB_MAX.length()/3);
 		return this;
 	}
 	

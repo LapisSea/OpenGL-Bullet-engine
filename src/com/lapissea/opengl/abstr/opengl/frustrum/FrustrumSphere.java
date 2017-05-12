@@ -1,11 +1,12 @@
 package com.lapissea.opengl.abstr.opengl.frustrum;
 
+import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
 public class FrustrumSphere implements IFrustrumShape{
 	
-	private final float radius;
-	private float scale=1;
+	private final float	radius;
+	private float		scale	=1;
 	
 	public FrustrumSphere(float radius){
 		this.radius=radius;
@@ -22,14 +23,14 @@ public class FrustrumSphere implements IFrustrumShape{
 	}
 	
 	@Override
-	public IFrustrumShape withScale(Vec3f scale){
-		return withScale(scale.x(),scale.z(),scale.y());
+	public IFrustrumShape withTransform(float x, float y, float z, Quat4M q){
+		scale=Math.max(x, Math.max(y, z));
+		return this;
 	}
 	
 	@Override
-	public IFrustrumShape withScale(float x, float y, float z){
-		scale=Math.max(x, Math.max(y, z));
-		return this;
+	public String toString(){
+		return "Sphere{r="+radius+"}";
 	}
 	
 }

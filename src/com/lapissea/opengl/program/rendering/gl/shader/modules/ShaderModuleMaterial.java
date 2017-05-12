@@ -19,6 +19,7 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 	UniformFloat1[]	shineDamper;
 	UniformFloat1[]	reflectivity;
 	UniformFloat1[]	lightTroughput;
+	UniformFloat1	tim;
 	
 	public ShaderModuleMaterial(Shader parent){
 		super(parent);
@@ -33,18 +34,20 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 		shineDamper=getUniformArray(UniformFloat1.class, i->"materials["+i+"].shineDamper");
 		reflectivity=getUniformArray(UniformFloat1.class, i->"materials["+i+"].reflectivity");
 		lightTroughput=getUniformArray(UniformFloat1.class, i->"materials["+i+"].lightTroughput");
+		tim=getUniform(UniformFloat1.class, "tim");
 	}
 	
 	@Override
 	public void bindAttributes(){
 		bindAttribute(ModelAttribute.MAERIAL_ID_ATTR);
 	}
-
+	
 	@Override
 	public void uploadUniformsModel(IModel model){
-		
+		if(tim!=null)tim.upload((float)((System.currentTimeMillis()/400D)%(Math.PI*2)));
 		for(int i=0, j=Math.min(model.getMaterialCount(), ambient.length-1);i<j;i++){
-			uploadMaterial(i, model.getMaterial(i));
+			IMaterial mat=model.getMaterial(i);
+			uploadMaterial(mat.getId(), mat);
 		}
 	}
 	

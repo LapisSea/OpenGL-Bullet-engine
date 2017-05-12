@@ -11,9 +11,8 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
-import com.lapissea.opengl.abstr.opengl.assets.ITexture;
+import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.UtilM;
@@ -30,26 +29,27 @@ public class Terrain implements ModelInWorld{
 	protected static final Matrix4f	TRANSFORM	=new Matrix4f();
 	protected static final Vec3f	POS			=new Vec3f();
 	
-	private static final int SIZE=32,RESOLUTION=32;
+	public static final int		SIZE	=32,RESOLUTION=16;
+	public static final float	WORLD_H	=5;
 	
 	public final float	x,z;
-	public Model		model;
+	public IModel		model	=ModelLoader.EMPTY_MODEL;
 	public RigidBody	chunkBody;
 	
 	protected final Matrix4f mat=new Matrix4f();
 	
 	public final double seed=Math.random();
 	
-	public Terrain(int gridX, int gridZ, ITexture texture){
+	public Terrain(int gridX, int gridZ){
 		
 		x=gridX*SIZE;
 		z=gridZ*SIZE;
 		mat.translate(new Vec3f(x, -2, z));
-		model=generateModel(gridX, gridZ, texture);
-		model.getMaterial(0).setShineDamper(50).setReflectivity(0.2F).setDiffuse(0.2F,1,0.25F,1).setSpecular(1, 1, 1, 1);
+		model=generateModel(gridX, gridZ);
+		model.getMaterial(0).setShineDamper(50).setReflectivity(0.2F).setDiffuse(0.2F, 1, 0.25F, 1).setSpecular(1, 1, 1, 1);
 	}
 	
-	private Model generateModel(int gridX, int gridZ, ITexture texture){
+	private IModel generateModel(int gridX, int gridZ){
 		int r1=RESOLUTION+1;
 		
 		FloatList vertices=new FloatArrayList(),uvs=new FloatArrayList();
@@ -57,14 +57,17 @@ public class Terrain implements ModelInWorld{
 		IntList indices=new IntArrayList();
 		
 		float mul=SIZE/(float)RESOLUTION;
-		double div=SIZE;
 		for(int z=0;z<r1;z++){
 			for(int x=0;x<r1;x++){
-				vertices.add(x*mul);
-				float h=(float)SimplexNoise.noise((x+gridX*RESOLUTION)/div, (z+gridZ*RESOLUTION)/div);
+				double h=SimplexNoise.noise((x/(float)RESOLUTION+gridX), (z/(float)RESOLUTION+gridZ));
 				h-=0.5;
-				vertices.add(h*4+(float)(SimplexNoise.noise(x+gridX*RESOLUTION, z+gridZ*RESOLUTION)*0.1)-SIZE/2F);
+				
+				h+=(SimplexNoise.noise(x/(float)RESOLUTION+gridX, z/(float)RESOLUTION+gridZ)-0.5)/10;
+
+				vertices.add(x*mul);
+				vertices.add((float)(h*WORLD_H));
 				vertices.add(z*mul-SIZE/2F);
+				
 				uvs.add(x/(float)RESOLUTION);
 				uvs.add(z/(float)RESOLUTION);
 			}
@@ -93,25 +96,24 @@ public class Terrain implements ModelInWorld{
 		float[] vts=vertices.toFloatArray();
 		int[] ids=indices.toIntArray();
 		
-		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(vts,ids), true);
+		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(vts, ids), true);
 		MotionState ballMotionState=new DefaultMotionState(new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x, 0, z), 1)));
 		RigidBodyConstructionInfo ballConstructionInfo=new RigidBodyConstructionInfo(0, ballMotionState, trimeshshape, new Vector3f());
 		ballConstructionInfo.restitution=0F;
 		chunkBody=new RigidBody(ballConstructionInfo);
 		chunkBody.setUserPointer(this);
 		
-		return ModelLoader.buildModel("Gen_Floor-"+gridX+"_"+gridZ, false, "vertices", vts, "uvs", uvs.toFloatArray(), "indices", ids, "genNormals", true, "textures", texture);
+		return ModelLoader.buildModel("Gen_Floor-"+gridX+"_"+gridZ, false, "vertices", vts, "uvs", uvs.toFloatArray(), "indices", ids, "genNormals", true);
 	}
 	
 	@Override
-	public Model getModel(){
+	public IModel getModel(){
 		return model;
 	}
 	
 	@Override
 	public Matrix4f getTransform(){
-		model.getMaterial(0).setReflectivity(10).setShineDamper(500);
-		
+		model.getMaterial(0).setShineDamper(100).setReflectivity(2F);
 		TRANSFORM.setIdentity();
 		POS.x=x;
 		POS.y=0;

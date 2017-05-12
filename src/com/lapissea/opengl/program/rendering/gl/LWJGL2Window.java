@@ -37,9 +37,9 @@ import it.unimi.dsi.fastutil.booleans.BooleanList;
 
 public class LWJGL2Window implements IGLWindow{
 	
-	private final BooleanList prevKbKeys=new BooleanArrayList(),prevMsKeys=new BooleanArrayList();
-	
 	private class Vec2iVal extends Vec2i{
+		
+		private static final long serialVersionUID=-2021779386959208482L;
 		
 		final IntSupplier x,y;
 		
@@ -60,136 +60,11 @@ public class LWJGL2Window implements IGLWindow{
 		}
 	}
 	
+	private final BooleanList prevKbKeys=new BooleanArrayList(),prevMsKeys=new BooleanArrayList();
+	
 	private final Vec2i		pos	=new Vec2iVal(Display::getX, Display::getY);
 	private final Vec2i		size=new Vec2iVal(Display::getWidth, Display::getHeight);
 	private final ILWJGLCtx	ctx;
-	
-	public LWJGL2Window(ILWJGLCtx ctx){
-		this.ctx=ctx;
-	}
-	
-	@Override
-	public ILWJGLCtx getCtx(){
-		return ctx;
-	}
-	
-	@Override
-	public IGLWindow setSize(Vec2i size){
-		try{
-			Display.setDisplayMode(new DisplayMode(Math.max(size.x(), 100), Math.max(size.y(), 100)));
-		}catch(LWJGLException e){
-			e.printStackTrace();
-		}
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setFullScreen(boolean fullScreen0){
-		try{
-			Display.setFullscreen(fullScreen0);
-		}catch(LWJGLException e){
-			e.printStackTrace();
-		}
-		return this;
-	}
-	
-	public static boolean isFullscreen(){
-		return Display.isFullscreen();
-	}
-	
-	@Override
-	public IGLWindow setPos(Vec2i pos){
-		setPos(pos.x(), pos.y());
-		return this;
-	}
-	
-	public void setPos(int x, int y){
-		if(!isFullscreen()) Display.setLocation(x, y);
-	}
-	
-	@Override
-	public void swapBuffers(int fps){
-		Display.update();
-		//		Display.setVSyncEnabled(false);
-		Display.sync(fps);
-	}
-	
-	public void closeWindow(){
-		Display.destroy();
-	}
-	
-	@Override
-	public void centerMouse(){
-		Mouse.setCursorPosition(Display.getWidth()/2, Display.getHeight()/2);
-	}
-	
-	@Override
-	public boolean isClosed(){
-		return Display.isCloseRequested();
-	}
-	
-	@Override
-	public boolean isFocused(){
-		return Display.isActive();
-	}
-	
-	public boolean active3d(){
-		return isFocused()&&Mouse.isGrabbed();
-	}
-	
-	@Override
-	public IGLWindow create() throws LWJGLException{
-		
-		LogUtil.println("Creating window...");
-		
-		setPos(pos);
-		setSize(size);
-		PixelFormat format=new PixelFormat();
-		ContextAttribs ctx=new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true);
-		Display.create(format, null, ctx);
-		
-		GL11.glClearColor(1, 1, 1, 1);
-		
-		Mouse.create();
-		Keyboard.create();
-		
-		LogUtil.println("Window created!");
-		LogUtil.printWrapped("OPEN_GL_INFO\nLWJGL version:"+Sys.getVersion()+"\nOpenGL version:"+GL11.glGetString(GL11.GL_VERSION)+"\nOPEN_GL_INFO");
-		
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setTitle(String title){
-		Display.setTitle(title);
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setResizable(boolean flag){
-		Display.setResizable(flag);
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setVSync(boolean flag){
-		Display.setVSyncEnabled(flag);
-		return this;
-	}
-	
-	@Override
-	public Vec2i getPos(){
-		return pos;
-	}
-	
-	@Override
-	public Vec2i getSize(){
-		return size;
-	}
-	
-	/////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////
 	
 	private int prevMouseX=-1,prevMouseY=-1,prevSizeW,prevSizeH;
 	
@@ -202,40 +77,8 @@ public class LWJGL2Window implements IGLWindow{
 	protected IFocusHook			focus;
 	protected IResizeHook			resize;
 	
-	@Override
-	public IGLWindow setEventHook(IKeyEventHook hook){
-		keyKb=hook;
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setEventHook(IMouseKeyEventHook hook){
-		keyMs=hook;
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setEventHook(IMouseMoveEventHook hook){
-		moveMs=hook;
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setEventHook(IMouseScrollEventHook hook){
-		scrollMs=hook;
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setEventHook(IFocusHook hook){
-		focus=hook;
-		return this;
-	}
-	
-	@Override
-	public IGLWindow setEventHook(IResizeHook hook){
-		resize=hook;
-		return this;
+	public LWJGL2Window(ILWJGLCtx ctx){
+		this.ctx=ctx;
 	}
 	
 	@Override
@@ -257,9 +100,12 @@ public class LWJGL2Window implements IGLWindow{
 				int key=Mouse.getEventButton();
 				if(key!=-1){
 					boolean state=Mouse.getEventButtonState();
-					set(prevMsKeys, key, state);
+					while(prevMsKeys.size()<=key){
+						prevMsKeys.add(false);
+					}
+					prevMsKeys.set(key, state);
 					Button b=MouseKeyEvent.buttonFromInt(key);
-					if(b!=null) keyMs.onMouseKeyEvent(new MouseKeyEvent(this, state?Action.PRESS:Action.RELEASE, b));
+					if(b!=null) keyMs.onMouseKeyEvent(new MouseKeyEvent(this, state?Action.DOWN:Action.UP, b));
 				}
 			}
 		}
@@ -269,7 +115,10 @@ public class LWJGL2Window implements IGLWindow{
 				int key=Keyboard.getEventKey();
 				if(key!=-1){
 					boolean state=Keyboard.getEventKeyState();
-					set(prevKbKeys, key, state);
+					while(prevKbKeys.size()<=key){
+						prevKbKeys.add(false);
+					}
+					prevKbKeys.set(key, state);
 					
 					keyKb.onKeyEvent(new KeyEvent(this, state?Keyboard.isRepeatEvent()?KeyAction.HOLD:KeyAction.PRESS:KeyAction.RELEASE, key));
 				}
@@ -312,15 +161,152 @@ public class LWJGL2Window implements IGLWindow{
 		////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 	
-	private void set(BooleanList list, int id, boolean value){
-		while(list.size()<=id)
-			list.add(false);
-		list.set(id, value);
+	@Override
+	public ILWJGLCtx getCtx(){
+		return ctx;
+	}
+	
+	@Override
+	public IGLWindow setFullScreen(boolean fullScreen0){
+		try{
+			Display.setFullscreen(fullScreen0);
+		}catch(LWJGLException e){
+			e.printStackTrace();
+		}
+		return this;
+	}
+	
+	public static boolean isFullscreen(){
+		return Display.isFullscreen();
+	}
+	
+	@Override
+	public IGLWindow setPos(int x, int y){
+		if(!isFullscreen()) Display.setLocation(x, y);
+		return this;
+	}
+	
+	@Override
+	public void swapBuffers(int fps){
+		Display.update();
+		Display.sync(fps);
+	}
+	
+	public void closeWindow(){
+		Display.destroy();
+	}
+	
+	@Override
+	public void centerMouse(){
+		Mouse.setCursorPosition(Display.getWidth()/2, Display.getHeight()/2);
+	}
+	
+	@Override
+	public boolean isClosed(){
+		return Display.isCloseRequested();
+	}
+	
+	@Override
+	public boolean isFocused(){
+		return Display.isActive();
+	}
+	
+	public boolean active3d(){
+		return isFocused()&&Mouse.isGrabbed();
+	}
+	
+	@Override
+	public IGLWindow create() throws LWJGLException{
+		LogUtil.println("Creating window...");
+		Display.create(new PixelFormat().withSamples(4), null, new ContextAttribs(3, 2).withForwardCompatible(true).withProfileCore(true));
+		
+		GL11.glClearColor(1, 1, 1, 1);
+		
+		Mouse.create();
+		Keyboard.create();
+		
+		LogUtil.printWrapped("OPEN_GL_INFO\nLWJGL version:"+Sys.getVersion()+"\nOpenGL version:"+GL11.glGetString(GL11.GL_VERSION)+"\nOPEN_GL_INFO");
+		
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setTitle(String title){
+		Display.setTitle(title);
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setResizable(boolean flag){
+		Display.setResizable(flag);
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setVSync(boolean flag){
+		Display.setVSyncEnabled(flag);
+		return this;
+	}
+	
+	@Override
+	public Vec2i getPos(){
+		return pos;
+	}
+	
+	@Override
+	public Vec2i getSize(){
+		return size;
+	}
+	
+	@Override
+	public IGLWindow setEventHook(IKeyEventHook hook){
+		keyKb=hook;
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setEventHook(IMouseKeyEventHook hook){
+		keyMs=hook;
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setEventHook(IMouseMoveEventHook hook){
+		moveMs=hook;
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setEventHook(IMouseScrollEventHook hook){
+		scrollMs=hook;
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setEventHook(IFocusHook hook){
+		focus=hook;
+		return this;
+	}
+	
+	@Override
+	public IGLWindow setEventHook(IResizeHook hook){
+		resize=hook;
+		return this;
 	}
 	
 	@Override
 	public void destroy(){
 		Display.destroy();
+	}
+	
+	@Override
+	public IGLWindow setSize(int x, int y){
+		try{
+			Display.setDisplayMode(new DisplayMode(Math.max(x, 100), Math.max(y, 100)));
+		}catch(LWJGLException e){
+			e.printStackTrace();
+		}
+		return this;
 	}
 	
 }

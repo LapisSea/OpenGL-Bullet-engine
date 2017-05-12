@@ -10,13 +10,13 @@ import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
 public abstract class Entity implements Renderable,ModelInWorld{
-
-	protected static final Vec3f POS=new Vec3f(),SCAL=new Vec3f();
-	protected static final Quat4M ROT=new Quat4M();
+	
+	protected static final Vec3f	POS	=new Vec3f(),SCAL=new Vec3f();
+	protected static final Quat4M	ROT	=new Quat4M();
 	
 	public IModel		model;
 	public final Vec3f	pos,scale;
-	public final Quat4M rot;
+	public final Quat4M	rot;
 	private boolean		dead;
 	public final World	world;
 	
@@ -32,11 +32,13 @@ public abstract class Entity implements Renderable,ModelInWorld{
 	protected Vec3f initPos(Vec3f pos){
 		return pos;
 	}
+	
 	protected Quat4M initRot(){
 		return new Quat4M();
 	}
+	
 	protected Vec3f initScale(){
-		return new Vec3f(1,1,1);
+		return new Vec3f(1, 1, 1);
 	}
 	
 	public void kill(){
@@ -72,11 +74,10 @@ public abstract class Entity implements Renderable,ModelInWorld{
 	@Override
 	public void render(){
 		Renderer r=getRenderer();
-		
 		r.notifyEntityRender();
-		if(!model.isLoaded()||!model.getFrustrumShape().withScale(scale).isVisibleAt(pos, r.frustrum)) return;
+		if(!model.isLoaded()||!model.getFrustrumShape().withTransform(getModelScale(), getModelRot()).isVisibleAt(getModelPos(), r.frustrum)) return;
 		r.notifyEntityActualRender();
 		
-		Shaders.ENTITY.renderSingle(this);
+		Shaders.ENTITY.renderBatched(this);
 	}
 }

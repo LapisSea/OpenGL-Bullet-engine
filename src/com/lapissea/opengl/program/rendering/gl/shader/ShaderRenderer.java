@@ -42,29 +42,29 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld>extends Sha
 	
 	@Override
 	public void render(){
-		if(!isLoaded()){
-			toRender.clear();
-			return;
-		}
-		GLUtil.checkError();
-		
-		onRendered();
-		GLUtil.checkError();
-		if(toRender.isEmpty()) return;
-		prepareGlobal();
-		GLUtil.checkError();
-		
-		UtilM.doAndClear(toRender, (model, entitysWithSameModel)->{
-			if(entitysWithSameModel.isEmpty()) return;
-			if(!model.isLoaded()) return;
-			prepareModel(model);
-			entitysWithSameModel.forEach(renderable->{
-				prepareInstance(renderable);
-				model.drawCall();
+		synchronized(toRender){
+			if(!isLoaded()){
+				toRender.clear();
+				return;
+			}
+			onRendered();
+			if(toRender.isEmpty()) return;
+			prepareGlobal();
+			
+			UtilM.doAndClear(toRender, (model, entitysWithSameModel)->{
+				if(entitysWithSameModel.isEmpty()) return;
+				if(!model.isLoaded()) return;
+				prepareModel(model);
+				entitysWithSameModel.forEach(renderable->{
+					prepareInstance(renderable);
+					model.drawCall();
+				});
+				unbindModel(model);
 			});
-			unbindModel(model);
-		});
-		unbind();
+			
+			unbind();
+			
+		}
 	}
 	
 	public void renderBatch(List<? extends RenderType> entitysWithSameModel){
@@ -87,11 +87,13 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld>extends Sha
 	
 	public void renderBatched(RenderType renderable){
 		if(!isLoaded()) return;
-		if(!added){
-			getRenderer().addShader(this);
-			added=true;
+		synchronized(toRender){
+			if(!added){
+				getRenderer().addShader(this);
+				added=true;
+			}
+			toRender.add(renderable.getModel(), renderable);
 		}
-		toRender.add(renderable.getModel(), renderable);
 	}
 	
 	protected void prepareGlobal(){

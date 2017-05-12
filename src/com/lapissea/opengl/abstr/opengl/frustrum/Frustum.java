@@ -151,6 +151,7 @@ public class Frustum{
 	}
 	
 	public boolean point(float x, float y, float z){
+		
 		for(int p=0;p<6;p++)
 			if(frustum[p][0]*x+frustum[p][1]*y+frustum[p][2]*z+frustum[p][3]<=0)
 				return false;
@@ -163,7 +164,7 @@ public class Frustum{
 	
 	// Test If A Sphere Is In The Frustum
 	public boolean sphere(float x, float y, float z, float radius){
-		if(radius<0.0001)return point(x, y, z);
+		if(radius<0.0001) return point(x, y, z);
 		for(int p=0;p<6;p++)
 			if(frustum[p][0]*x+frustum[p][1]*y+frustum[p][2]*z+frustum[p][3]<=-radius)
 				return false;
@@ -171,19 +172,27 @@ public class Frustum{
 	}
 	
 	public boolean cube(Vec3f pos, float size){
-		return cube(pos.x, pos.y, pos.z, size, size, size);
+		return cube(pos.x(), pos.y(), pos.z(), size, size, size);
 	}
 	
-	// Test If A Cube Is In The Frustum
+	public boolean cube(Vec3f pos, Vec3f size){
+		return cube(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z());
+	}
+	
 	public boolean cube(float x, float y, float z, float size){
 		return cube(x, y, z, size, size, size);
 	}
 	
+	public boolean cube(float x, float y, float z, Vec3f size){
+		return cube(x, y, z, size.x(), size.y(), size.z());
+	}
+	
 	public boolean cube(Vec3f pos, float sizeX, float sizeY, float sizeZ){
-		return cube(pos.x, pos.y, pos.z, sizeX, sizeY, sizeZ);
+		return cube(pos.x(), pos.y(), pos.z(), sizeX, sizeY, sizeZ);
 	}
 	
 	public boolean cube(float x, float y, float z, float sizeX, float sizeY, float sizeZ){
+		
 		for(int p=0;p<6;p++){
 			if(frustum[p][0]*(x-sizeX)+frustum[p][1]*(y-sizeY)+frustum[p][2]*(z-sizeZ)+frustum[p][3]>0) continue;
 			if(frustum[p][0]*(x+sizeX)+frustum[p][1]*(y-sizeY)+frustum[p][2]*(z-sizeZ)+frustum[p][3]>0) continue;

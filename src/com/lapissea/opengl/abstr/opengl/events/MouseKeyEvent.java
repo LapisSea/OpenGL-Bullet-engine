@@ -10,7 +10,7 @@ public class MouseKeyEvent extends WindowEvent{
 	}
 	
 	public enum Action{
-		PRESS,RELEASE;
+		DOWN,UP;
 	}
 	
 	public enum Button{

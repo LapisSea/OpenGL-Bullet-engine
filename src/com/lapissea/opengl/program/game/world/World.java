@@ -4,6 +4,7 @@ import static com.bulletphysics.linearmath.DebugDrawModes.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import javax.vecmath.Vector3f;
 
@@ -23,13 +24,13 @@ import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSo
 import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
-import com.lapissea.opengl.abstr.opengl.assets.ITexture;
 import com.lapissea.opengl.abstr.opengl.events.Updateable;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.Camera;
 import com.lapissea.opengl.program.game.entity.Entity;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.entity.entitys.EntityCrazyCube;
+import com.lapissea.opengl.program.game.entity.entitys.EntityGrass;
 import com.lapissea.opengl.program.game.entity.entitys.EntityTree;
 import com.lapissea.opengl.program.game.terrain.Terrain;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
@@ -45,7 +46,7 @@ public class World{
 	private List<EntityUpd>	entitysUpd	=new ArrayList<>();
 	private boolean			checkDead;
 	private long			ticksPassed;
-	private double			dayDuration	=200;
+	private double			dayDuration	=400;
 	
 	public final List<Terrain> terrains=new ArrayList<>();
 	
@@ -107,27 +108,38 @@ public class World{
 	
 	private void setUpEntity(){
 		
-		ITexture texture=null;
-		int tileNum=20;
-		for(int x=0;x<tileNum;x++){
-			for(int z=0;z<tileNum;z++){
-				Terrain t=new Terrain(x-tileNum/2, z-tileNum/2, texture);
+		LogUtil.println("Generating chunks...");
+		int tileNum=10;
+		IntStream.range(0, tileNum).parallel().forEach(x->IntStream.range(0, tileNum).forEach(z->{
+			Terrain t=new Terrain(x-tileNum/2, z-tileNum/2);
+			synchronized(terrains){
 				terrains.add(t);
 				bulletWorld.addRigidBody(t.chunkBody);
 			}
-		}
+		}));
 		
-		int worldSize=100;
+		LogUtil.println("Done!");
+		
+		int worldSize=tileNum*Terrain.SIZE;
+		
+		for(int i=0;i<500;i++){
+			spawn(new EntityGrass(this, new Vec3f(Terrain.SIZE/2F+RandUtil.CRF(worldSize), 0, RandUtil.CRF(worldSize))));
+		}
 		
 		List<EntityTree> t=new ArrayList<>(100);
 		for(int i=0, j=1;i<j;i++){
-			t.add(new EntityTree(this, new Vec3f(RandUtil.CRF(worldSize*1.5), 0, RandUtil.CRF(worldSize*1.5))));
+			t.add(new EntityTree(this, new Vec3f(100+RandUtil.CRF(worldSize*1.5), 0, RandUtil.CRF(worldSize*1.5))));
 		}
-		
-		for(int i=0, j=20;i<j;i++){
-			EntityCrazyCube c;
-			spawn(c=new EntityCrazyCube(this, new Vec3f(RandUtil.CRF(100), 20+RandUtil.CRF(10), RandUtil.CRF(100))));
-			if(i<ShaderModuleLight.MAX_POINT_LIGHT) c.lightColor=IColorM.randomRGB();
+		int i=0;
+		for(int x=0;x<5;x++){
+			for(int y=0;y<5;y++){
+				for(int z=0;z<5;z++){
+					EntityCrazyCube c;
+					spawn(c=new EntityCrazyCube(this, new Vec3f(x, y+70, z)));
+					if(i<ShaderModuleLight.MAX_POINT_LIGHT) c.lightColor=IColorM.randomRGB();
+					i++;
+				}
+			}
 		}
 		
 		t.forEach(this::spawn);
@@ -151,7 +163,13 @@ public class World{
 	}
 	
 	public void update(){
-		bulletWorld.stepSimulation(1F/Game.get().timer.getUps());
+		
+		int steps=1;
+		float step=1F/Game.get().timer.getUps()/steps;
+		for(int i=0;i<steps;i++){
+			bulletWorld.stepSimulation(step, 1, step);
+		}
+		
 		bulletWorld.debugDrawWorld();
 		Game.get().renderer.lines.clearIfEmpty();
 		
@@ -192,7 +210,7 @@ public class World{
 			if(v.hasHit()){
 				if(v.collisionObject!=null&&v.collisionObject.getUserPointer() instanceof EntityCrazyCube){
 					v.collisionObject.activate();
-					float siz=1;
+					float siz=5F;
 					((RigidBody)v.collisionObject).applyCentralForce(new Vector3f(vc.x*siz, vc.y*siz, vc.z*siz));
 				}
 			}
@@ -223,9 +241,9 @@ public class World{
 	}
 	
 	public double getSunPos(double pt){
-		return ((time()+pt)/dayDuration)%1;
+//		return ((time()+pt)/dayDuration)%1;
 //		return 0.75;
-//		return 0.25;
+		return 0.25;
 	}
 	
 	public double getSunBrightness(){

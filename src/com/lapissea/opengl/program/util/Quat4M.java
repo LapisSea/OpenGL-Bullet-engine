@@ -13,7 +13,7 @@ public class Quat4M extends Quat4f{
 	private static final long serialVersionUID=1217013901730370836L;
 	
 	public Quat4M(){
-		super();
+		super(0,0,0,1);
 	}
 	
 	public Quat4M(float arg0, float arg1, float arg2, float arg3){
@@ -159,4 +159,34 @@ public class Quat4M extends Quat4f{
 		z=(float)(c1*s2*c3-s1*c2*s3);
 	}
 	
+	public Vec3f rotate(Vec3f srcDest){
+		return rotate(srcDest, srcDest);
+	}
+	public Vec3f rotate(Vec3f src,Vec3f dest){
+		float k0=w*w-0.5f;
+		float k1;
+		float rx,ry,rz;
+		
+		// k1 = Q.V
+		k1=src.x*x;
+		k1+=src.y*y;
+		k1+=src.z*z;
+		
+		// (qq-1/2)V+(Q.V)Q
+		rx=src.x*k0+x*k1;
+		ry=src.y*k0+y*k1;
+		rz=src.z*k0+z*k1;
+		
+		// (Q.V)Q+(qq-1/2)V+q(QxV)
+		rx+=w*(y*src.z-z*src.y);
+		ry+=w*(z*src.x-x*src.z);
+		rz+=w*(x*src.y-y*src.x);
+		
+		//  2((Q.V)Q+(qq-1/2)V+q(QxV))
+		rx+=rx;
+		ry+=ry;
+		rz+=rz;
+		
+		return dest.setThis(rx, ry, rz);
+	}
 }

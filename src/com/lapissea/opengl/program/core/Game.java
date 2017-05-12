@@ -44,7 +44,6 @@ public class Game{
 	}
 	
 	public void start(){
-		glCtx.init();
 		win().setEventHooks(registry);
 		
 		ShaderModule.register();

@@ -12,10 +12,11 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
 import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.abstr.opengl.assets.ITexture;
 import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
-import com.lapissea.opengl.abstr.opengl.frustrum.FrustrumSphere;
+import com.lapissea.opengl.abstr.opengl.frustrum.FrustrumCube;
 import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
@@ -56,25 +57,30 @@ public class ModelLoader{
 		}
 	};
 	
-	@SuppressWarnings({"unchecked","unused"})
-	private static <T> T get(Object data, Class<T> type, int minSiz){
-		if(data==null) return null;
-		
-		//		if(data.equals(0))
-		
-		//TODO
-		
-		return (T)data;
+	private static final Vec3f V0=new Vec3f(),V1=new Vec3f(),V2=new Vec3f(),V01=new Vec3f(),V12=new Vec3f(),NORMAL=new Vec3f();
+	
+	public static Model[] buildModels(ModelData...modelsData){
+		Model[] models=new Model[modelsData.length];
+		for(int i=0;i<modelsData.length;i++){
+			models[i]=buildModel(modelsData[0]);
+		}
+		return models;
 	}
 	
-	private static final Vec3f V0=new Vec3f(),V1=new Vec3f(),V2=new Vec3f(),V01=new Vec3f(),V12=new Vec3f(),NORMAL=new Vec3f();
+	public static <T extends Model> T[] buildModels(Class<T> type, ModelData...modelsData){
+		T[] models=UtilM.array(type, modelsData.length);
+		for(int i=0;i<modelsData.length;i++){
+			models[i]=buildModel(type, modelsData[0]);
+		}
+		return models;
+	}
 	
 	public static Model buildModel(ModelData modelData){
 		return buildModel(Model.class, modelData);
 	}
 	
 	public static <T extends Model> T buildModel(Class<T> type, ModelData modelData){
-		return buildModel(type, modelData.name, modelData.usesQuads, "vertices", modelData.getVert(), "uvs", modelData.getUv(), "normals", modelData.getNorm(), "materialIds", modelData.getMat());
+		return buildModel(type, modelData.name, modelData.usesQuads, "vertices", modelData.getVert(), "uvs", modelData.getUv(), "normals", modelData.getNorm(), "materialIds", modelData.getMat(), "materials", modelData.materials);
 	}
 	
 	/**
@@ -88,6 +94,8 @@ public class ModelLoader{
 	 * <br>genNormals = boolean (defaults to yes if no normals are present)
 	 * <br>killSmooth = boolean (defaults to yes)
 	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
+	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
+	 * <br>primitiveColor = float[] (rgba)
 	 */
 	public synchronized static Model buildModel(String name, boolean usesQuads, Object...data){
 		return buildModel(Model.class, name, usesQuads, data);
@@ -104,6 +112,8 @@ public class ModelLoader{
 	 * <br>genNormals = boolean (defaults to yes if no normals are present)
 	 * <br>killSmooth = boolean (defaults to yes)
 	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
+	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
+	 * <br>primitiveColor = float[] (rgba)
 	 */
 	public synchronized static <T extends Model> T buildModel(Class<T> type, String name, boolean usesQuads, Object...data){
 		if(data==null||data.length==0) return null;
@@ -130,6 +140,7 @@ public class ModelLoader{
 	 * <br>genNormals = boolean (defaults to yes if no normals are present)
 	 * <br>killSmooth = boolean (defaults to yes)
 	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
+	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
 	 * <br>primitiveColor = float[] (rgba)
 	 */
 	public static <T extends Model> T buildModel(Class<T> type, String name, boolean usesQuads, HashMap<String,Object> data){
@@ -153,13 +164,13 @@ public class ModelLoader{
 		T model;
 		try{
 			Constructor<T> ctr=type.getConstructor(String.class);
+			ctr.setAccessible(true);
 			model=ctr.newInstance(Objects.requireNonNull(name));
 		}catch(NoSuchMethodException e){
 			throw new RuntimeException("Missing "+type.getName()+".<init>(String)", e);
 		}catch(Exception e){
 			throw new RuntimeException(e);
 		}
-		float rad=calcRad(vert);
 		
 		if(killSmooth){
 			float[] vert0=vert,uvs0=uvs,normals0=normals,materialIds0=materialIds,primitiveColor0=primitiveColor;
@@ -352,7 +363,7 @@ public class ModelLoader{
 			else if(textures.getClass().isArray()){
 				Class<?> typeTx=textures.getClass().getComponentType();
 				
-				if(typeTx==ITexture.class){
+				if(UtilM.instanceOf(typeTx, ITexture.class)){
 					for(ITexture tx:(ITexture[])textures){
 						model.addTexture(tx);
 					}
@@ -366,6 +377,24 @@ public class ModelLoader{
 				}
 			}
 		}
+		
+		Object materials=data.get("materials");
+		if(materials!=null){
+			if(materials instanceof IMaterial) model.addMaterial((IMaterial)materials);
+			else if(materials instanceof Iterable){
+				((Iterable<?>)materials).forEach(mat->model.addMaterial((IMaterial)mat));
+			}
+			else if(materials.getClass().isArray()){
+				Class<?> typeTx=materials.getClass().getComponentType();
+				
+				if(UtilM.instanceOf(typeTx, IMaterial.class)){
+					for(IMaterial tx:(IMaterial[])materials){
+						model.addMaterial(tx);
+					}
+				}
+			}
+		}
+		if(model.getMaterialCount()==0) model.createMaterial();
 		
 		float[] vertF=vert,uvsF=uvs,normalsF=normals,materialIdsF=materialIds,primitiveColorF=primitiveColor;
 		boolean hasIdsF=hasIds;
@@ -384,8 +413,8 @@ public class ModelLoader{
 			putAttribute(vbos, attributes, ModelAttribute.MAERIAL_ID_ATTR, materialIdsF);
 			putAttribute(vbos, attributes, ModelAttribute.PRIMITIVE_COLOR_ATTR, primitiveColorF);
 			unbindVao();
-			
-			model.load(vao, hasIdsF?indicesF.length:vertF.length, hasIdsF, usesQuads, vbos.toIntArray(), attributes.toArray(new ModelAttribute[attributes.size()]), new FrustrumSphere(rad));
+
+			model.load(vao, hasIdsF?indicesF.length:vertF.length, hasIdsF, usesQuads, vbos.toIntArray(), attributes.toArray(new ModelAttribute[attributes.size()]), calcShape(vertF));
 			if(!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 		});
 		return model;
@@ -439,14 +468,19 @@ public class ModelLoader{
 	//		return model;
 	//	}
 	
-	private static float calcRad(float[] vert){
-		float rad=0;
+	private static IFrustrumShape calcShape(float[] vert){
+		Vec3f start=new Vec3f(),end=new Vec3f();
 		
 		for(int i=0;i<vert.length;i+=3){
 			float p1=vert[i+0],p2=vert[i+1],p3=vert[i+2];
-			rad=Math.max(rad, (float)Math.sqrt(p1*p1+p2*p2+p3*p3));
+			start.x(Math.min(start.x(), p1));
+			start.y(Math.min(start.y(), p2));
+			start.z(Math.min(start.z(), p3));
+			end.x(Math.max(end.x(), p1));
+			end.y(Math.max(end.y(), p2));
+			end.z(Math.max(end.z(), p3));
 		}
-		return rad;
+		return new FrustrumCube(start, end);
 	}
 	
 	private synchronized static float[] generateNormals(float[] vert){

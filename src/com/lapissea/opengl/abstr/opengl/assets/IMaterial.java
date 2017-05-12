@@ -44,5 +44,4 @@ public interface IMaterial{
 	String getName();
 
 	int getId();
-	
 }

@@ -9,10 +9,9 @@ import com.bulletphysics.linearmath.Transform;
 import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
+import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.util.MotionStateM;
-import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.RigidBodyEntity;
 import com.lapissea.opengl.program.util.color.ColorM;
 import com.lapissea.opengl.program.util.math.PartialTick;
@@ -77,37 +76,7 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	private static IModel getModel0(){
 		if(MODEL==null){
-			
-			float[] uvs={
-					
-					0,0,
-					0,1,
-					1,1,
-					1,0,
-					0,0,
-					0,1,
-					1,1,
-					1,0,
-					0,0,
-					0,1,
-					1,1,
-					1,0,
-					0,0,
-					0,1,
-					1,1,
-					1,0,
-					0,0,
-					0,1,
-					1,1,
-					1,0,
-					0,0,
-					0,1,
-					1,1,
-					1,0
-			
-			};
-			MODEL=ModelLoader.buildModel("BigCube", false, "vertices", VERT, "uvs", uvs, "indices", indices, "genNormals", true);
-			MODEL.getMaterial(0).setDiffuse(170/256F, 200/256F, 250/256F, 1).setLightTroughput(0.2F);
+			MODEL=ObjModelLoader.loadAndBuild("FancyCube");
 		}
 		return MODEL;
 	}
@@ -121,9 +90,9 @@ public class EntityCrazyCube extends EntityUpd{
 		super(world, getModel0(), pos);
 		transform=new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F));
 
-		scale.set(1+RandUtil.RF(1),1+RandUtil.RF(1),1+RandUtil.RF(1));
+//		scale.set(1-RandUtil.RF(0.5),1-RandUtil.RF(0.5),1-RandUtil.RF(0.5));
 		
-		float massKg=0.05F*scale.x*scale.y*scale.z;
+		float massKg=0.5F*scale.x*scale.y*scale.z;
 		
 		
 		physicsBody=new RigidBodyEntity(this, massKg, new MotionStateM(transform), new BoxShape(new Vector3f(scale.x/2,scale.y/2,scale.z/2)), null, 0.9F, 0).antiTunnel();
@@ -137,7 +106,11 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	@Override
 	public void update(){
-		physicsBody.setDamping(0.5F, 0.5F);
+		model.getMaterial(2).getDiffuse().set(177/256F,0,177/256F,1);
+		model.getMaterial(1).getDiffuse().set(0x00C7E7);
+		model.getMaterial(1).getAmbient().set(0x00C7E7).a(1);
+		model.getMaterial(0).getDiffuse().set(0x0000FF);
+		//physicsBody.setDamping(0.5F, 0.5F);
 		
 		updatePrevs();
 		pos.set(transform.origin.x, transform.origin.y, transform.origin.z);
@@ -147,9 +120,9 @@ public class EntityCrazyCube extends EntityUpd{
 	@Override
 	public void preRender(){
 		if(lightColor!=null){
-			MODEL.getMaterial(0).setLightTroughput(0.2F);
-			if(light==null) 
-				light=new PointLight(new Vec3f(), lightColor, new Vec3f(0.5F, 0, 0.03F/(scale.max()*scale.max())));
+			MODEL.getMaterial(0).setLightTroughput(1F);
+//			if(light==null) 
+				light=new PointLight(new Vec3f(), lightColor, new Vec3f(1F, 0, 0.02F/(scale.max()*scale.max())));
 			PartialTick.calc(light.pos, prevPos, pos);
 			getRenderer().pointLights.add(light);
 		}

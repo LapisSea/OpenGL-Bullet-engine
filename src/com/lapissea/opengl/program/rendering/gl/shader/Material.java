@@ -6,8 +6,6 @@ import com.lapissea.opengl.program.util.color.ColorM;
 public class Material implements IMaterial{
 	
 	private static final String NO_NAME="NO_NAME";
-
-	public static final IMaterial DEFAULT=new Material(0);
 	
 	private final ColorM	ambient			=new ColorM(0, 0, 0, 0);
 	private final ColorM	diffuse			=new ColorM();
@@ -18,7 +16,12 @@ public class Material implements IMaterial{
 	private float			reflectivity	=0;
 	private float			lightTroughput	=0;
 	private final String	name;
-	public final int		id;
+	private final int		id;
+
+	@Override
+	public String toString(){
+		return "Material{id="+id+", ambient="+ambient+", diffuse="+diffuse+", specular="+specular+", jelly="+jelly+"}";
+	}
 	
 	public Material(int id){
 		this(id, NO_NAME);
@@ -124,5 +127,6 @@ public class Material implements IMaterial{
 		specular.set(r, g, b, a);
 		return this;
 	}
+	
 	
 }

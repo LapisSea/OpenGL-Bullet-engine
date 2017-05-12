@@ -11,10 +11,13 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GLContext;
 
 import com.lapissea.opengl.abstr.opengl.assets.ITexture;
 import com.lapissea.opengl.abstr.opengl.assets.ITextureCube;
@@ -57,6 +60,7 @@ public class TextureLoader{
 		//		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		DEFAULT_PARAMS.put(GL14.GL_TEXTURE_LOD_BIAS, -1);
 		
 		BufferedImage badImg=new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB);
 		badImg.setRGB(0, 0, 0xFF02FF41);
@@ -230,7 +234,14 @@ public class TextureLoader{
 			
 			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.width, image.height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, image.data);
 			
-			if(mergeParams(texture.params()).get(GL11.GL_TEXTURE_MIN_FILTER)!=GL11.GL_NEAREST) GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+			if(mergeParams(texture.params()).get(GL11.GL_TEXTURE_MIN_FILTER)!=GL11.GL_NEAREST){
+				GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+				if(GLContext.getCapabilities().GL_EXT_texture_filter_anisotropic){
+					float ammount=Math.min(4, GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
+					GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, ammount);
+					GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, 0);
+				}
+			}
 			CUSTOM_PARAMS.forEach((k, v)->GL11.glTexParameteri(GL11.GL_TEXTURE_2D, k, v));
 			
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);

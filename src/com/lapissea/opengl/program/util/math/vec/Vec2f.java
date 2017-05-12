@@ -1,8 +1,5 @@
 package com.lapissea.opengl.program.util.math.vec;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.lapissea.opengl.program.interfaces.Calculateable;
 
 public class Vec2f implements Calculateable<Vec2f>{
@@ -11,21 +8,6 @@ public class Vec2f implements Calculateable<Vec2f>{
 	
 	private float x,y;
 
-	public Vec2f(JSONObject json){
-		try{
-			set((float)json.getDouble("x"), (float)json.getDouble("y"));
-		}catch(JSONException e){
-			try{
-				set((float)json.getDouble("w"), (float)json.getDouble("h"));
-			}catch(JSONException e1){
-				try{
-					set((float)json.getDouble("i"), (float)json.getDouble("j"));
-				}catch(JSONException e2){
-					throw new IllegalArgumentException("Json does not contain x,y or w,h or i,j as float/double");
-				}
-			}
-		}
-	}
 	
 	public Vec2f(){
 		this(0, 0);

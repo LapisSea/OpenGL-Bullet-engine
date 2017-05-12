@@ -149,7 +149,7 @@ public abstract class Shader{
 			unis.add(unif);
 		}
 		
-		return unis.isEmpty()?null:unis.toArray(UtilM.newArray(uniformType, unis.size()));
+		return unis.isEmpty()?null:unis.toArray(UtilM.array(uniformType, unis.size()));
 	}
 	
 	public <T extends AbstractUniform> T getUniform(Class<T> uniformType, String name){

@@ -13,7 +13,7 @@ import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.abstr.opengl.events.InputEvents;
 import com.lapissea.opengl.abstr.opengl.events.MouseKeyEvent;
-import com.lapissea.opengl.abstr.opengl.events.Renderable;
+import com.lapissea.opengl.abstr.opengl.events.MouseKeyEvent.Action;
 import com.lapissea.opengl.abstr.opengl.events.ResizeEvent;
 import com.lapissea.opengl.abstr.opengl.events.Updateable;
 import com.lapissea.opengl.abstr.opengl.events.WindowEvents;
@@ -38,9 +38,12 @@ import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.rendering.gl.shader.light.DirectionalLight;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
+import com.lapissea.opengl.program.util.LogUtil;
+import com.lapissea.opengl.program.util.NanoTimer;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.color.ColorM;
+import com.lapissea.opengl.program.util.color.IColorM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
 import it.unimi.dsi.fastutil.floats.FloatList;
@@ -50,6 +53,8 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	static{
 		ShaderModule.register();
 	}
+	
+	public static boolean RENDER_FRUSTRUM=true;
 	
 	private final Matrix4f	projection	=new Matrix4f(),view=new Matrix4f();
 	private Camera			camera		=new Camera();
@@ -68,6 +73,8 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	private int potentialRenders,actualRenders;
 	
 	public ParticleHandler<ParticleFoo> particleHandler;
+	
+	private NanoTimer renderBuildBechmark=new NanoTimer(),renderBechmark=new NanoTimer();
 	
 	public static class Lined extends DynamicModel{
 		
@@ -134,7 +141,12 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	@Override
 	public void onMouseKeyEvent(MouseKeyEvent event){
-		if(!event.source.isFocused()) return;
+		if(event.action==Action.DOWN){
+			if(Shaders.ENTITY!=null){
+				Shaders.ENTITY.load();
+				Shaders.TERRAIN.load();
+			}
+		}
 		
 		event.source.centerMouse();
 		Mouse.setGrabbed(true);
@@ -144,7 +156,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void update(){
 		camera.update();
 		particleHandler.update();
-		particleHandler.spawn(new Vec3f(10, 10, 10));
+		//		particleHandler.spawn(new Vec3f(10, 10, 10));
 	}
 	
 	@Override
@@ -153,6 +165,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	public void render(){
+		RENDER_FRUSTRUM=true;
 		fpsCounter.frame();
 		World world=Game.get().world;
 		float pt=Game.getPartialTicks();
@@ -202,16 +215,16 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		Shaders.SKYBOX.render();
 		GL11.glDepthMask(true);
 		
-		//		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
 		addShader(Shaders.TERRAIN);
 		
-		entitys.stream().forEach(Renderable::preRender);
-		entitys.stream().forEach(Renderable::render);
+		renderBuildBechmark.start();
+		entitys.forEach(e->e.preRender());
+		entitys.forEach(e->e.render());
+		renderBuildBechmark.end();
 		
-		//		GL11.glDisable(GL11.GL_ALPHA_TEST);
-		//		GL11.glEnable(GL11.GL_BLEND);
-		//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		renderBechmark.start();
+		
 		UtilM.doAndClear(toRender, ShaderRenderer::render);
 		Shaders.ENTITY.renderSingle(new EntityStatic(world, fontDynamicModel, new Vec3f(0, 2, 0)));
 		particleHandler.render();
@@ -222,18 +235,28 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		Shaders.LINE.renderSingle(new EntityStatic(world, lines, new Vec3f()));
 		Shaders.LINE.render();
+		renderBechmark.end();
 		
 		pointLights.clear();
 		dirLights.clear();
+		
+		LogUtil.println("Build", renderBuildBechmark.msAvrg100()+"ms \tRender", renderBechmark.msAvrg100(), "ms");
 	}
 	
 	public void drawLine(Vector3f from, Vector3f to, Vector3f color){
 		lines.add(ModelAttribute.VERTEX_ATTR, from.x, from.y, from.z);
 		lines.add(ModelAttribute.VERTEX_ATTR, to.x, to.y, to.z);
 		
-		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.x, color.y, color.z, 0.5F);
-		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.x, color.y, color.z, 0.5F);
+		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.x, color.y, color.z, 1);
+		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.x, color.y, color.z, 1);
+	}
+	
+	public void drawLine(Vec3f from, Vec3f to, IColorM color){
+		lines.add(ModelAttribute.VERTEX_ATTR, from.x, from.y, from.z);
+		lines.add(ModelAttribute.VERTEX_ATTR, to.x, to.y, to.z);
 		
+		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.r(), color.g(), color.b(), 1);
+		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.r(), color.g(), color.b(), 1);
 	}
 	
 	public void addShader(ShaderRenderer<?> shader){
@@ -247,5 +270,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void notifyEntityActualRender(){
 		actualRenders++;
 	}
+	
 	
 }

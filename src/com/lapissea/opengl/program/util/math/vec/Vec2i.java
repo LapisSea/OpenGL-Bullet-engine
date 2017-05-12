@@ -1,27 +1,26 @@
 package com.lapissea.opengl.program.util.math.vec;
 
+import java.awt.Dimension;
+import java.awt.Point;
+import java.io.Serializable;
 import java.util.function.BiConsumer;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.lapissea.opengl.program.interfaces.Calculateable;
 
-public class Vec2i implements Calculateable<Vec2i>{
+
+public class Vec2i implements Calculateable<Vec2i>,Serializable{
 	
-	private static final Vec2i STATIC_SAFE=new Vec2i();
-	private int x,y;
+	private static final long serialVersionUID=7737581116406153679L;
 	
-	public Vec2i(JSONObject json){
-		try{
-			set(json.getInt("x"), json.getInt("y"));
-		}catch(JSONException e){
-			try{
-				set(json.getInt("w"), json.getInt("h"));
-			}catch(JSONException e1){
-				throw new IllegalArgumentException("Json does not contain x,y or w,h as int");
-			}
-		}
+	private int	x;
+	private int	y;
+	
+	public Vec2i(Point point){
+		this(point.x, point.y);
+	}
+	
+	public Vec2i(Dimension dimension){
+		this(dimension.width, dimension.height);
 	}
 	
 	public Vec2i(){
@@ -113,44 +112,33 @@ public class Vec2i implements Calculateable<Vec2i>{
 		y(y()*y());
 		return this;
 	}
-	public void putXY(JSONObject json){
-		try{
-			json.put("x", x());
-			json.put("y", y());
-		}catch(JSONException e){
-			e.printStackTrace();
-		}
-	}
-	public void putWH(JSONObject json){
-		try{
-			json.put("w", x());
-			json.put("h", y());
-		}catch(JSONException e){
-			e.printStackTrace();
-		}
-	}
-
+	
+	
 	public void putXY(BiConsumer<String,Integer> put){
 		put.accept("x", x());
 		put.accept("y", y());
 	}
+	
 	public void putWH(BiConsumer<String,Integer> put){
 		put.accept("w", x());
 		put.accept("h", y());
 	}
+	
 	@Override
 	public String toString(){
 		return "Vec2i{x="+x()+", y="+y()+"}";
 	}
+	
 	@Override
 	public Vec2i clone(){
 		return new Vec2i(x(), y());
 	}
+	
 	@Override
 	public Vec2i mul(float f){
-		STATIC_SAFE.set((int)f, (int)f);
-		return mul(STATIC_SAFE);
+		return x((int)(x()*f)).y((int)(y()*f));
 	}
+	
 	@Override
 	public Vec2i set(Vec2i src){
 		return set(src.x(), src.y());

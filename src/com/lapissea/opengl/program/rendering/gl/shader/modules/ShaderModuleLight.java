@@ -49,7 +49,7 @@ public class ShaderModuleLight extends ShaderModule implements Global{
 	
 	protected static final Vec3f UNIT_VEC=new Vec3f();
 	
-	public static final int	MAX_POINT_LIGHT	=5;
+	public static final int	MAX_POINT_LIGHT	=5*5;
 	public static final int	MAX_DIR_LIGHT	=2;
 	
 	private static final List<PointLight>		POINTS	=new LimitedList<PointLight>(MAX_POINT_LIGHT);

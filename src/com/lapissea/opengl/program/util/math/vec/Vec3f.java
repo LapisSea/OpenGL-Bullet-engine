@@ -1,27 +1,16 @@
 package com.lapissea.opengl.program.util.math.vec;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.lwjgl.util.vector.ReadableVector3f;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.lapissea.opengl.program.interfaces.Calculateable;
+import com.lapissea.opengl.program.util.Pool;
 
 public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 	
 	private static final long serialVersionUID=8084946802516068121L;
 	
-	public Vec3f(JSONObject json){
-		try{
-			set((float)json.getDouble("x"), (float)json.getDouble("y"), (float)json.getDouble("z"));
-		}catch(JSONException e){
-			try{
-				set((float)json.getDouble("w"), (float)json.getDouble("h"), (float)json.getDouble("d"));
-			}catch(JSONException e1){
-				throw new IllegalArgumentException("Json does not contain x,y,z or w,h,d as float/double");
-			}
-		}
-	}
+	public static final Pool<Vec3f> POOL=new Pool<>(Vec3f::new);
 	
 	public Vec3f(float[] data){
 		this(data[0], data[1], data[2]);
@@ -138,6 +127,7 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 		z(z()/c.z());
 		return this;
 	}
+	
 	public Vec3f div(float x, float y, float z){
 		x(x()/x);
 		y(y()/y);
@@ -218,10 +208,34 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>{
 		z(src.z());
 		return this;
 	}
+	
 	public Vec3f set(javax.vecmath.Vector3f src){
 		x(src.x);
 		y(src.y);
 		z(src.z);
 		return this;
 	}
+	
+	public Vec3f setThis(float x, float y, float z){
+		super.set(x, y, z);
+		return this;
+	}
+	
+	public Vec3f setMax(Vec3f vec){
+		if(x()<vec.x()) x(vec.x());
+		if(y()<vec.y()) y(vec.y());
+		if(z()<vec.z()) z(vec.z());
+		return this;
+	}
+
+	public Vec3f mulX(int x){
+		return x(x()*x);
+	}
+	public Vec3f mulY(int y){
+		return y(y()*y);
+	}
+	public Vec3f mulZ(int z){
+		return z(z()*z);
+	}
+	
 }

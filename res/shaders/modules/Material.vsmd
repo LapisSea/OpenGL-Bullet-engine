@@ -6,3 +6,25 @@ out float materialId;
 void setupModelMaterial(){
 	materialId=materialIdIn;
 }
+
+#ifndef ModelMaterial_STR
+#define ModelMaterial_STR
+
+struct ModelMaterial{
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float jelly;
+	float shineDamper;
+	float reflectivity;
+	float lightTroughput;
+};
+
+#endif
+
+uniform ModelMaterial materials["<MATERIAL_MAX_COUNT>"];
+uniform float tim;
+
+ModelMaterial getMaterial(){
+	return materials[int(ceil(materialIdIn))];
+}

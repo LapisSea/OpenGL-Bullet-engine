@@ -21,13 +21,35 @@ void setupModelMaterial(){
 	materialId=materialIdIn;
 }
 
+#ifndef ModelMaterial_STR
+#define ModelMaterial_STR
+
+struct ModelMaterial{
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float jelly;
+	float shineDamper;
+	float reflectivity;
+	float lightTroughput;
+};
+
+#endif
+
+uniform ModelMaterial materials[20];
+uniform float tim;
+
+ModelMaterial getMaterial(){
+	return materials[int(ceil(materialIdIn))];
+}
+
 
 
 out vec3 normal;
 out vec3 toCamera;
 
-out vec3 vecToPointLight[5];
-uniform vec3 pointLightPos[5];
+out vec3 vecToPointLight[25];
+uniform vec3 pointLightPos[25];
 uniform int numberOfPointLights;
 
 
@@ -59,13 +81,21 @@ void applyFog(vec3 worldViewPos){
 
 
 void main(void){
-	vec4 worldPos=transformMat*vec4(pos,1);
+	setupModelMaterial();
+	ModelMaterial m=getMaterial();
+	vec3 pos0=pos;
+	if(m.jelly>0){
+		float vt=length((transformMat*vec4(pos0,1)).xyz);
+		pos0.x+=m.jelly*sin(tim+vt);
+		pos0.z+=m.jelly*cos(tim+vt);
+	}
+	vec4 worldPos=transformMat*vec4(pos0,1);
 	vec4 posRelativeToCam=viewMat*worldPos;
 	
 	gl_Position=projectionMat*posRelativeToCam;
 	uv=uvIn;
 	
-	setupModelMaterial();
+	
 	
 	lightingSetUp(transformMat, worldPos, normalIn, (inverse(viewMat)*vec4(0,0,0,1)).xyz);
 	

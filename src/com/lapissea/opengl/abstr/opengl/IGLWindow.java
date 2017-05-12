@@ -14,11 +14,19 @@ public interface IGLWindow{
 	
 	IGLWindow create() throws LWJGLException;
 	
-	IGLWindow setPos(Vec2i pos);
+	default IGLWindow setPos(Vec2i pos){
+		return setPos(pos.x(), pos.y());
+	}
+	
+	IGLWindow setPos(int x, int y);
 	
 	Vec2i getPos();
 	
-	IGLWindow setSize(Vec2i size);
+	default IGLWindow setSize(Vec2i size){
+		return setSize(size.x(), size.y());
+	}
+	
+	IGLWindow setSize(int x, int y);
 	
 	Vec2i getSize();
 	

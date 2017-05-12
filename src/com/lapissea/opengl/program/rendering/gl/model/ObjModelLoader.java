@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
 import com.lapissea.opengl.program.rendering.gl.shader.Material;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.MathUtil;
@@ -23,11 +24,12 @@ public class ObjModelLoader{
 		
 		public String name;
 		
-		public List<Vec3f>	vertecies	=new ArrayList<>();
-		public List<Vec2f>	uvs			=new ArrayList<>();
-		public FloatList	materialIds	=new FloatArrayList();
-		public List<Vec3f>	normals		=new ArrayList<>();
-		public boolean		hasUvs,hasMaterials,hasNormals;
+		public List<Vec3f>		vertecies	=new ArrayList<>();
+		public List<Vec2f>		uvs			=new ArrayList<>();
+		public FloatList		materialIds	=new FloatArrayList();
+		public List<Vec3f>		normals		=new ArrayList<>();
+		public List<IMaterial>	materials	=new ArrayList<>();
+		public boolean			hasUvs,hasMaterials,hasNormals;
 		
 		public boolean usesQuads;
 		
@@ -74,6 +76,7 @@ public class ObjModelLoader{
 	}
 	
 	private static String[] getFileLines(String path){
+		LogUtil.println(path);
 		String srcAll=UtilM.getTxtResource(path);
 		if(srcAll==null) return null;
 		String[] src=srcAll.replaceAll(" +", " ").split("\n");
@@ -81,34 +84,37 @@ public class ObjModelLoader{
 	}
 	
 	public static ModelData load(String name){
+		name=name.replace('\\', '/');
 		LogUtil.println("Loading model:", name);
 		
 		if(name.contains("\\")) name=name.replace('\\', '/');
 		name=name.replaceAll("/+", "/");
 		if(name.startsWith("/")) name=name.substring(1, name.length());
 		
-		String[] src=getFileLines("models/"+name+".obj");
+		String[] src=getFileLines("models/"+name+(name.endsWith(".obj")?"":".obj"));
 		if(src==null){
 			LogUtil.println("Model", name, "does not exist!");
 			return null;
 		}
 		
 		String mtllib=null;
-		Map<String,Material> materials=null;
+		Map<String,IMaterial> materials=null;
 		
 		//find mtl file pointer
 		for(int i=0;i<src.length;i++){
 			String line=src[i];
 			if(line.isEmpty()||line.charAt(0)=='#') continue;
 			if(line.startsWith("mtllib ")){
-				mtllib=line.substring("mtllib ".length());
+				int pos=name.lastIndexOf('/');
+				String s=(pos!=-1?name.substring(0, pos+1):"");
+				mtllib=s+line.substring("mtllib ".length());
 				break;
 			}
 		}
 		//read materials
 		if(mtllib!=null){
 			materials=new HashMap<>();
-			String path="models/"+(name.contains("/")?name.substring(0, name.lastIndexOf('/')):"")+"/"+mtllib;
+			String path="models/"+mtllib;
 			String[] mtlSrc=getFileLines(path);
 			
 			if(mtlSrc==null){
@@ -156,7 +162,7 @@ public class ObjModelLoader{
 		List<int[]> idsVert=new ArrayList<>(),idsUv=new ArrayList<>(),idsNorm=new ArrayList<>();
 		IntList idsMater=new IntArrayList();
 		
-		Material material=null;
+		IMaterial material=null;
 		
 		//read raw data
 		for(int i=0;i<src.length;i++){
@@ -201,7 +207,7 @@ public class ObjModelLoader{
 						hasNorm=true;
 					}
 				}
-				idsMater.add(material!=null?material.id:0);
+				idsMater.add(material!=null?material.getId():0);
 				idsVert.add(faceVert);
 				idsUv.add(hasUv?faceUv:null);
 				idsNorm.add(hasNorm?faceNorm:null);
@@ -310,12 +316,27 @@ public class ObjModelLoader{
 		model.usesQuads=hasQuad;
 		
 		if(!model.hasMaterials) model.materialIds=null;
+		else materials.values().forEach(model.materials::add);
+		
 		if(!model.hasNormals) model.normals=null;
 		if(!model.hasUvs) model.uvs=null;
 		
 		model.name=name;
 		
 		return model;
+	}
+	
+	public static Model[] loadAndBuildArr(String name){
+		return loadAndBuildArr(Model.class, name);
+	}
+	
+	public static <T extends Model> T[] loadAndBuildArr(Class<T> type, String name){
+		String[] mds=UtilM.getResourceFolderContent("models/"+name, s->s.endsWith(".obj")&&Character.isDigit(s.charAt(0)));
+		T[] arr=UtilM.array(type, mds.length);
+		for(int i=0;i<arr.length;i++){
+			arr[i]=loadAndBuild(type, name+"/"+mds[i]);
+		}
+		return arr;
 	}
 	
 	public static Model loadAndBuild(String name){

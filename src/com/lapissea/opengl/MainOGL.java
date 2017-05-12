@@ -2,21 +2,29 @@ package com.lapissea.opengl;
 
 import java.lang.reflect.Field;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.lapissea.opengl.abstr.opengl.IGLWindow;
 import com.lapissea.opengl.abstr.opengl.ILWJGLCtx;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.core.Globals;
 import com.lapissea.opengl.program.opengl.LWJGL2Ctx;
-import com.lapissea.opengl.program.util.ConfigHandler;
 import com.lapissea.opengl.program.util.LogUtil;
-import com.lapissea.opengl.program.util.math.vec.Vec2i;
+import com.lapissea.opengl.program.util.config.Config;
+import com.lapissea.opengl.program.util.config.configs.WindowConfig;
 
 public class MainOGL{
 	
 	public static void main(String[] args) throws Exception{
+		LogUtil.__.INJECT_EXTERNAL_PRINT("dev_log");
+		LogUtil.__.INJECT_DEBUG_PRINT(true);
+		
+		//		while(UtilM.TRUE()){
+		//			UtilM.sleep(500);
+		//			LogUtil.clear();
+		//			LogUtil.println("asd26");
+		//			LogUtil.println("asd27");
+		//			LogUtil.printlnEr("asd28");
+		//			LogUtil.println("29\n\n");
+		//		}
 		
 		LogUtil.printWrapped("=====PRE_GAME_INIT=====");
 		
@@ -41,36 +49,38 @@ public class MainOGL{
 			System.exit(1);
 		});
 		
+		// ()->"{'pos':{'x':-1,'y':-1},'full-sc':false, 'v-sync':true,'size':{'w':600,'h':400}}".replaceAll("'", "\"")
+		Thread.currentThread().setName("Render");
+		
+		ILWJGLCtx glCtx=new LWJGL2Ctx();
+		Game.createGame(glCtx);
+		
+		IGLWindow window=glCtx.getCtxWindow();
+		WindowConfig winCfg=Config.getConfig(WindowConfig.class, "win_startup");
 		try{
-			JSONObject winCfg=ConfigHandler.getS("win_startup", ()->"{'pos':{'x':-1,'y':-1},'full-sc':false,'size':{'w':600,'h':400}}".replaceAll("'", "\""));
-			Thread.currentThread().setName("Render");
+			window.setPos(winCfg.position);
+			LogUtil.println(window.getPos());
+			window.setSize(winCfg.size);
+			LogUtil.println(window.getSize());
 			
-			ILWJGLCtx glCtx=new LWJGL2Ctx();
-			Game.createGame(glCtx);
+			window.setTitle("LWJGL 2 game");
+			window.setFullScreen(false);
+			window.setResizable(true);
+			window.setVSync(true);
+			glCtx.init();
 			
-			IGLWindow window=glCtx.getCtxWindow();
-			try{
-				
-				window.setPos(new Vec2i(winCfg.getJSONObject("pos")));
-				window.setSize(new Vec2i(winCfg.getJSONObject("size")));
-				window.setTitle("LWJGL 2 game");
-				window.setFullScreen(winCfg.getBoolean("full-sc"));
-				glCtx.init();
-				
-			}catch(Exception e){
-				e.printStackTrace();
-				System.exit(1);
-			}
-			Game.get().start();
-			
-			window.getSize().putWH(winCfg.getJSONObject("size"));
-			window.getPos().putXY(winCfg.getJSONObject("pos"));
-			
-			glCtx.destroy();
-			ConfigHandler.set("win_startup", winCfg);
-		}catch(JSONException e){
+		}catch(Exception e){
 			e.printStackTrace();
+			System.exit(1);
 		}
+		Game.get().start();
+		
+		winCfg.size.set(window.getSize());
+		winCfg.position.set(window.getPos());
+		
+		glCtx.destroy();
+		
+		winCfg.save();
 		
 	}
 }

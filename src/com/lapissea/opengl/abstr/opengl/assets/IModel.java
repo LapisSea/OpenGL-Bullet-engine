@@ -23,6 +23,7 @@ public interface IModel{
 	IMaterial removeMaterial(int i);
 	
 	IMaterial createMaterial();
+	
 	IMaterial createMaterial(String name);
 	
 	IModel iterateMaterials(IntObjConsumer<IMaterial> consummer);
@@ -48,9 +49,14 @@ public interface IModel{
 	boolean isLoaded();
 	
 	void delete();
+	
 	int getVertexCount();
 	
 	ModelAttribute getAttribute(int i);
+	
 	int getAttributeCount();
+	
 	IModel bindVao();
+	
+	void addMaterial(IMaterial material);
 }

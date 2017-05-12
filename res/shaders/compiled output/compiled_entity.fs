@@ -68,8 +68,8 @@ struct DirectionalLight{
 in vec3 normal;
 in vec3 toCamera;
 
-uniform PointLight pointLights[5];
-in vec3 vecToPointLight[5];
+uniform PointLight pointLights[25];
+in vec3 vecToPointLight[25];
 uniform int numberOfPointLights;
 
 uniform DirectionalLight dirLights[2];
@@ -83,27 +83,28 @@ vec4 light_specularTotal=vec4(0,0,0,0);
 
 
 void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 unitToLight, vec3 lightColor, ModelMaterial material){
-	if(attFact>512)return;
+	float cutOff=6/256.0;
+	attFact-=cutOff;
+	if(attFact<0)return;
+	attFact*=1+cutOff;
 	
 	float brightness=1;
-	if(abs(unitNormal.x)+abs(unitNormal.y)+abs(unitNormal.z)>0)brightness=dot(unitNormal,unitToLight);
+	if(abs(unitNormal.x)+abs(unitNormal.y)+abs(unitNormal.z)>0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
 	
+	if(brightness<0)return;
+	//if(attFact<0.0001)light_diffuseTotal.rgb+=1;
+	vec3 col=lightColor*attFact;
 	
-	if(brightness<0){
-		if(material.lightTroughput>0)brightness*=-material.lightTroughput;
-		else return;
-	}
-	
-	light_diffuseTotal.rgb+=brightness*lightColor/attFact;
+	light_diffuseTotal.rgb+=brightness*col;
 	
 	if(material.reflectivity>0){
-		vec3 lightDir=-unitToLight;
+		vec3 lightDir=-unitToLight; 
 		vec3 reflectedDir=reflect(lightDir,unitNormal);
 		
 		float sepcularFact=max(0, dot(reflectedDir, unitToCamera));
 		float dampedSpecular=pow(sepcularFact,material.shineDamper);
 		
-		light_specularTotal.rgb+=dampedSpecular*lightColor*brightness*material.reflectivity/(attFact/2);
+		light_specularTotal.rgb+=dampedSpecular*brightness*material.reflectivity*col;
 	}
 }
 
@@ -115,7 +116,7 @@ void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, vec3 toLightVec, Po
 		(light.attenuation.y*dist)+
 		(light.attenuation.z * dist*dist)
 	;
-	if(attFact>0)calcGenericLight(unitToCamera, unitNormal, attFact, normalize(toLightVec), light.color.rgb*light.color.a,material);
+	if(attFact>0)calcGenericLight(unitToCamera, unitNormal, 1/attFact, normalize(toLightVec), light.color.rgb*light.color.a,material);
 }
 
 void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, ModelMaterial material){
@@ -128,16 +129,13 @@ vec4 applyLighting(vec4 baseColor, ModelMaterial material){
 	vec3 unitNormal=normalize(normal);
 	if(!gl_FrontFacing)unitNormal*=-1;
 	
-	if(numberOfPointLights>0){
-		for(int i=0;i<numberOfPointLights;i++){
-			calcPointLightColor(unitToCamera,unitNormal,vecToPointLight[i],pointLights[i],material);
-		}
+	for(int i=0;i<numberOfPointLights;i++){
+		calcPointLightColor(unitToCamera,unitNormal,vecToPointLight[i],pointLights[i],material);
 	}
-	if(numberOfDirLights>0){
-		for(int i=0;i<numberOfDirLights;i++){
-			calcDirLightColor(unitToCamera,unitNormal,dirLights[i],material);
-		}
+	for(int i=0;i<numberOfDirLights;i++){
+		calcDirLightColor(unitToCamera,unitNormal,dirLights[i],material);
 	}
+	
 	light_diffuseTotal.rgb*=material.diffuse;
 	light_diffuseTotal.rgb+=material.ambient;
 	light_specularTotal.rgb*=material.specular*baseColor.a;
