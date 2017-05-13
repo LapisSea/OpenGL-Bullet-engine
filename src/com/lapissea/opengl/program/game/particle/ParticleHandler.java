@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.lapissea.opengl.program.rendering.gl.model.Model;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 

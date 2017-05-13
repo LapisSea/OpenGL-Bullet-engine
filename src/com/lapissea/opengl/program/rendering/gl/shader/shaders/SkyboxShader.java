@@ -6,13 +6,13 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
+import com.lapissea.opengl.program.opengl.assets.BasicTextureCube;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
-import com.lapissea.opengl.program.rendering.gl.texture.BasicTextureCube;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.util.math.Maths;
 

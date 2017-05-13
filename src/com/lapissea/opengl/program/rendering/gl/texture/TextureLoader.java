@@ -22,6 +22,7 @@ import org.lwjgl.opengl.GLContext;
 import com.lapissea.opengl.abstr.opengl.assets.ITexture;
 import com.lapissea.opengl.abstr.opengl.assets.ITextureCube;
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.opengl.assets.BasicTexture;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.UtilM;

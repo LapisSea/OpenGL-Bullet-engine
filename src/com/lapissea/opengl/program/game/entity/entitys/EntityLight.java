@@ -2,7 +2,7 @@ package com.lapissea.opengl.program.game.entity.entitys;
 
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.util.RandUtil;

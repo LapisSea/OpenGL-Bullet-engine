@@ -19,6 +19,7 @@ import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.abstr.opengl.frustrum.FrustrumCube;
 import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.util.BufferUtil;

@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
-import com.lapissea.opengl.program.rendering.gl.shader.Material;
+import com.lapissea.opengl.program.opengl.assets.Material;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.MathUtil;
 import com.lapissea.opengl.program.util.UtilM;

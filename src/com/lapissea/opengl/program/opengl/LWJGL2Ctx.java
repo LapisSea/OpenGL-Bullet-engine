@@ -8,7 +8,6 @@ import org.lwjgl.LWJGLException;
 import com.lapissea.opengl.abstr.opengl.IGLLoader;
 import com.lapissea.opengl.abstr.opengl.IGLWindow;
 import com.lapissea.opengl.abstr.opengl.ILWJGLCtx;
-import com.lapissea.opengl.program.rendering.gl.LWJGL2Window;
 
 public class LWJGL2Ctx implements ILWJGLCtx{
 	

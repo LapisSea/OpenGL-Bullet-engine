@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl;
+package com.lapissea.opengl.program.opengl;
 
 import java.util.function.IntSupplier;
 

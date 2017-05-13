@@ -5,10 +5,10 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;

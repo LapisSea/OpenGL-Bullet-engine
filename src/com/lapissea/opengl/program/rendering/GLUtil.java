@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.OpenGLException;
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.rendering.gl.model.Model;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.color.IColorM;

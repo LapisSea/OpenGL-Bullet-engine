@@ -20,8 +20,8 @@ import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 
 import com.lapissea.opengl.program.interfaces.FloatConsumer;
+import com.lapissea.opengl.program.opengl.assets.TextureTiled;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
-import com.lapissea.opengl.program.rendering.gl.texture.TextureTiled;
 import com.lapissea.opengl.program.rendering.gl.texture.UvArea;
 import com.lapissea.opengl.program.util.IntTree;
 import com.lapissea.opengl.program.util.LogUtil;

@@ -15,7 +15,7 @@ public class Timer implements Runnable{
 	/**frame period*/
 	private long		fp;
 	private long		lastSec;
-	private int			updateQu;
+	private int			updateQueue;
 	private int			updatesCount;
 	private int			framesCount;
 	private int			ups;
@@ -45,7 +45,7 @@ public class Timer implements Runnable{
 		long time=time();
 		if(time-lastTimeUpdated>=up){
 			lastTimeUpdated=time;
-			updateQu++;
+			updateQueue++;
 		}
 		time=time();
 		if(!restrictFps||time-lastTimeRendered>=fp){
@@ -64,9 +64,9 @@ public class Timer implements Runnable{
 	}
 	
 	public void runUpdateRender(){
-		while(updateQu>0){
+		while(updateQueue>0){
 			updateHook.run();
-			updateQu--;
+			updateQueue--;
 			updatesCount++;
 		}
 		

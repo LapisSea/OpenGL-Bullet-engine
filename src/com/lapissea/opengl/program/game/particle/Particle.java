@@ -3,8 +3,8 @@ package com.lapissea.opengl.program.game.particle;
 import javax.vecmath.Vector3f;
 
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.rendering.ModelInWorld;
-import com.lapissea.opengl.program.rendering.gl.model.Model;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
