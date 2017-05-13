@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.model;
+package com.lapissea.opengl.program.opengl.assets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,6 @@ import com.lapissea.opengl.abstr.opengl.assets.ITexture;
 import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.interfaces.IntObjConsumer;
-import com.lapissea.opengl.program.rendering.gl.shader.Material;
 
 public class Model implements IModel{
 	

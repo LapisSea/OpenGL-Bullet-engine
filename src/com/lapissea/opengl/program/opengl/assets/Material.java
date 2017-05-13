@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.shader;
+package com.lapissea.opengl.program.opengl.assets;
 
 import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
 import com.lapissea.opengl.program.util.color.ColorM;

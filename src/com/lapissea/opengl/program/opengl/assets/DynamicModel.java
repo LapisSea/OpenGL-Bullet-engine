@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.model;
+package com.lapissea.opengl.program.opengl.assets;
 
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;

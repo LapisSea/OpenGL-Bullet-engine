@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.texture;
+package com.lapissea.opengl.program.opengl.assets;
 
 import com.lapissea.opengl.abstr.opengl.assets.ITextureCube;
 
