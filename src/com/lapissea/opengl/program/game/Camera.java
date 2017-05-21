@@ -8,7 +8,7 @@ import org.lwjgl.util.vector.Vector4f;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.util.Quat4M;
-import com.lapissea.opengl.program.util.math.Maths;
+import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
@@ -44,7 +44,7 @@ public class Camera{
 		Matrix4f mat=new Matrix4f();
 		EFF_POS.set(rot).mul(-1);
 		EFF_POS.x=0;
-		Maths.rotateXYZ(mat, EFF_POS);
+		MatrixUtil.rotate(mat, EFF_POS);
 		
 		Matrix4f.transform(mat, vec4, vec4);
 		MOVE.x=vec4.x;
@@ -75,10 +75,10 @@ public class Camera{
 	
 	public Matrix4f createView(Matrix4f dest){
 		dest.setIdentity();
-		Maths.rotateZXY(dest, PartialTick.calc(activeRotVec, prevRot, rot));
+		MatrixUtil.rotateZXY(dest, PartialTick.calc(activeRotVec, prevRot, rot));
 		dest.translate(PartialTick.calc(EFF_POS, prevPos, pos).mul(-1F));
-		activeRotQuat.set(activeRotVec.mul(-1));
 		activeRotVec.mul(-1);
+		activeRotQuat.set(activeRotVec);
 		return dest;
 	}
 	

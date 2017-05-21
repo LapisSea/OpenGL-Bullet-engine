@@ -7,11 +7,9 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.OpenGLException;
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.util.LogUtil;
-import com.lapissea.opengl.program.util.Quat4M;
-import com.lapissea.opengl.program.util.color.IColorM;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.impl.assets.Model;
 
 public class GLUtil{
 	
@@ -147,7 +145,7 @@ public class GLUtil{
 	}
 	
 	public static void checkError(boolean willThrow){
-		if(!RUN_GL_ERROR_CHECK)return;
+		if(!RUN_GL_ERROR_CHECK) return;
 		
 		int err=GL11.glGetError();
 		if(err!=GL11.GL_NO_ERROR){
@@ -157,7 +155,7 @@ public class GLUtil{
 		}
 	}
 	
-	private static final class ModelInWorldSingleUse implements ModelInWorld{
+	private static final class ModelInWorldSingleUse implements ModelTransformed{
 		
 		Matrix4f	mat;
 		Model		model;
@@ -172,28 +170,6 @@ public class GLUtil{
 			return mat;
 		}
 		
-		@Override
-		public Vec3f getModelScale(){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public Quat4M getModelRot(){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public Vec3f getModelPos(){
-			throw new UnsupportedOperationException();
-		}
-	}
-	
-	private static final ModelInWorldSingleUse MIW=new ModelInWorldSingleUse();
-	
-	protected static ModelInWorld singleUse0(Matrix4f worldTransform, Model model){
-		MIW.mat=worldTransform;
-		MIW.model=model;
-		return MIW;
 	}
 	
 }

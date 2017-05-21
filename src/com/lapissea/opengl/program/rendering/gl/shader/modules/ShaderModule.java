@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.lapissea.opengl.abstr.opengl.assets.IModel;
-import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
-import com.lapissea.opengl.program.rendering.ModelInWorld;
+import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.window.assets.ModelAttribute;
 
 public abstract class ShaderModule{
 	
@@ -118,7 +118,7 @@ public abstract class ShaderModule{
 	
 	public interface Instance{
 		
-		void uploadUniformsInstance(ModelInWorld instance);
+		void uploadUniformsInstance(ModelTransformed instance);
 	}
 	
 	public interface ModelUniforms{

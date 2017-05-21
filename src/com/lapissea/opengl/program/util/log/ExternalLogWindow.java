@@ -16,6 +16,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import com.lapissea.opengl.program.rendering.swing.ScrollUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.config.Config;
 import com.lapissea.opengl.program.util.config.configs.SwingWindowConfig;
@@ -41,8 +42,8 @@ public class ExternalLogWindow extends JFrame{
 		SwingWindowConfig config=Config.getConfig(SwingWindowConfig.class, configLocation);
 		
 		getContentPane().setLayout(new BorderLayout());
-		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		//		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		text=new JTextPane();
 		
@@ -106,26 +107,30 @@ public class ExternalLogWindow extends JFrame{
 					UtilM.sleep(1);
 					continue;
 				}
-				int i=0;
-				while(bufferFlags.size()>i){
-					boolean b;
-					b=bufferFlags.get(i);
-					builder.append(buffer.getChar(i));
-					i++;
-					while(bufferFlags.size()>i&&b==bufferFlags.get(i)){
-						char c=buffer.getChar(i++);
-						if(c=='\n') scrollUpdate=true;
-						builder.append(c);
+				try{
+					synchronized(buffer){
+						int i=0;
+						while(bufferFlags.size()>i){
+							boolean b;
+							b=bufferFlags.get(i);
+							builder.append(buffer.getChar(i));
+							i++;
+							while(bufferFlags.size()>i&&b==bufferFlags.get(i)){
+								char c=buffer.getChar(i++);
+								if(c=='\n') scrollUpdate=true;
+								builder.append(c);
+							}
+							try{
+								doc.insertString(doc.getLength(), builder.toString(), b?outStyle:errStyle);
+							}catch(BadLocationException e1){
+								e1.printStackTrace();
+							}
+							builder.setLength(0);
+						}
+						bufferFlags.clear();
+						buffer.clear();
 					}
-					try{
-						doc.insertString(doc.getLength(), builder.toString(), b?outStyle:errStyle);
-					}catch(BadLocationException e1){
-						e1.printStackTrace();
-					}
-					builder.setLength(0);
-				}
-				bufferFlags.clear();
-				buffer.clear();
+				}catch(Exception e){}
 			}
 		}, "log-updater").start();
 		

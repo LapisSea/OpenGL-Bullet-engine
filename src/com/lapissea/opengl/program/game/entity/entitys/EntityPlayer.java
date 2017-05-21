@@ -2,9 +2,9 @@ package com.lapissea.opengl.program.game.entity.entitys;
 
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.impl.assets.Model;
 
 public class EntityPlayer extends EntityUpd{
 	

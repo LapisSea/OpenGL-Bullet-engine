@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
-import com.lapissea.opengl.program.opengl.assets.Material;
-import com.lapissea.opengl.program.opengl.assets.Model;
 import com.lapissea.opengl.program.util.LogUtil;
-import com.lapissea.opengl.program.util.MathUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.MathUtil;
+import com.lapissea.opengl.window.assets.IMaterial;
+import com.lapissea.opengl.window.impl.assets.Material;
+import com.lapissea.opengl.window.impl.assets.Model;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
@@ -77,7 +77,7 @@ public class ObjModelLoader{
 	}
 	
 	private static String[] getFileLines(String path){
-		LogUtil.println(path);
+		//		LogUtil.println(path);
 		String srcAll=UtilM.getTxtResource(path);
 		if(srcAll==null) return null;
 		String[] src=srcAll.replaceAll(" +", " ").split("\n");
@@ -325,6 +325,15 @@ public class ObjModelLoader{
 		model.name=name;
 		
 		return model;
+	}
+	
+	public static ModelData[] loadArr(String name){
+		String[] mds=UtilM.getResourceFolderContent("models/"+name, s->s.endsWith(".obj")&&Character.isDigit(s.charAt(0)));
+		ModelData[] arr=new ModelData[mds.length];
+		for(int i=0;i<arr.length;i++){
+			arr[i]=load(name+"/"+mds[i]);
+		}
+		return arr;
 	}
 	
 	public static Model[] loadAndBuildArr(String name){

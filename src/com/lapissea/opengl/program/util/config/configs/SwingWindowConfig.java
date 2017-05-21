@@ -20,7 +20,7 @@ public class SwingWindowConfig extends Config{
 	
 	@JsonCreator
 	public SwingWindowConfig(@JsonProperty("name") String name, @JsonProperty("position") Point position, @JsonProperty("size") Dimension size){
-		super(name);
+		this(name);
 		this.position=position;
 		this.size=size;
 	}

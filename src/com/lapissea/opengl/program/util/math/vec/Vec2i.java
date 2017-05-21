@@ -5,10 +5,11 @@ import java.awt.Point;
 import java.io.Serializable;
 import java.util.function.BiConsumer;
 
-import com.lapissea.opengl.program.interfaces.Calculateable;
+import com.lapissea.opengl.window.api.util.Calculateable;
+import com.lapissea.opengl.window.api.util.IVec2i;
 
 
-public class Vec2i implements Calculateable<Vec2i>,Serializable{
+public class Vec2i implements Calculateable<Vec2i>,Serializable, IVec2i{
 	
 	private static final long serialVersionUID=7737581116406153679L;
 	
@@ -39,19 +40,23 @@ public class Vec2i implements Calculateable<Vec2i>,Serializable{
 		return x(x).y(y);
 	}
 	
+	@Override
 	public int x(){
 		return x;
 	}
 	
+	@Override
 	public Vec2i x(int x){
 		this.x=x;
 		return this;
 	}
 	
+	@Override
 	public int y(){
 		return y;
 	}
 	
+	@Override
 	public Vec2i y(int y){
 		this.y=y;
 		return this;
@@ -141,6 +146,9 @@ public class Vec2i implements Calculateable<Vec2i>,Serializable{
 	
 	@Override
 	public Vec2i set(Vec2i src){
+		return set(src.x(), src.y());
+	}
+	public Vec2i set(IVec2i src){
 		return set(src.x(), src.y());
 	}
 }

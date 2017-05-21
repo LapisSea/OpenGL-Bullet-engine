@@ -6,52 +6,52 @@ import javax.vecmath.Vector3f;
 
 import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.linearmath.Transform;
-import com.lapissea.opengl.abstr.opengl.assets.IModel;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.util.MotionStateM;
 import com.lapissea.opengl.program.util.RigidBodyEntity;
-import com.lapissea.opengl.program.util.color.ColorM;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.color.ColorM;
+import com.lapissea.opengl.window.assets.IModel;
 
 public class EntityCrazyCube extends EntityUpd{
 	
 	public static IModel MODEL;
-	private static float[] VERT={
-			-0.5f,0.5f,-0.5f,
-			-0.5f,-0.5f,-0.5f,
-			0.5f,-0.5f,-0.5f,
-			0.5f,0.5f,-0.5f,
-			
-			-0.5f,0.5f,0.5f,
-			-0.5f,-0.5f,0.5f,
-			0.5f,-0.5f,0.5f,
-			0.5f,0.5f,0.5f,
-			
-			0.5f,0.5f,-0.5f,
-			0.5f,-0.5f,-0.5f,
-			0.5f,-0.5f,0.5f,
-			0.5f,0.5f,0.5f,
-			
-			-0.5f,0.5f,-0.5f,
-			-0.5f,-0.5f,-0.5f,
-			-0.5f,-0.5f,0.5f,
-			-0.5f,0.5f,0.5f,
-			
-			-0.5f,0.5f,0.5f,
-			-0.5f,0.5f,-0.5f,
-			0.5f,0.5f,-0.5f,
-			0.5f,0.5f,0.5f,
-			
-			-0.5f,-0.5f,0.5f,
-			-0.5f,-0.5f,-0.5f,
-			0.5f,-0.5f,-0.5f,
-			0.5f,-0.5f,0.5f
-	
-	};
+//	private static float[] VERT={
+//			-0.5f,0.5f,-0.5f,
+//			-0.5f,-0.5f,-0.5f,
+//			0.5f,-0.5f,-0.5f,
+//			0.5f,0.5f,-0.5f,
+//			
+//			-0.5f,0.5f,0.5f,
+//			-0.5f,-0.5f,0.5f,
+//			0.5f,-0.5f,0.5f,
+//			0.5f,0.5f,0.5f,
+//			
+//			0.5f,0.5f,-0.5f,
+//			0.5f,-0.5f,-0.5f,
+//			0.5f,-0.5f,0.5f,
+//			0.5f,0.5f,0.5f,
+//			
+//			-0.5f,0.5f,-0.5f,
+//			-0.5f,-0.5f,-0.5f,
+//			-0.5f,-0.5f,0.5f,
+//			-0.5f,0.5f,0.5f,
+//			
+//			-0.5f,0.5f,0.5f,
+//			-0.5f,0.5f,-0.5f,
+//			0.5f,0.5f,-0.5f,
+//			0.5f,0.5f,0.5f,
+//			
+//			-0.5f,-0.5f,0.5f,
+//			-0.5f,-0.5f,-0.5f,
+//			0.5f,-0.5f,-0.5f,
+//			0.5f,-0.5f,0.5f
+//	
+//	};
 
 	static int[] indices={
 			3,1,0,
@@ -90,7 +90,7 @@ public class EntityCrazyCube extends EntityUpd{
 		super(world, getModel0(), pos);
 		transform=new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F));
 
-//		scale.set(1-RandUtil.RF(0.5),1-RandUtil.RF(0.5),1-RandUtil.RF(0.5));
+		scale.set(2,2,2);
 		
 		float massKg=0.5F*scale.x*scale.y*scale.z;
 		
@@ -127,5 +127,6 @@ public class EntityCrazyCube extends EntityUpd{
 			getRenderer().pointLights.add(light);
 		}
 	}
+
 	
 }

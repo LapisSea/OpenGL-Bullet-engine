@@ -19,5 +19,5 @@ struct ModelMaterial{
 uniform ModelMaterial materials["<MATERIAL_MAX_COUNT>"];
 
 ModelMaterial getMaterial(){
-	return materials[int(ceil(materialId))];
+	return materials[int(round(materialId))];
 }

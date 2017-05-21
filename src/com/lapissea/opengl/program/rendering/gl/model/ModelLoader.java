@@ -12,20 +12,23 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
-import com.lapissea.opengl.abstr.opengl.assets.IModel;
-import com.lapissea.opengl.abstr.opengl.assets.ITexture;
-import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
-import com.lapissea.opengl.abstr.opengl.frustrum.FrustrumCube;
-import com.lapissea.opengl.abstr.opengl.frustrum.IFrustrumShape;
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.opengl.assets.Model;
+import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
-import com.lapissea.opengl.program.util.BufferUtil;
 import com.lapissea.opengl.program.util.LogUtil;
+import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
+import com.lapissea.opengl.window.api.util.BufferUtil;
+import com.lapissea.opengl.window.api.util.IRotation;
+import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.opengl.window.assets.IMaterial;
+import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.window.assets.ITexture;
+import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.opengl.window.impl.assets.Model;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -38,7 +41,7 @@ public class ModelLoader{
 	public static final IModel EMPTY_MODEL=new Model("EMPTY_MODEL"){
 		
 		@Override
-		public IModel load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape shape){
+		public IModel load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape<? extends IVec3f,? extends IRotation> shape){
 			throw new UnsupportedOperationException();
 		}
 		
@@ -469,7 +472,7 @@ public class ModelLoader{
 	//		return model;
 	//	}
 	
-	private static IFrustrumShape calcShape(float[] vert){
+	private static IFrustrumShape<Vec3f,Quat4M> calcShape(float[] vert){
 		Vec3f start=new Vec3f(),end=new Vec3f();
 		
 		for(int i=0;i<vert.length;i+=3){

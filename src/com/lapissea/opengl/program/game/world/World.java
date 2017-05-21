@@ -24,20 +24,19 @@ import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSo
 import com.bulletphysics.linearmath.IDebugDraw;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
-import com.lapissea.opengl.abstr.opengl.events.Updateable;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.Camera;
 import com.lapissea.opengl.program.game.entity.Entity;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.entity.entitys.EntityCrazyCube;
-import com.lapissea.opengl.program.game.entity.entitys.EntityGrass;
 import com.lapissea.opengl.program.game.entity.entitys.EntityTree;
+import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.program.game.terrain.Terrain;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.RandUtil;
-import com.lapissea.opengl.program.util.color.IColorM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.color.IColorM;
 
 public class World{
 	
@@ -46,7 +45,7 @@ public class World{
 	private List<EntityUpd>	entitysUpd	=new ArrayList<>();
 	private boolean			checkDead;
 	private long			ticksPassed;
-	private double			dayDuration	=400;
+	private double			dayDuration	=600;
 	
 	public final List<Terrain> terrains=new ArrayList<>();
 	
@@ -109,7 +108,7 @@ public class World{
 	private void setUpEntity(){
 		
 		LogUtil.println("Generating chunks...");
-		int tileNum=10;
+		int tileNum=7;
 		IntStream.range(0, tileNum).parallel().forEach(x->IntStream.range(0, tileNum).forEach(z->{
 			Terrain t=new Terrain(x-tileNum/2, z-tileNum/2);
 			synchronized(terrains){
@@ -122,20 +121,20 @@ public class World{
 		
 		int worldSize=tileNum*Terrain.SIZE;
 		
-		for(int i=0;i<500;i++){
-			spawn(new EntityGrass(this, new Vec3f(Terrain.SIZE/2F+RandUtil.CRF(worldSize), 0, RandUtil.CRF(worldSize))));
-		}
+		//		for(int i=0;i<100;i++){
+		//			spawn(new EntityGrass(this, new Vec3f(RandUtil.CRF(worldSize), 0, RandUtil.CRF(worldSize))));
+		//		}
 		
 		List<EntityTree> t=new ArrayList<>(100);
 		for(int i=0, j=1;i<j;i++){
-			t.add(new EntityTree(this, new Vec3f(100+RandUtil.CRF(worldSize*1.5), 0, RandUtil.CRF(worldSize*1.5))));
+			t.add(new EntityTree(this, new Vec3f(RandUtil.CRF(worldSize), 0, RandUtil.CRF(worldSize))));
 		}
 		int i=0;
-		for(int x=0;x<5;x++){
-			for(int y=0;y<5;y++){
-				for(int z=0;z<5;z++){
+		for(int x=0;x<3;x++){
+			for(int y=0;y<3;y++){
+				for(int z=0;z<3;z++){
 					EntityCrazyCube c;
-					spawn(c=new EntityCrazyCube(this, new Vec3f(x, y+70, z)));
+					spawn(c=new EntityCrazyCube(this, new Vec3f(x*2, y*2+10, z*2)));
 					if(i<ShaderModuleLight.MAX_POINT_LIGHT) c.lightColor=IColorM.randomRGB();
 					i++;
 				}
@@ -170,7 +169,14 @@ public class World{
 			bulletWorld.stepSimulation(step, 1, step);
 		}
 		
-		bulletWorld.debugDrawWorld();
+//		bulletWorld.debugDrawWorld();
+		
+		if(checkDead){
+			entitysUpd.removeIf(Entity::isDead);
+			checkDead=false;
+		}
+		ticksPassed++;
+		
 		Game.get().renderer.lines.clearIfEmpty();
 		
 		entitysUpd.stream().forEach(Updateable::update);
@@ -216,12 +222,6 @@ public class World{
 			}
 		}
 		
-		if(checkDead){
-			entitysUpd.removeIf(Entity::isDead);
-			checkDead=false;
-		}
-		ticksPassed++;
-		
 	}
 	
 	public List<Entity> getAll(){
@@ -241,33 +241,42 @@ public class World{
 	}
 	
 	public double getSunPos(double pt){
-//		return ((time()+pt)/dayDuration)%1;
-//		return 0.75;
-		return 0.25;
+		return ((time()+pt)/dayDuration)%1;
+		//				return 0.75;
+		//				return 0.25;
+		//				return 0.5;
 	}
 	
 	public double getSunBrightness(){
 		return getSunBrightness(0);
 	}
 	
-	public double getSunBrightness(float pt){
-		double pos=getSunPos(pt),gradientSize=0.1;
+	public double getSunBrightnessPos(double pos){
+		double gradientSize=0.1,result;
 		
 		if(pos<0.5){
-			if(pos<gradientSize) return 0.5+(pos/gradientSize)/2;
-			pos=0.5-pos;
-			if(pos<gradientSize) return 0.5+(pos/gradientSize)/2;
-			return 1;
+			if(pos<gradientSize) result=0.5+(pos/gradientSize)/2;
+			else{
+				pos=0.5-pos;
+				if(pos<gradientSize) result=0.5+(pos/gradientSize)/2;
+				else result=1;
+			}
 		}
 		else{
 			pos-=0.5;
 			
-			if(pos<gradientSize) return 0.5-(pos/gradientSize)/2;
-			pos=0.5-pos;
-			if(pos<gradientSize) return 0.5-(pos/gradientSize)/2;
-			return 0;
+			if(pos<gradientSize) result=0.5-(pos/gradientSize)/2;
+			else{
+				pos=0.5-pos;
+				if(pos<gradientSize) result=0.5-(pos/gradientSize)/2;
+				else result=0;
+			}
 		}
-		
+		return Math.sqrt(result);
+	}
+	
+	public double getSunBrightness(float pt){
+		return getSunBrightnessPos(getSunPos(pt));
 	}
 	
 }

@@ -21,6 +21,7 @@ public class NanoTimer{
 	}
 	
 	public double msAvrg100(){
+		if(count==0)return -1;
 		long sum=0;
 		for(int i=0;i<count;i++){
 			sum+=data[i];

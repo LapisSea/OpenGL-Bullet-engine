@@ -37,6 +37,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import com.bulletphysics.collision.shapes.IndexedMesh;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.lapissea.opengl.program.core.Globals;
+import com.lapissea.opengl.window.api.util.MathUtil;
 
 public class UtilM{
 	
@@ -377,5 +378,11 @@ public class UtilM{
 		try{
 			closeable.close();
 		}catch(IOException e){}
+	}
+	
+	public static String stringFill(int length, char c){
+		char[] ch=new char[length];
+		Arrays.fill(ch, c);
+		return new String(ch);
 	}
 }

@@ -38,6 +38,11 @@ uniform float minBrightness;
 vec4 light_diffuseTotal=vec4(0,0,0,1);
 vec4 light_specularTotal=vec4(0,0,0,0);
 
+#ifndef LIGHT_DOT
+#define LIGHT_DOT
+
+
+#endif
 
 void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 unitToLight, vec3 lightColor, ModelMaterial material){
 	float cutOff=6/256.0;

@@ -2,14 +2,19 @@ package com.lapissea.opengl.program.game.particle;
 
 import javax.vecmath.Vector3f;
 
+import org.lwjgl.util.vector.Matrix4f;
+
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.opengl.assets.Model;
-import com.lapissea.opengl.program.rendering.ModelInWorld;
+import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.util.Quat4M;
+import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.impl.assets.Model;
 
-public class Particle<T extends Particle<T>> implements ModelInWorld{
+public class Particle<T extends Particle<T>> implements ModelTransformed{
+	
+	static final Matrix4f TRANS=new Matrix4f();
 	
 	protected static final Vec3f	POS			=new Vec3f(),SCAL=new Vec3f(),ACTELERATION=new Vec3f();
 	protected static final Quat4M	ROT			=new Quat4M();
@@ -36,7 +41,7 @@ public class Particle<T extends Particle<T>> implements ModelInWorld{
 		this.scale.add(-0.02F, -0.02F, -0.02F);
 		if(scale.x<0) kill();
 		
-		if(gravity!=0)speed.addY(gravity);
+		if(gravity!=0) speed.addY(gravity);
 		pos.add(speed);
 	}
 	
@@ -54,17 +59,11 @@ public class Particle<T extends Particle<T>> implements ModelInWorld{
 		return dead;
 	}
 	
-	@Override
-	public Quat4M getModelRot(){
-		return Game.get().renderer.getCamera().activeRotQuat;
-	}
 	
-	@Override
 	public Vec3f getModelPos(){
 		return PartialTick.calc(POS, prevPos, pos);
 	}
 	
-	@Override
 	public Vec3f getModelScale(){
 		return PartialTick.calc(SCAL, prevScale, scale);
 	}
@@ -76,6 +75,13 @@ public class Particle<T extends Particle<T>> implements ModelInWorld{
 	
 	public int getModelIndex(){
 		return 0;
+	}
+	
+	@Override
+	public Matrix4f getTransform(){
+		TRANS.setIdentity();
+		
+		return MatrixUtil.createTransformMat(TRANS, getModelPos(), Game.get().renderer.getCamera().activeRotQuat, getModelScale());
 	}
 	
 }

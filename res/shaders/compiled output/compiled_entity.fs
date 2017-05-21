@@ -38,7 +38,7 @@ struct ModelMaterial{
 uniform ModelMaterial materials[20];
 
 ModelMaterial getMaterial(){
-	return materials[int(ceil(materialId))];
+	return materials[int(round(materialId))];
 }
 
 
@@ -68,8 +68,8 @@ struct DirectionalLight{
 in vec3 normal;
 in vec3 toCamera;
 
-uniform PointLight pointLights[25];
-in vec3 vecToPointLight[25];
+uniform PointLight pointLights[5];
+in vec3 vecToPointLight[5];
 uniform int numberOfPointLights;
 
 uniform DirectionalLight dirLights[2];
@@ -81,6 +81,11 @@ uniform float minBrightness;
 vec4 light_diffuseTotal=vec4(0,0,0,1);
 vec4 light_specularTotal=vec4(0,0,0,0);
 
+#ifndef LIGHT_DOT
+#define LIGHT_DOT
+
+
+#endif
 
 void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 unitToLight, vec3 lightColor, ModelMaterial material){
 	float cutOff=6/256.0;

@@ -7,13 +7,20 @@ import javax.vecmath.Tuple4d;
 import javax.vecmath.Tuple4f;
 
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.IRotation;
+import com.lapissea.opengl.window.api.util.IVec3f;
 
-public class Quat4M extends Quat4f{
+public class Quat4M extends Quat4f implements IRotation{
 	
 	private static final long serialVersionUID=1217013901730370836L;
 	
 	public Quat4M(){
-		super(0,0,0,1);
+		super(0, 0, 0, 1);
+	}
+	
+	public Quat4M(Vec3f euler){
+		super();
+		set(euler);
 	}
 	
 	public Quat4M(float arg0, float arg1, float arg2, float arg3){
@@ -54,10 +61,10 @@ public class Quat4M extends Quat4f{
 	}
 	
 	public Quat4M set(Quat4M src){
-		x=src.x;
-		y=src.y;
-		z=src.z;
-		w=src.w;
+		x=src.x();
+		y=src.y();
+		z=src.z();
+		w=src.w();
 		return this;
 	}
 	
@@ -145,48 +152,74 @@ public class Quat4M extends Quat4f{
 	}
 	
 	public void set(Vec3f euler){
-		double c1=Math.cos(euler.y()/2);
-		double s1=Math.sin(euler.y()/2);
-		double c2=Math.cos(euler.z()/2);
-		double s2=Math.sin(euler.z()/2);
-		double c3=Math.cos(euler.x()/2);
-		double s3=Math.sin(euler.x()/2);
+		double x2=euler.x()/2;
+		double y2=euler.y()/2;
+		double z2=euler.z()/2;
+		
+		double c1=Math.cos(y2);
+		double s1=Math.sin(y2);
+		double c2=Math.cos(z2);
+		double s2=Math.sin(z2);
+		double c3=Math.cos(x2);
+		double s3=Math.sin(x2);
 		double c1c2=c1*c2;
 		double s1s2=s1*s2;
 		w=(float)(c1c2*c3-s1s2*s3);
 		x=(float)(c1c2*s3+s1s2*c3);
 		y=(float)(s1*c2*c3+c1*s2*s3);
 		z=(float)(c1*s2*c3-s1*c2*s3);
+		normalize();
 	}
 	
-	public Vec3f rotate(Vec3f srcDest){
-		return rotate(srcDest, srcDest);
+	@Override
+	public float x(){
+		return x;
 	}
-	public Vec3f rotate(Vec3f src,Vec3f dest){
+	
+	@Override
+	public float y(){
+		return y;
+	}
+	
+	@Override
+	public float z(){
+		return z;
+	}
+	
+	@Override
+	public float w(){
+		return w;
+	}
+	
+	@Override
+	public <T extends IVec3f> T rotate(T src, T dest){
 		float k0=w*w-0.5f;
 		float k1;
 		float rx,ry,rz;
 		
 		// k1 = Q.V
-		k1=src.x*x;
-		k1+=src.y*y;
-		k1+=src.z*z;
+		k1=src.x()*x;
+		k1+=src.y()*y;
+		k1+=src.z()*z;
 		
 		// (qq-1/2)V+(Q.V)Q
-		rx=src.x*k0+x*k1;
-		ry=src.y*k0+y*k1;
-		rz=src.z*k0+z*k1;
+		rx=src.x()*k0+x*k1;
+		ry=src.y()*k0+y*k1;
+		rz=src.z()*k0+z*k1;
 		
 		// (Q.V)Q+(qq-1/2)V+q(QxV)
-		rx+=w*(y*src.z-z*src.y);
-		ry+=w*(z*src.x-x*src.z);
-		rz+=w*(x*src.y-y*src.x);
+		rx+=w*(y*src.z()-z*src.y());
+		ry+=w*(z*src.x()-x*src.z());
+		rz+=w*(x*src.y()-y*src.x());
 		
 		//  2((Q.V)Q+(qq-1/2)V+q(QxV))
 		rx+=rx;
 		ry+=ry;
 		rz+=rz;
+		dest.x(rx);
+		dest.y(ry);
+		dest.z(rz);
 		
-		return dest.setThis(rx, ry, rz);
+		return dest;
 	}
 }

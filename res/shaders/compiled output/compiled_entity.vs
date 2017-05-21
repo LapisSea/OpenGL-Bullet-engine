@@ -48,8 +48,8 @@ ModelMaterial getMaterial(){
 out vec3 normal;
 out vec3 toCamera;
 
-out vec3 vecToPointLight[25];
-uniform vec3 pointLightPos[25];
+out vec3 vecToPointLight[5];
+uniform vec3 pointLightPos[5];
 uniform int numberOfPointLights;
 
 
@@ -85,7 +85,8 @@ void main(void){
 	ModelMaterial m=getMaterial();
 	vec3 pos0=pos;
 	if(m.jelly>0){
-		float vt=length((transformMat*vec4(pos0,1)).xyz);
+		vec3 v=(transformMat*vec4(pos0,1)).xyz;
+		float vt=v.x/5+v.y/2+v.z/5;
 		pos0.x+=m.jelly*sin(tim+vt);
 		pos0.z+=m.jelly*cos(tim+vt);
 	}

@@ -1,5 +1,7 @@
 package com.lapissea.opengl.program.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -92,7 +94,7 @@ public class LogUtil{
 			if(DEBUG_INIT) return;
 			DEBUG_INIT=true;
 			DEBUG_ACTIVE=active;
-			if(!(DEBUG_ACTIVE=active))return;
+			if(!(DEBUG_ACTIVE=active)) return;
 			
 			System.setOut(new PrintStream(new DebugHeaderStream(System.out)));
 			System.setErr(new PrintStream(new DebugHeaderStream(System.err)));
@@ -106,7 +108,7 @@ public class LogUtil{
 			static boolean				LAST_CH_ENDL=true;
 			static DebugHeaderStream	LAST;
 			
-			static final Object LOCK=new Object();
+			//			static final Object LOCK=new Object();
 			
 			public DebugHeaderStream(OutputStream child){
 				this.child=child;
@@ -114,22 +116,22 @@ public class LogUtil{
 			
 			@Override
 			public void write(int b) throws IOException{
-				synchronized(LOCK){
-					
-					if(LAST!=this){//prevent half of the line to be from other stream
-						if(!LAST_CH_ENDL) LAST.write('\n');//OI! END YO FUCKEN LINES
-						LAST=this;
-					}
-					
-					if(LAST_CH_ENDL){
-						LAST_CH_ENDL=false;
-						debugHeader(child);
-					}
-					
-					if(b=='\n') LAST_CH_ENDL=true;
-					
-					child.write((char)b);
+				//				synchronized(LOCK){
+				
+				if(LAST!=this){//prevent half of the line to be from other stream
+					if(!LAST_CH_ENDL) LAST.write('\n');//OI! END YO FUCKEN LINES
+					LAST=this;
 				}
+				
+				if(LAST_CH_ENDL){
+					LAST_CH_ENDL=false;
+					debugHeader(child);
+				}
+				
+				if(b=='\n') LAST_CH_ENDL=true;
+				
+				child.write((char)b);
+				//				}
 			}
 			
 			private static void debugHeader(OutputStream stream){
@@ -149,6 +151,40 @@ public class LogUtil{
 				}catch(IOException e){
 					e.printStackTrace();
 				}
+			}
+		}
+		
+		private static class SplitStream extends OutputStream{
+			
+			private final OutputStream s1,s2;
+			
+			public SplitStream(OutputStream s1, OutputStream s2){
+				this.s1=s1;
+				this.s2=s2;
+			}
+			
+			@Override
+			public void write(int b) throws IOException{
+				s1.write(b);
+				s2.write(b);
+			}
+		}
+		
+		public static void INJECT_FILE_LOG(String file){
+			try{
+				File logFile=new File(file);
+				FileOutputStream fileOut=new FileOutputStream(logFile);
+				
+				if(logFile.exists()) logFile.delete();
+				else{
+					logFile.getParentFile().mkdirs();
+					logFile.createNewFile();
+				}
+				System.setErr(new PrintStream(new SplitStream(System.err, fileOut)));
+				System.setOut(new PrintStream(new SplitStream(System.out, fileOut)));
+				
+			}catch(Exception e){
+				e.printStackTrace();
 			}
 		}
 	}

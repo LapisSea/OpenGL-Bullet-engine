@@ -7,14 +7,16 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lapissea.opengl.program.util.OperatingSystem;
 
 public class Config{
 	
-	private static final String CONFIG_ROOT="config";
+	private static final String CONFIG_ROOT=OperatingSystem.APP_DATA+"/OpenGL engine/config";
 	
 	private static final List<Config> CONFIG_CASH=new ArrayList<>();
 	
@@ -24,8 +26,12 @@ public class Config{
 		MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static <T extends Config> T getConfig(Class<T> type, String name){
+		return getConfig(type, name, t->{});
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends Config> T getConfig(Class<T> type, String name, Consumer<T> onCreate){
 		Objects.requireNonNull(name);
 		return (T)CONFIG_CASH.stream().filter(cf->cf.name.equals(name)).findFirst().orElseGet(()->{
 			byte[] src=null;
@@ -34,10 +40,11 @@ public class Config{
 			}catch(IOException e3){}
 			
 			
-			Config config;
+			T config;
 			if(src==null){
 				try{
 					config=type.getConstructor(String.class).newInstance(name);
+					onCreate.accept(config);
 				}catch(Exception e1){
 					throw new RuntimeException(e1);
 				}
@@ -69,7 +76,7 @@ public class Config{
 	}
 	
 	public void save(){
-		new File("config").mkdir();
+		new File(CONFIG_ROOT).mkdir();
 		try{
 			Files.write(path(name), MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(this));
 		}catch(IOException e){

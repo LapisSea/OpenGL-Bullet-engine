@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.util.math.vec;
 
-import com.lapissea.opengl.program.interfaces.Calculateable;
+import com.lapissea.opengl.window.api.util.Calculateable;
 
 public class Vec2f implements Calculateable<Vec2f>{
 	

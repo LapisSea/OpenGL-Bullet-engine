@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.lwjgl.opengl.OpenGLException;
 
-import com.lapissea.opengl.abstr.opengl.IGLWindow;
-import com.lapissea.opengl.abstr.opengl.ILWJGLCtx;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
@@ -17,6 +15,8 @@ import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.window.api.IGLWindow;
+import com.lapissea.opengl.window.api.ILWJGLCtx;
 
 public class Game{
 	

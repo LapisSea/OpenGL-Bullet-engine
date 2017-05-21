@@ -1,13 +1,13 @@
 package com.lapissea.opengl.program.game.entity;
 
 import com.bulletphysics.dynamics.RigidBody;
-import com.lapissea.opengl.abstr.opengl.assets.IModel;
-import com.lapissea.opengl.abstr.opengl.events.Updateable;
+import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.RigidBodyEntity;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.assets.IModel;
 
 public abstract class EntityUpd extends Entity implements Updateable{
 	

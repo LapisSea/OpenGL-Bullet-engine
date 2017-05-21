@@ -2,37 +2,32 @@ package com.lapissea.opengl.program.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.function.Function;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.jar.JarFile;
 
+import com.lapissea.opengl.launch.GameStart;
 import com.lapissea.opengl.program.util.LogUtil;
 
 public class Globals{
 	
-	public static enum EnumOS{
-		WINDOWS(s->s.contains("win")),
-		LINUX(s->s.contains("linux")||s.contains("unix")),
-		MACOSX(s->s.contains("mac")),
-		SOLARIS(s->s.contains("solaris")||s.contains("sunos")),
-		FREEBDS(s->s.contains("freebsd")),
-		OPENBDS(s->s.contains("openbds"));
-		
-		public final Function<String,Boolean> detector;
-		
-		private EnumOS(Function<String,Boolean> detector){
-			this.detector=detector;
-		}
-		
-	}
-	
-	public static final String	OS_NAME			=System.getProperty("os.name").toLowerCase(Locale.ROOT);
-	public static final EnumOS	ACTIVE_OS		=Arrays.stream(EnumOS.values()).filter(os->os.detector.apply(OS_NAME)).findFirst().orElseThrow(()->new UnsupportedOperationException("Sorry, os with name "+OS_NAME+" is not supported or could not be identified. :("));
-	public static final File	SOURCE_LOCATION	=new File(Globals.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-	public static final boolean	DEV_ENV			=!SOURCE_LOCATION.isFile();
+	public static final File	SOURCE_LOCATION;
+	public static final boolean	DEV_ENV;
 	
 	static{
+		String path=GameStart.class.getResource(GameStart.class.getSimpleName()+".class").getFile();
+		if(path.startsWith("/")) SOURCE_LOCATION=new File("").getAbsoluteFile();
+		else{
+			try{
+				path=URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource(path).getFile(), "UTF-8");
+			}catch(UnsupportedEncodingException e){
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			SOURCE_LOCATION=new File(path.substring(path.startsWith("file:")?6:0, path.lastIndexOf('!')));
+		}
+		
+		DEV_ENV=!SOURCE_LOCATION.isFile();
 		
 		if(DEV_ENV){
 			LogUtil.println("Clearing old compiled shaders...");

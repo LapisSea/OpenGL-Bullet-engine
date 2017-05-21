@@ -6,17 +6,17 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.abstr.opengl.assets.IModel;
-import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
-import com.lapissea.opengl.abstr.opengl.events.Renderable;
+import com.lapissea.opengl.program.game.events.Renderable;
 import com.lapissea.opengl.program.rendering.GLUtil;
-import com.lapissea.opengl.program.rendering.ModelInWorld;
+import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.util.MapOfLists;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.window.assets.ModelAttribute;
 
-public abstract class ShaderRenderer<RenderType extends ModelInWorld>extends Shader implements Renderable{
+public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends Shader implements Renderable{
 	
 	private static final Matrix4f NULL_VIEW=new Matrix4f(),NULL_PROJECTION=new Matrix4f();
 	
@@ -106,6 +106,7 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld>extends Sha
 		GLUtil.checkError();
 		model.bindVao();
 		model.enableAttributes();
+		GLUtil.CULL_FACE.set(model.culface());
 		modulesModelUniforms.forEach(module->module.uploadUniformsModel(model));
 	}
 	
@@ -121,13 +122,29 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld>extends Sha
 	
 	//----SINGLE----//
 	
-	public void renderSingle(RenderType renderable){
-		if(!isLoaded()) return;
-		if(!renderable.getModel().isLoaded()) return;
-		prepareGlobal();
+	public void renderSingle(Matrix4f transform, IModel model){
+		if(!isLoaded()||!model.isLoaded()) return;
 		
+		prepareGlobal();
+		renderSingleBare(transform, model);
+		unbind();
+	}
+	
+	public void renderSingle(RenderType renderable){
+		if(!isLoaded()||!renderable.getModel().isLoaded()) return;
+		
+		prepareGlobal();
 		renderSingleBare(renderable);
 		unbind();
+	}
+	
+	public void renderSingleBare(Matrix4f transform, IModel model){
+		
+		prepareModel(model);
+		uploadTransformMat(transform);
+		model.drawCall();
+		unbindModel(model);
+		
 	}
 	
 	public void renderSingleBare(RenderType renderable){
@@ -169,7 +186,7 @@ public abstract class ShaderRenderer<RenderType extends ModelInWorld>extends Sha
 		return NULL_VIEW;
 	}
 	
-	public static class Basic3D<RenderType extends ModelInWorld>extends ShaderRenderer<RenderType>{
+	public static class Basic3D<RenderType extends ModelTransformed>extends ShaderRenderer<RenderType>{
 		
 		public Basic3D(){
 			super();

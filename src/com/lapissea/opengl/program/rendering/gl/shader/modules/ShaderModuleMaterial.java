@@ -1,12 +1,12 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
-import com.lapissea.opengl.abstr.opengl.assets.IMaterial;
-import com.lapissea.opengl.abstr.opengl.assets.IModel;
-import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelUniforms;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
+import com.lapissea.opengl.window.assets.IMaterial;
+import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.window.assets.ModelAttribute;
 
 public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 	

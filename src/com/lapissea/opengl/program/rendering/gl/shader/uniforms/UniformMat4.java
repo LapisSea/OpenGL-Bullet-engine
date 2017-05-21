@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.util.math.Maths;
+import com.lapissea.opengl.program.util.math.MatrixUtil;
 
 public class UniformMat4 extends AbstractUniform{
 	
@@ -23,7 +23,7 @@ public class UniformMat4 extends AbstractUniform{
 	public void upload(Matrix4f mat){
 		shader.bindingProttect();
 		
-		if(Maths.equals(mat, prev)) return;
+		if(MatrixUtil.equals(mat, prev)) return;
 		prev.load(mat);
 		
 		mat.store(BUFF);

@@ -19,13 +19,13 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GLContext;
 
-import com.lapissea.opengl.abstr.opengl.assets.ITexture;
-import com.lapissea.opengl.abstr.opengl.assets.ITextureCube;
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.opengl.assets.BasicTexture;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.window.assets.ITexture;
+import com.lapissea.opengl.window.assets.ITextureCube;
+import com.lapissea.opengl.window.impl.assets.BasicTexture;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;

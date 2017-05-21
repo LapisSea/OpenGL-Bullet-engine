@@ -1,18 +1,23 @@
 package com.lapissea.opengl.program.game.entity;
 
-import com.lapissea.opengl.abstr.opengl.assets.IModel;
-import com.lapissea.opengl.abstr.opengl.events.Renderable;
+import org.lwjgl.util.vector.Matrix4f;
+
+import com.lapissea.opengl.program.game.events.Renderable;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.ModelInWorld;
+import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.util.Quat4M;
+import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.assets.IModel;
 
-public abstract class Entity implements Renderable,ModelInWorld{
+public abstract class Entity implements Renderable,ModelTransformed{
 	
 	protected static final Vec3f	POS	=new Vec3f(),SCAL=new Vec3f();
 	protected static final Quat4M	ROT	=new Quat4M();
+	
+	protected static final Matrix4f TRANS=new Matrix4f();
 	
 	public IModel		model;
 	public final Vec3f	pos,scale;
@@ -50,18 +55,15 @@ public abstract class Entity implements Renderable,ModelInWorld{
 		return dead;
 	}
 	
-	@Override
 	public Quat4M getModelRot(){
 		ROT.set(rot);
 		return ROT;
 	}
 	
-	@Override
 	public Vec3f getModelPos(){
 		return POS.set(pos);
 	}
 	
-	@Override
 	public Vec3f getModelScale(){
 		return SCAL.set(scale);
 	}
@@ -79,5 +81,12 @@ public abstract class Entity implements Renderable,ModelInWorld{
 		r.notifyEntityActualRender();
 		
 		Shaders.ENTITY.renderBatched(this);
+	}
+	
+	@Override
+	public Matrix4f getTransform(){
+		TRANS.setIdentity();
+		
+		return MatrixUtil.createTransformMat(TRANS, getModelPos(), getModelRot(), getModelScale());
 	}
 }

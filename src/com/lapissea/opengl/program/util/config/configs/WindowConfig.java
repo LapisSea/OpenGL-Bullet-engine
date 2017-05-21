@@ -8,7 +8,7 @@ import com.lapissea.opengl.program.util.math.vec.Vec2i;
 public class WindowConfig extends Config{
 	
 	public Vec2i	position=new Vec2i();
-	public Vec2i	size	=new Vec2i(800, 600);
+	public Vec2i	size	=new Vec2i(1000, 600);
 	
 	public WindowConfig(String name){
 		super(name);

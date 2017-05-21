@@ -8,8 +8,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,15 +15,13 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import javax.imageio.ImageIO;
-
 import com.lapissea.opengl.program.interfaces.FloatConsumer;
-import com.lapissea.opengl.program.opengl.assets.TextureTiled;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.rendering.gl.texture.UvArea;
 import com.lapissea.opengl.program.util.IntTree;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.PairM;
+import com.lapissea.opengl.program.util.TextureTiled;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 
@@ -43,6 +39,8 @@ public class FontFamily{
 	@SuppressWarnings("unused")
 	private float	xOrigin,yOrigin,x,y,xMargin,yMargin;
 	private boolean	quad=false;
+	public int tabSize=4;
+	
 	
 	private IntTree<LetterUv>	data	=new IntTree<>();
 	public final TextureFont	letters	=TextureLoader.loadTexture("letters", new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), TextureFont.class/*, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST*/);
@@ -269,12 +267,12 @@ public class FontFamily{
 		
 		TextureLoader.reloadTexture(letters, img);
 		
-		File outputfile=new File("image.png");
-		try{
-			ImageIO.write(img, "png", outputfile);
-		}catch(IOException e){
-			e.printStackTrace();
-		}
+//		File outputfile=new File("image.png");
+//		try{
+//			ImageIO.write(img, "png", outputfile);
+//		}catch(IOException e){
+//			e.printStackTrace();
+//		}
 		
 	}
 	
@@ -406,10 +404,16 @@ public class FontFamily{
 	}
 	
 	private void addChar(char toBuild, FloatConsumer vert, FloatConsumer uv){
-		
+
 		if(toBuild=='\n'){
 			x=xOrigin;
 			y-=metrics.getHeight()+yMargin;
+			return;
+		}
+		if(toBuild=='\t'){
+			LetterUv tile=data.get(' ');
+			float space1=tile.width+xMargin+tile.leftMar+tile.rightMar;
+			this.x=(float)Math.floor(x/(space1*tabSize)+1)*space1*tabSize;
 			return;
 		}
 		LetterUv tile=data.get(toBuild);

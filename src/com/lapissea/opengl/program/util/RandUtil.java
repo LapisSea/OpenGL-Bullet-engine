@@ -2,6 +2,8 @@ package com.lapissea.opengl.program.util;
 
 import java.util.Random;
 
+import com.lapissea.opengl.window.api.util.MathUtil;
+
 public class RandUtil{
 	
 	private static final Random RAND=new Random();

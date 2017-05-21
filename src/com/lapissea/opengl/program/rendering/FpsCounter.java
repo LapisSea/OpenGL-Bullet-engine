@@ -15,13 +15,13 @@ public class FpsCounter{
 		second=useNano?1000_000_000:1000;
 	}
 	
-	public void frame(){
+	public void newFrame(){
 		if(!active) return;
 		
 		long time=useNano?System.nanoTime():System.currentTimeMillis();
 		
 		frames.removeIf(f->time-f>second);
-		frames.add(time);
+		frames.add(frames.size(),time);
 	}
 	
 	public int getFps(){

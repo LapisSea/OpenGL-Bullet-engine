@@ -14,7 +14,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.abstr.opengl.assets.ModelAttribute;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.core.Globals;
 import com.lapissea.opengl.program.rendering.GLUtil;
@@ -25,6 +24,7 @@ import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.window.assets.ModelAttribute;
 
 public abstract class Shader{
 	
