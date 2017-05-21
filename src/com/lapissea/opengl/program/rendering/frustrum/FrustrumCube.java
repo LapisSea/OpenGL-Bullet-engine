@@ -1,12 +1,16 @@
-package com.lapissea.opengl.abstr.opengl.frustrum;
+package com.lapissea.opengl.program.rendering.frustrum;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.util.Quat4M;
-import com.lapissea.opengl.program.util.color.IColorM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.frustrum.Frustum;
+import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
+import com.lapissea.opengl.window.api.util.color.IColorM;
 
-public class FrustrumCube implements IFrustrumShape{
+public class FrustrumCube implements IFrustrumShape<Vec3f,Quat4M>{
+	
+	private static final Vec3f START=new Vec3f(),END=new Vec3f(),VEC=new Vec3f(),SS=new Vec3f(),CP=new Vec3f();
 	
 	private final Vec3f		size	=new Vec3f();
 	private final Vec3f		offset	=new Vec3f();
@@ -27,10 +31,10 @@ public class FrustrumCube implements IFrustrumShape{
 	
 	private void draw(boolean hasNoRot){
 		
-		
 		Renderer r=Game.get().renderer;
-		Vec3f start=Vec3f.POOL.borrow();
-		Vec3f end=Vec3f.POOL.borrow();
+		
+		Vec3f start=START;
+		
 		float x=effectivePos.x();
 		float y=effectivePos.y();
 		float z=effectivePos.z();
@@ -39,26 +43,26 @@ public class FrustrumCube implements IFrustrumShape{
 		float sizeY=size.y()*scale.y();
 		float sizeZ=size.z()*scale.z();
 		if(!hasNoRot){
-			r.drawLine(start.setThis(x, y, z), rotation.rotate(end.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), IColorM.WHITE);
-			r.drawLine(start.setThis(x, y, z), rotation.rotate(end.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), IColorM.RED);
-			r.drawLine(start.setThis(x, y, z), rotation.rotate(end.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.GREEN);
-			r.drawLine(start.setThis(x, y, z), rotation.rotate(end.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.BLUE);
+			r.drawLine(start.setThis(x, y, z), rotation.rotate(END.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), IColorM.WHITE);
+			r.drawLine(start.setThis(x, y, z), rotation.rotate(END.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), IColorM.RED);
+			r.drawLine(start.setThis(x, y, z), rotation.rotate(END.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.GREEN);
+			r.drawLine(start.setThis(x, y, z), rotation.rotate(END.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.BLUE);
 			
-			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.GREEN);
-			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), IColorM.RED);
-			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.BLUE);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.GREEN);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), IColorM.RED);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.BLUE);
 			
-			r.drawLine(rotation.rotate(start.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.CYAN);
-			r.drawLine(rotation.rotate(start.setThis(-sizeX, sizeY, -sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
-			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), rotation.rotate(end.setThis(sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(-sizeX, sizeY, -sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), rotation.rotate(END.setThis(sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
 			
-			r.drawLine(rotation.rotate(start.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.CYAN);
-			r.drawLine(rotation.rotate(start.setThis(sizeX, -sizeY, -sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
-			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, -sizeY, sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, -sizeY, -sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, sizeY, -sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
 			
-			r.drawLine(rotation.rotate(start.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
-			r.drawLine(rotation.rotate(start.setThis(-sizeX, -sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(-sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
-			r.drawLine(rotation.rotate(start.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), rotation.rotate(end.setThis(sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(-sizeX, sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(-sizeX, -sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(-sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
+			r.drawLine(rotation.rotate(start.setThis(sizeX, -sizeY, sizeZ)).add(x, y, z), rotation.rotate(END.setThis(sizeX, -sizeY, -sizeZ)).add(x, y, z), IColorM.CYAN);
 		}
 		
 		
@@ -66,29 +70,39 @@ public class FrustrumCube implements IFrustrumShape{
 		sizeY=effectiveSize.y();
 		sizeZ=effectiveSize.z();
 		
-		r.drawLine(start.setThis(x+sizeX, y+sizeY, z+sizeZ), end.setThis(x+sizeX, y-sizeY, z+sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x+sizeX, y+sizeY, z+sizeZ), end.setThis(x-sizeX, y+sizeY, z+sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x+sizeX, y+sizeY, z+sizeZ), end.setThis(x+sizeX, y+sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y+sizeY, z+sizeZ), END.setThis(x+sizeX, y-sizeY, z+sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y+sizeY, z+sizeZ), END.setThis(x-sizeX, y+sizeY, z+sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y+sizeY, z+sizeZ), END.setThis(x+sizeX, y+sizeY, z-sizeZ), IColorM.CYAN);
 		
-		r.drawLine(start.setThis(x-sizeX, y+sizeY, z+sizeZ), end.setThis(x-sizeX, y-sizeY, z+sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x-sizeX, y+sizeY, z-sizeZ), end.setThis(x-sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x+sizeX, y+sizeY, z-sizeZ), end.setThis(x+sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x-sizeX, y+sizeY, z+sizeZ), END.setThis(x-sizeX, y-sizeY, z+sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x-sizeX, y+sizeY, z-sizeZ), END.setThis(x-sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y+sizeY, z-sizeZ), END.setThis(x+sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
 		
-		r.drawLine(start.setThis(x+sizeX, y-sizeY, z+sizeZ), end.setThis(x-sizeX, y-sizeY, z+sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x+sizeX, y-sizeY, z-sizeZ), end.setThis(x-sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x+sizeX, y+sizeY, z-sizeZ), end.setThis(x-sizeX, y+sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y-sizeY, z+sizeZ), END.setThis(x-sizeX, y-sizeY, z+sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y-sizeY, z-sizeZ), END.setThis(x-sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y+sizeY, z-sizeZ), END.setThis(x-sizeX, y+sizeY, z-sizeZ), IColorM.CYAN);
 		
-		r.drawLine(start.setThis(x-sizeX, y+sizeY, z+sizeZ), end.setThis(x-sizeX, y+sizeY, z-sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x-sizeX, y-sizeY, z+sizeZ), end.setThis(x-sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
-		r.drawLine(start.setThis(x+sizeX, y-sizeY, z+sizeZ), end.setThis(x+sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x-sizeX, y+sizeY, z+sizeZ), END.setThis(x-sizeX, y+sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x-sizeX, y-sizeY, z+sizeZ), END.setThis(x-sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
+		r.drawLine(start.setThis(x+sizeX, y-sizeY, z+sizeZ), END.setThis(x+sizeX, y-sizeY, z-sizeZ), IColorM.CYAN);
 		
-		Vec3f.POOL.giveBack(start);
-		Vec3f.POOL.giveBack(end);
 	}
 	
 	
 	@Override
 	public boolean isVisibleAt(Vec3f pos, Frustum frustrum){
+
+		
+		Vec3f scaledSize=SS.set(this.size).mul(scale);
+		
+		Vec3f camPos=CP.set(Game.get().renderer.getCamera().pos);
+		
+		float distance=camPos.sub(pos).length();
+		
+		boolean b=Game.get().renderer.worldFog.calcVisiblityLimit()<=distance-30;
+		
+		if(b) return false;
+		
 		boolean hasNoRot=rotation==null||rotation.x==0&&rotation.y==0&&rotation.z==0&&rotation.w==1;
 		
 		if(hasNoRot){
@@ -96,14 +110,11 @@ public class FrustrumCube implements IFrustrumShape{
 			effectivePos.set(offset).mul(scale).add(pos);
 		}
 		else{
-			Vec3f vec=Vec3f.POOL.borrow();
-			Vec3f scaledSize=Vec3f.POOL.borrow();
+			Vec3f vec=VEC;
 			
 			vec.set(offset).mul(scale);
 			rotation.rotate(vec);
 			effectivePos.set(pos).add(vec);
-			
-			scaledSize.set(this.size).mul(scale).abs();
 			
 			rotation.rotate(effectiveSize.set(scaledSize)).abs();
 			
@@ -111,8 +122,6 @@ public class FrustrumCube implements IFrustrumShape{
 			effectiveSize.setMax(rotation.rotate(vec.set(scaledSize).mulY(-1)).abs());
 			effectiveSize.setMax(rotation.rotate(vec.set(scaledSize).mulZ(-1)).abs());
 			
-			Vec3f.POOL.giveBack(vec);
-			Vec3f.POOL.giveBack(scaledSize);
 		}
 		
 		if(Renderer.RENDER_FRUSTRUM) draw(hasNoRot);
@@ -127,7 +136,7 @@ public class FrustrumCube implements IFrustrumShape{
 	}
 	
 	@Override
-	public IFrustrumShape withTransform(float x, float y, float z, Quat4M quat){
+	public IFrustrumShape<Vec3f,Quat4M> withTransform(float x, float y, float z, Quat4M quat){
 		scale.set(x, y, z);
 		this.rotation.set(quat);
 		return this;
