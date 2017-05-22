@@ -3,17 +3,28 @@
 
 in vec3 pos;
 
+out vec2 elementSize;
+out vec2 screenUv;
+out vec2 elementUv;
 
 uniform mat4 transformMat;
-uniform float z;
 uniform vec2 screenSize;
+uniform vec2 size;
 
 void main(void){
+	vec2 ss2=screenSize/2;
 	vec3 p=pos;
-	p.z=z;
+	
+	elementUv=p.xy;
+	p.xy*=size;
 	vec4 screenPos=transformMat*vec4(p,1);
-	screenPos.xy/=screenSize/2;
+	elementSize=size;
+	
+	screenPos.xy/=ss2;
 	screenPos.x-=1;
 	screenPos.y=1-screenPos.y;
+	
+	screenUv=vec2(screenPos.x+1,screenPos.y+1)/2;
+	
 	gl_Position=screenPos;
 }

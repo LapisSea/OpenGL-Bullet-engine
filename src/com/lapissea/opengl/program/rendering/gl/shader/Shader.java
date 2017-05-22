@@ -118,10 +118,11 @@ public abstract class Shader{
 	}
 	
 	public void uploadTransformMat(Matrix4f mat){
-		transformMat.upload(mat);
+		if(transformMat!=null)transformMat.upload(mat);
 	}
 	
 	public void uploadProjectionAndViewMat(Matrix4f project, Matrix4f view){
+		if(viewMat==null) return;
 		viewMat.upload(view);
 		projectionMat.upload(project);
 	}

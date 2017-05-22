@@ -5,11 +5,10 @@ import java.util.function.Consumer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.OpenGLException;
-import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.util.LogUtil;
+import com.lapissea.opengl.window.api.util.IVec2i;
 import com.lapissea.opengl.window.api.util.color.IColorM;
-import com.lapissea.opengl.window.impl.assets.Model;
 
 public class GLUtil{
 	
@@ -155,21 +154,12 @@ public class GLUtil{
 		}
 	}
 	
-	private static final class ModelInWorldSingleUse implements ModelTransformed{
-		
-		Matrix4f	mat;
-		Model		model;
-		
-		@Override
-		public Model getModel(){
-			return model;
-		}
-		
-		@Override
-		public Matrix4f getTransform(){
-			return mat;
-		}
-		
+	public static void viewport(IVec2i size){
+		viewport(size.x(), size.y());
+	}
+	
+	public static void viewport(int width, int height){
+		GL11.glViewport(0, 0, width, height);
 	}
 	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
@@ -105,8 +106,11 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public DynamicModel	lines			=ModelLoader.buildModel(Lined.class, "lines", false, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
 	public DynamicModel	fontDynamicModel=ModelLoader.buildModel(DynamicModel.class, "lines", false, "vertices", new float[9], "uvs", new float[6], "primitiveColor", new float[12], "genNormals", false).culface(false);
 	//	private Model		moon			=ObjModelLoader.loadAndBuild("moon");
+	public Fbo fobMain=new Fbo(Display.getWidth(), Display.getHeight());
 	
 	public Renderer(){
+		fobMain.hasDepth=true;
+		Game.glCtx(fobMain::create);
 		fpsCounter.activate();
 		particleHandler=new ParticleHandler<>((parent, pos)->new ParticleFoo(parent, pos));
 		particleHandler.models.add(ModelLoader.buildModel("ParticleQuad", false, "genNormals", false, "vertices", new float[]{
@@ -151,6 +155,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 				//Shaders.TERRAIN.load();
 				//Shaders.SKYBOX.load();
 				Shaders.GUI.load();
+				Shaders.POST.load();
 			}
 		}
 		
@@ -171,6 +176,9 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	public void render(){
+		
+		fobMain.bind();
+		
 		//PREPARE 
 		RENDER_FRUSTRUM=false;
 		fpsCounter.newFrame();
@@ -273,14 +281,18 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		Shaders.LINE.renderSingle(new EntityStatic(world, lines, new Vec3f()));
 		Shaders.LINE.render();
-		Shaders.GUI.render();
+		
 		
 		renderBechmark.end();
 		
 		pointLights.clear();
 		dirLights.clear();
-		
+
 		//GUI
+		Shaders.GUI.render();
+		
+		Fbo.bindDefault();
+		fobMain.drawImg();
 		
 	}
 	

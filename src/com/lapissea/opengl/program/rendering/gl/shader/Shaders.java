@@ -56,11 +56,13 @@ public class Shaders{
 	public static ShaderRenderer<ModelTransformed>	LINE;
 	public static SkyboxShader						SKYBOX;
 	public static GuiShader							GUI;
+	public static ShaderRenderer<ModelTransformed>	POST;
 	
 	public static void load(){
 		ENTITY=new ShaderRenderer.Basic3D<>("entity");
 		TERRAIN=new TerrainShader();
-		LINE=new ShaderRenderer.Basic3D<>("line");
+		LINE=new ShaderRenderer.Basic3D<>("line"); 
+		POST=new ShaderRenderer.Basic3D<>("post"); 
 		SKYBOX=new SkyboxShader();
 		GUI=new GuiShader();
 	}

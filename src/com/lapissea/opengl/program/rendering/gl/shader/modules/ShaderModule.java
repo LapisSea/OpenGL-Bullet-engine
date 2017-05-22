@@ -54,6 +54,8 @@ public abstract class ShaderModule{
 		registerModule("Fog", ShaderModuleFog.class, null);
 		registerModule("Material", ShaderModuleMaterial.class, null, "MATERIAL_MAX_COUNT", String.valueOf(ShaderModuleMaterial.MATERIAL_MAX_COUNT));
 		registerModule("Texture", ShaderModuleTexture.class, new ShaderModuleTexture.Loader());
+		registerModule("ScreenSize", ShaderModuleScreenSize.class, null);
+		registerModule("MousePosition", ShaderModuleMousePosition.class, null);
 	}
 	
 	/**

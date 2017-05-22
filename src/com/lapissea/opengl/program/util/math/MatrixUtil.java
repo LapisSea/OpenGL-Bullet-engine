@@ -24,10 +24,10 @@ public class MatrixUtil{
 	}
 	
 	public static Matrix4f createTransformMat(Matrix4f src, Vec3f translation, Vec3f rotation, Vec3f scale){
-		return rotate(createTransformMat(src, translation, scale), rotation);
+		return rotate(src.translate(translation),rotation).scale(scale);
 	}
 	public static Matrix4f createTransformMat(Matrix4f src, Vec3f translation, Quat4M rotation, Vec3f scale){
-		return rotate(createTransformMat(src, translation, scale), rotation);
+		return rotate(src.translate(translation),rotation).scale(scale);
 	}
 	
 	public static synchronized Matrix4f rotate(Matrix4f mat, Quat4M rot){

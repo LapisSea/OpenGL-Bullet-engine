@@ -1,113 +1,48 @@
 package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
-import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 
-import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.ModelTransformed;
-import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
+import com.lapissea.opengl.program.rendering.gl.Fbo;
+import com.lapissea.opengl.program.rendering.gl.guis.GuiElement;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
-import com.lapissea.opengl.program.rendering.gl.shader.shaders.GuiShader.IGuiElement;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat2;
-import com.lapissea.opengl.program.util.math.MatrixUtil;
-import com.lapissea.opengl.program.util.math.vec.Vec2f;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
-import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat4;
+import com.lapissea.opengl.window.api.util.color.ColorM;
 
-@SuppressWarnings("serial")
-public class GuiShader extends ShaderRenderer.Basic3D<IGuiElement>{
+public class GuiShader extends ShaderRenderer.Basic3D<GuiElement>{
 	
-	public interface IGuiElement extends ModelTransformed{
+	public Fbo mainBlur;
+	
+	class RenderType{
 		
-		static Matrix4f _MAT=new Matrix4f();
+		UniformFloat4	color;
+		UniformFloat1	mouseRad,blurRad;
 		
-		Vec3f _POS=new Vec3f(){
-			
-			@Override
-			public float z(){
-				return 0;
-			}
-		};
 		
-		Vec3f _NO_SCALE=new Vec3f(){
-			
-			@Override
-			public float x(){
-				return 1;
-			}
-			
-			@Override
-			public float y(){
-				return 1;
-			}
-			
-			@Override
-			public float z(){
-				return 1;
-			}
-		};
-		
-		default Vec3f getModelScale(){
-			return _NO_SCALE;
+		public RenderType(String name){
+			blurRad=getUniform(UniformFloat1.class, name+".blurRad");
+			color=getUniform(UniformFloat4.class, name+".color");
+			mouseRad=getUniform(UniformFloat1.class, name+".mouseRad");
 		}
 		
-		Vec2f getModelPos();
 		
-		int getZ();
-		
-		@Override
-		default Matrix4f getTransform(){
-			_MAT.setIdentity();
-			Vec2f pos=getModelPos();
-			_POS.set(pos.x(), pos.y());
-			return MatrixUtil.createTransformMat(_MAT, _POS, getModelScale());
+		void upload(float blur, ColorM col, float mouse){
+			blurRad.upload(blur);
+			color.upload(col);
+			mouseRad.upload(mouse);
 		}
 		
 	}
 	
-	static IModel UNIT_QUAD=ModelLoader.buildModel("UNIT_QUAD", false, "genNormals", false, "vertices", new float[]{
-			0,0, 0,
-			1,0,0,
-			1,1,0,
-			
-			0,0,0,
-			1,1,0,
-			0,1,0,
-	});
+	GuiElement foo=new GuiElement();
 	
-	static class Foo implements IGuiElement{
-		
-		public Vec2f	pos		=new Vec2f();
-		public IModel	model	=UNIT_QUAD;
-		public int		z;
-		
-		@Override
-		public IModel getModel(){
-			return model;
-		}
-		
-		@Override
-		public Vec2f getModelPos(){
-			return pos;
-		}
-		
-		@Override
-		public int getZ(){
-			return z;
-		}
-		
-		@Override
-		public Vec3f getModelScale(){
-			return new Vec3f(200, 100, 0);
-		}
-	}
-	
-	Foo foo=new Foo();
-	
-	UniformFloat2	screenSize;
-	UniformFloat1	z;
+	UniformFloat1	borderWidth;
+	UniformFloat2	size;
+	RenderType		background,border;
 	
 	public GuiShader(){
 		super("gui");
@@ -115,7 +50,21 @@ public class GuiShader extends ShaderRenderer.Basic3D<IGuiElement>{
 	
 	@Override
 	public void render(){
-		foo.model.culface(false);
+		if(mainBlur==null){
+			mainBlur=new Fbo(Display.getWidth(), Display.getHeight());
+			mainBlur.hasDepth=false;
+			
+			mainBlur.create();
+		}
+		mainBlur.bind();
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		getRenderer().fobMain.drawImg();
+		getRenderer().fobMain.bind();
+		
+		if(foo.model.getTextures().isEmpty()){
+			foo.model.getTextures().add(getRenderer().fobMain.tex);
+		}
+		foo.model.getTextures().set(0, getRenderer().fobMain.tex);
 		renderSingle(foo);
 		super.render();
 	}
@@ -123,21 +72,25 @@ public class GuiShader extends ShaderRenderer.Basic3D<IGuiElement>{
 	@Override
 	protected void setUpUniforms(){
 		transformMat=getUniform(UniformMat4.class, "transformMat");
-		screenSize=getUniform(UniformFloat2.class, "screenSize");
-		z=getUniform(UniformFloat1.class, "z");
+		size=getUniform(UniformFloat2.class, "size");
+		
+		background=new RenderType("background");
+		border=new RenderType("border");
+		borderWidth=getUniform(UniformFloat1.class, "borderWidth");
 	}
 	
 	@Override
 	protected void prepareGlobal(){
 		bind();
-		if(screenSize!=null)screenSize.upload(Game.win().getSize());
 		modulesGlobal.forEach(ShaderModule.Global::uploadUniformsGlobal);
 	}
 	
 	@Override
-	protected void prepareInstance(IGuiElement renderable){
+	protected void prepareInstance(GuiElement renderable){
 		super.prepareInstance(renderable);
-		if(z!=null)z.upload(renderable.getZ());
-		
+		background.upload(3, new ColorM(0, 0.5, 0.7, 0.5), -1);
+		border.upload(5, new ColorM(0.2, 0.1, 1, 0.5), 200);
+		size.upload(renderable.getSize());
+		borderWidth.upload(2);
 	}
 }

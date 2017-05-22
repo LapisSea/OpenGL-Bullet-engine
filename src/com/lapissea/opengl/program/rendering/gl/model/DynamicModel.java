@@ -9,7 +9,6 @@ import com.lapissea.opengl.window.api.util.IRotation;
 import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.opengl.window.assets.IModel;
-import com.lapissea.opengl.window.assets.ITexture;
 import com.lapissea.opengl.window.assets.ModelAttribute;
 import com.lapissea.opengl.window.impl.assets.Model;
 
@@ -23,14 +22,6 @@ public class DynamicModel extends Model{
 	private FloatList	data[];
 	private boolean		dirty;
 	private Int2IntMap	vtIds	=new Int2IntArrayMap();
-	
-	public DynamicModel(ITexture...texture){
-		super(texture);
-	}
-	
-	public DynamicModel(String name, ITexture...texture){
-		super(name, texture);
-	}
 	
 	public DynamicModel(String name){
 		super(name);
