@@ -3,6 +3,7 @@ package com.lapissea.opengl.program.game.terrain;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
@@ -146,7 +147,7 @@ public class Terrain implements ModelTransformed{
 				mats.add(1);
 			}
 		}
-		return ModelLoader.buildModel("Gen_Floor-"+gridX+"_"+gridZ, false, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toFloatArray(), "genNormals", true).culface(false);
+		return ModelLoader.buildModel("Gen_Floor-"+gridX+"_"+gridZ, GL11.GL_TRIANGLES, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toFloatArray(), "genNormals", true).culface(false);
 	}
 	
 	@Override

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL11;
+
 import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
@@ -32,7 +34,7 @@ public class ObjModelLoader{
 		public List<IMaterial>	materials	=new ArrayList<>();
 		public boolean			hasUvs,hasMaterials,hasNormals;
 		
-		public boolean usesQuads;
+		public int format;
 		
 		public float[] getVert(){
 			float[] data=new float[vertecies.size()*3];
@@ -314,7 +316,7 @@ public class ObjModelLoader{
 			model.materialIds.add(matId);
 			if(hasQuad) model.materialIds.add(matId);
 		}
-		model.usesQuads=hasQuad;
+		model.format=hasQuad?GL11.GL_QUADS:GL11.GL_TRIANGLES;
 		
 		if(!model.hasMaterials) model.materialIds=null;
 		else materials.values().forEach(model.materials::add);

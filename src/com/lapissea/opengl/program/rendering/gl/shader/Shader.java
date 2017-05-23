@@ -240,7 +240,9 @@ public abstract class Shader{
 		final String srcFinal=src;
 		
 		if(Globals.DEV_ENV) try{
-			Files.write(new File("res/shaders/compiled output/compiled_"+name+(isFragment?".fs":".vs")).toPath(), srcFinal.getBytes());
+			File f=new File("res/shaders/compiled output/"+name+(isFragment?".fs":".vs"));
+			f.getParentFile().mkdirs();
+			Files.write(f.toPath(), srcFinal.getBytes());
 		}catch(IOException e){
 			e.printStackTrace();
 		}

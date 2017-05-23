@@ -9,13 +9,13 @@ import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
 import com.lapissea.opengl.window.api.events.FocusEvent;
 import com.lapissea.opengl.window.api.events.KeyEvent;
-import com.lapissea.opengl.window.api.events.MouseKeyEvent;
+import com.lapissea.opengl.window.api.events.MouseButtonEvent;
 import com.lapissea.opengl.window.api.events.MouseMoveEvent;
 import com.lapissea.opengl.window.api.events.MouseScrollEvent;
 import com.lapissea.opengl.window.api.events.ResizeEvent;
 import com.lapissea.opengl.window.api.events.FocusEvent.IFocusEventListener;
 import com.lapissea.opengl.window.api.events.KeyEvent.IKeyEventListener;
-import com.lapissea.opengl.window.api.events.MouseKeyEvent.IMouseButtonEventListener;
+import com.lapissea.opengl.window.api.events.MouseButtonEvent.IMouseButtonEventListener;
 import com.lapissea.opengl.window.api.events.MouseMoveEvent.IMouseMoveEventListener;
 import com.lapissea.opengl.window.api.events.MouseScrollEvent.IMouseScrollEventListener;
 import com.lapissea.opengl.window.api.events.ResizeEvent.IResizeEventListener;
@@ -37,12 +37,12 @@ public class Registry implements Updateable,Initable,WindowEvents,InputEvents{
 	
 	public void bindWindow(ILWJGLCtx ctx){
 		ctx.getCtxWindow()
-				.setEventHook(this::onKeyEvent)
-				.setEventHook(this::onMouseKeyEvent)
-				.setEventHook(this::onMouseMoveEvent)
-				.setEventHook(this::onMouseScrollEvent)
-				.setEventHook(this::onFocusEvent)
-				.setEventHook(this::onResizeEvent);
+				.setEventHook(this::onKey)
+				.setEventHook(this::onMouseButton)
+				.setEventHook(this::onMouseMove)
+				.setEventHook(this::onMouseScroll)
+				.setEventHook(this::onFocus)
+				.setEventHook(this::onResize);
 	}
 	
 	private <T> void add(List<T> modules, T module){
@@ -64,8 +64,8 @@ public class Registry implements Updateable,Initable,WindowEvents,InputEvents{
 	}
 	
 	@Override
-	public void onResizeEvent(ResizeEvent e){
-		windowEvents.forEach(e0->e0.onResizeEvent(e));
+	public void onResize(ResizeEvent e){
+		windowEvents.forEach(e0->e0.onResize(e));
 	}
 	
 	@Override
@@ -89,28 +89,28 @@ public class Registry implements Updateable,Initable,WindowEvents,InputEvents{
 	}
 	
 	@Override
-	public void onKeyEvent(KeyEvent e){
-		keyEvents.forEach(e0->e0.onKeyEvent(e));
+	public void onKey(KeyEvent e){
+		keyEvents.forEach(e0->e0.onKey(e));
 	}
 	
 	@Override
-	public void onMouseKeyEvent(MouseKeyEvent e){
-		mouseKeyEvents.forEach(e0->e0.onMouseKeyEvent(e));
+	public void onMouseButton(MouseButtonEvent e){
+		mouseKeyEvents.forEach(e0->e0.onMouseButton(e));
 	}
 	
 	@Override
-	public void onMouseMoveEvent(MouseMoveEvent e){
-		mousemoveEvents.forEach(e0->e0.onMouseMoveEvent(e));
+	public void onMouseMove(MouseMoveEvent e){
+		mousemoveEvents.forEach(e0->e0.onMouseMove(e));
 	}
 	
 	@Override
-	public void onMouseScrollEvent(MouseScrollEvent e){
-		mouseScrollEvents.forEach(e0->e0.onMouseScrollEvent(e));
+	public void onMouseScroll(MouseScrollEvent e){
+		mouseScrollEvents.forEach(e0->e0.onMouseScroll(e));
 	}
 	
 	@Override
-	public void onFocusEvent(FocusEvent e){
-		focusEvents.forEach(e0->e0.onFocusEvent(e));
+	public void onFocus(FocusEvent e){
+		focusEvents.forEach(e0->e0.onFocus(e));
 	}
 	
 }

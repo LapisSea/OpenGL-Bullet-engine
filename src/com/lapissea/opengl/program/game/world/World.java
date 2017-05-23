@@ -242,7 +242,7 @@ public class World{
 	
 	public double getSunPos(double pt){
 		return ((time()+pt)/dayDuration)%1;
-		//				return 0.75;
+//						return 0.75;
 		//				return 0.25;
 		//				return 0.5;
 	}

@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.guis;
+package com.lapissea.opengl.program.rendering.gl.gui;
 
 import org.lwjgl.opengl.GL11;
 
@@ -73,7 +73,7 @@ public class SplashScreen{
 			tim=getUniform(UniformFloat1.class, "tim");
 		}
 		@Override
-		protected void prepareGlobal(){
+		public void prepareGlobal(){
 			super.prepareGlobal();
 			tim.upload((float)((System.currentTimeMillis()-START)/100D));
 		}

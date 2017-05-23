@@ -2,7 +2,9 @@
 
 
 in vec3 pos;
+in vec2 uvIn;
 
+out vec2 uv;
 out vec2 elementSize;
 out vec2 screenUv;
 out vec2 elementUv;
@@ -12,6 +14,7 @@ uniform vec2 screenSize;
 uniform vec2 size;
 
 void main(void){
+	uv=uvIn;
 	vec2 ss2=screenSize/2;
 	vec3 p=pos;
 	

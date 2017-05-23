@@ -29,7 +29,18 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 			StringBuilder src=new StringBuilder(parts[0].replace("<COUNT>", String.valueOf(args.length)));
 			
 			for(int i=0;i<args.length;i++){
-				src.append((args[i].startsWith("cube")?templateCube:template).replace("<NAME>", args[i]).replaceAll("<NUM>", String.valueOf(i)));
+				int colSplit=args[i].indexOf('-');
+				String name,color;
+				if(colSplit==-1){
+					name=args[i];
+					color="1";
+				}
+				else{
+					name=args[i].substring(0, colSplit);
+					color=args[i].substring(colSplit+1);
+				}
+				
+				src.append((args[i].startsWith("cube")?templateCube:template).replace("<NAME>", name).replace("<COL>", color).replaceAll("<NUM>", String.valueOf(i)));
 			}
 			
 			return src.toString();
@@ -62,6 +73,7 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 		
 		if(texturesUsed!=null){
 			List<ITexture> txts=model.getTextures();
+			//			LogUtil.println(txts);
 			for(int i=0;i<texturesUsed.length;i++){
 				ITexture texture=i<txts.size()?txts.get(i):null;
 				boolean valid=texture!=null&&texture.isLoaded();

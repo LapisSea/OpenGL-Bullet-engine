@@ -9,15 +9,42 @@ struct RenderType{
 in vec2 elementSize;
 in vec2 screenUv;
 in vec2 elementUv;
+in vec2 uv;
+
 out vec4 pixelColor;
 
-#include "ScreenSize"
-#include "MousePosition"
-#include "Texture: screen"
+uniform vec2 screenSize;
+
+uniform vec2 mousePos;
+
+
+uniform bool MDL_TEXTURE_USED[2];
+////////////////////////////////////////////////
+
+uniform sampler2D MDL_TEXTURE0;
+
+vec4 screen(vec2 uv){
+	if(!MDL_TEXTURE_USED[0])return vec4(1);
+	return texture(MDL_TEXTURE0, uv);
+}
+
+////////////////////////////////////////////////
+
+uniform sampler2D MDL_TEXTURE1;
+
+vec4 elementTexture(vec2 uv){
+	if(!MDL_TEXTURE_USED[1])return vec4(0);
+	return texture(MDL_TEXTURE1, uv);
+}
+
+////////////////////////////////////////////////
+
 
 uniform RenderType background;
 uniform RenderType border;
 uniform float borderWidth;
+uniform float blurDiv;
+uniform vec4 parentBg;
 
 
 vec4 color(RenderType type){
@@ -26,7 +53,7 @@ vec4 color(RenderType type){
 	float mouseRadAlpha;
 	if(type.mouseRad<0)mouseRadAlpha=1;
 	else{
-		mouseRadAlpha=clamp(1.2-length(mousePos-screenSize*screenUv)/type.mouseRad,0,1);
+		mouseRadAlpha=clamp(1-length(mousePos-screenSize*screenUv)/type.mouseRad,0,1);
 		if(mouseRadAlpha<1/256.0)return color;
 		//mouseRadAlpha=mouseRadAlpha;
 		//else mouseRadAlpha*=mouseRadAlpha;
@@ -50,18 +77,20 @@ vec4 color(RenderType type){
 		}
 		blurColor/=pxCount;
 		
-		color=vec4(mix(sqrt(blurColor),color.rgb,color.a),1);
+		color=vec4(mix(mix(sqrt(blurColor),parentBg.rgb,parentBg.a),color.rgb,color.a),1);
 	}
-	color=mix(screen(screenUv),color,mouseRadAlpha);
+	color.a*=mouseRadAlpha;
 	
 	return color;
 }
 
 void main(void){
+	pixelColor=elementTexture(uv);
+	if(pixelColor.a>255/256.0)return;
 	
 	vec2 uvPx=elementUv*elementSize;
 	bool isPxBorder=borderWidth>=1&&(uvPx.x<borderWidth||uvPx.x>elementSize.x-borderWidth||uvPx.y<borderWidth||uvPx.y>elementSize.y-borderWidth);
 	
-	pixelColor=color(isPxBorder?border:background);
-	
+	pixelColor=mix(color(isPxBorder?border:background),pixelColor,pixelColor.a);
+	if(pixelColor.a<1/256.0)discard;
 }

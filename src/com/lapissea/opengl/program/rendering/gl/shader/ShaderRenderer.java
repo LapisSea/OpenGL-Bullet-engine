@@ -96,7 +96,7 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		}
 	}
 	
-	protected void prepareGlobal(){
+	public void prepareGlobal(){
 		bind();
 		uploadProjectionAndViewMat(getProjection(), getView());
 		modulesGlobal.forEach(ShaderModule.Global::uploadUniformsGlobal);

@@ -2,6 +2,7 @@ package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 
@@ -61,7 +62,7 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 		
 	}
 	
-	private Model cube=ModelLoader.buildModel("Skybox", false, "vertices", Shaders.VERTEX_BOX, "genNormals", false, "textures", TextureLoader.loadTexture("skybox/test", BasicTextureCube.class));
+	private Model cube=ModelLoader.buildModel("Skybox", GL11.GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false, "textures", TextureLoader.loadTexture("skybox/test", BasicTextureCube.class));
 	
 	UniformFloat3	sunPos;
 	UniformFloat4	sunColor;
@@ -90,7 +91,7 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	}
 	
 	@Override
-	protected void prepareGlobal(){
+	public void prepareGlobal(){
 		super.prepareGlobal();
 		double sunPos0=Game.get().world.getSunPos(Game.getPartialTicks())*Math.PI*2;
 		float cos=(float)Math.cos(sunPos0);

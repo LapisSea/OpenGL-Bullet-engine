@@ -4,10 +4,20 @@ import com.lapissea.opengl.window.api.util.Calculateable;
 
 public class Vec2f implements Calculateable<Vec2f>{
 	
-	private static final Vec2f STATIC_SAFE=new Vec2f();
+	public static final Vec2f ZERO=new Vec2f(){
+		
+		@Override
+		public float x(){
+			return 0;
+		}
+		
+		@Override
+		public float y(){
+			return 0;
+		}
+	};
 	
 	private float x,y;
-
 	
 	public Vec2f(){
 		this(0, 0);
@@ -98,21 +108,28 @@ public class Vec2f implements Calculateable<Vec2f>{
 		y(y()*y());
 		return this;
 	}
-
+	
 	@Override
 	public Vec2f clone(){
 		return new Vec2f(x(), y());
 	}
+	
 	@Override
 	public Vec2f mul(float f){
-		STATIC_SAFE.set(f, f);
-		return mul(STATIC_SAFE);
+		x(x()*f);
+		y(y()*f);
+		return this;
 	}
-
+	
 	@Override
 	public Vec2f set(Vec2f src){
 		x(src.x());
 		y(src.y());
 		return this;
+	}
+	
+	@Override
+	public String toString(){
+		return "Vec2f{x="+x+", y="+y+"}";
 	}
 }

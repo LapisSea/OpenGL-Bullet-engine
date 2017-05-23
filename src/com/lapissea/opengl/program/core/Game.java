@@ -9,7 +9,8 @@ import org.lwjgl.opengl.OpenGLException;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.guis.SplashScreen;
+import com.lapissea.opengl.program.rendering.gl.gui.Gui;
+import com.lapissea.opengl.program.rendering.gl.gui.SplashScreen;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.util.LogUtil;
@@ -79,7 +80,7 @@ public class Game{
 		}
 		win().updateInput();
 		if(world==null) return;
-		world.update();
+		if(!isPaused()) world.update();
 		registry.update();
 	}
 	
@@ -132,5 +133,10 @@ public class Game{
 	
 	public static IGLWindow win(){
 		return get().glCtx.getCtxWindow();
+	}
+	
+	public static boolean isPaused(){
+		Gui g=get().renderer.guiHandler.getOpenGui();
+		return g!=null&&g.pausesGame();
 	}
 }

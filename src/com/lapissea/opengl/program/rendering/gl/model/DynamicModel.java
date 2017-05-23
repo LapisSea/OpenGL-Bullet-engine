@@ -28,14 +28,14 @@ public class DynamicModel extends Model{
 	}
 	
 	@Override
-	public IModel load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape<? extends IVec3f,? extends IRotation> shape){
+	public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape<? extends IVec3f,? extends IRotation> shape){
 		if(data==null||data.length!=vbos.length) data=new FloatList[vbos.length];
 		vtIds.clear();
 		for(int i=0;i<attributeIds.length;i++){
 			vtIds.put(attributeIds[i].id, i);
 			data[i]=new FloatArrayList();
 		}
-		return super.load(vao, vertexCount, usesIndicies, usesQuads, vbos, attributeIds, shape);
+		return super.load(vao, vertexCount, usesIndicies, format, vbos, attributeIds, shape);
 	}
 	
 	public DynamicModel pos(IVec3f vec){

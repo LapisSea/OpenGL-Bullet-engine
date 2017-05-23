@@ -14,6 +14,7 @@ public class GameStart{
 		
 		GAME_LOADER=new LapisClassLoader(((URLClassLoader)GameStart.class.getClassLoader()).getURLs());
 		Thread.currentThread().setContextClassLoader(GAME_LOADER);
+		
 		Class.forName(GameStart.class.getPackage().getName()+".Launch", true, GAME_LOADER).getDeclaredMethod("main", String[].class).invoke(null, new Object[]{args});
 	}
 	

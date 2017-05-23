@@ -41,10 +41,9 @@ public class ModelLoader{
 	public static final IModel EMPTY_MODEL=new Model("EMPTY_MODEL"){
 		
 		@Override
-		public IModel load(int vao, int vertexCount, boolean usesIndicies, boolean usesQuads, int[] vbos, ModelAttribute[] attributeIds, IFrustrumShape<? extends IVec3f,? extends IRotation> shape){
+		public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute[] attributeIds, com.lapissea.opengl.window.api.frustrum.IFrustrumShape<? extends IVec3f,? extends IRotation> shape) {
 			throw new UnsupportedOperationException();
 		}
-		
 		@Override
 		public IModel drawCall(){
 			return this;
@@ -84,7 +83,7 @@ public class ModelLoader{
 	}
 	
 	public static <T extends Model> T buildModel(Class<T> type, ModelData modelData){
-		return buildModel(type, modelData.name, modelData.usesQuads, "vertices", modelData.getVert(), "uvs", modelData.getUv(), "normals", modelData.getNorm(), "materialIds", modelData.getMat(), "materials", modelData.materials);
+		return buildModel(type, modelData.name, modelData.format, "vertices", modelData.getVert(), "uvs", modelData.getUv(), "normals", modelData.getNorm(), "materialIds", modelData.getMat(), "materials", modelData.materials);
 	}
 	
 	/**
@@ -101,8 +100,8 @@ public class ModelLoader{
 	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
 	 * <br>primitiveColor = float[] (rgba)
 	 */
-	public synchronized static Model buildModel(String name, boolean usesQuads, Object...data){
-		return buildModel(Model.class, name, usesQuads, data);
+	public synchronized static Model buildModel(String name, int format, Object...data){
+		return buildModel(Model.class, name, format, data);
 	}
 	
 	/**
@@ -119,7 +118,7 @@ public class ModelLoader{
 	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
 	 * <br>primitiveColor = float[] (rgba)
 	 */
-	public synchronized static <T extends Model> T buildModel(Class<T> type, String name, boolean usesQuads, Object...data){
+	public synchronized static <T extends Model> T buildModel(Class<T> type, String name, int format, Object...data){
 		if(data==null||data.length==0) return null;
 		if(data.length%2!=0) throw new IllegalArgumentException("Bad data!");
 		
@@ -128,7 +127,7 @@ public class ModelLoader{
 		for(int i=0;i<data.length;i+=2){
 			MODEL_BUILD_DATA.put((String)data[i], data[i+1]);
 		}
-		T model=buildModel(type, name, usesQuads, MODEL_BUILD_DATA);
+		T model=buildModel(type, name, format, MODEL_BUILD_DATA);
 		MODEL_BUILD_DATA.clear();
 		return model;
 	}
@@ -147,7 +146,7 @@ public class ModelLoader{
 	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
 	 * <br>primitiveColor = float[] (rgba)
 	 */
-	public static <T extends Model> T buildModel(Class<T> type, String name, boolean usesQuads, HashMap<String,Object> data){
+	public static <T extends Model> T buildModel(Class<T> type, String name, int format, HashMap<String,Object> data){
 		
 		data.keySet().stream().filter(key->data.get(key)==null).collect(Collectors.toList()).forEach(key->data.remove(key));
 		
@@ -184,7 +183,7 @@ public class ModelLoader{
 			if(materialIds!=null) materialIds=new float[indices.length];
 			if(primitiveColor!=null) primitiveColor=new float[indices.length*4];
 			
-			if(usesQuads){
+			if(format==GL11.GL_QUADS){
 				int counter=0;
 				for(int i=0;i<indices.length;i+=4){
 					vert[counter++]=vert0[indices[i+0]*3+0];
@@ -418,7 +417,7 @@ public class ModelLoader{
 			putAttribute(vbos, attributes, ModelAttribute.PRIMITIVE_COLOR_ATTR, primitiveColorF);
 			unbindVao();
 
-			model.load(vao, hasIdsF?indicesF.length:vertF.length, hasIdsF, usesQuads, vbos.toIntArray(), attributes.toArray(new ModelAttribute[attributes.size()]), calcShape(vertF));
+			model.load(vao, hasIdsF?indicesF.length:vertF.length, hasIdsF, format, vbos.toIntArray(), attributes.toArray(new ModelAttribute[attributes.size()]), calcShape(vertF));
 			if(!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 		});
 		return model;

@@ -23,26 +23,59 @@ public class Fbo{
 	
 	public int id;
 	
-	public ITexture tex;
+	private ITexture tex;
 	
-	public int depth;
+	
+	public ITexture getTex(){
+		return tex;
+	}
+	
+	public ITexture getDepth(){
+		return depth;
+	}
+	
+	public int getWidth(){
+		return width;
+	}
+	
+	public int getHeight(){
+		return height;
+	}
+	
+	public boolean isLoaded(){
+		return loaded;
+	}
+	
+	public boolean hasTexture(){
+		return hasTexture;
+	}
+	
+	public boolean hasDepth(){
+		return hasDepth;
+	}
+	
+	private ITexture depth;
 	
 	private int		width,height;
 	private boolean	loaded;
-	public boolean	hasTexture	=true,hasDepth=false;
+	private boolean	hasTexture,hasDepth;
 	
-	public static final IModel FULL_SCREEN_MODEL=ModelLoader.buildModel("gen_fscren", false, "genNormals", false, "vertices", new float[]{
-			-1.0f,-1.0f,0.0f,
-			1.0f,-1.0f,0.0f,
-			-1.0f,1.0f,0.0f,
-			-1.0f,1.0f,0.0f,
-			1.0f,-1.0f,0.0f,
-			1.0f,1.0f,0.0f,
+	public static final IModel FULL_SCREEN_MODEL=ModelLoader.buildModel("gen_fscren", GL11.GL_TRIANGLE_STRIP, "genNormals", false, "vertices", new float[]{
+			-1,-1,0,
+			+1,-1,0,
+			-1,+1,0,
+			+1,+1,0,
 	});
 	
 	public Fbo(int width, int height){
+		this(width, height, true, true);
+	}
+	
+	public Fbo(int width, int height, boolean hasTexture, boolean hasDepth){
 		this.width=width;
 		this.height=height;
+		this.hasDepth=hasDepth;
+		this.hasTexture=hasTexture;
 	}
 	
 	public static void bindDefault(){
@@ -65,7 +98,7 @@ public class Fbo{
 		
 		
 		if(hasTexture){
-			tex=TextureLoader.alocate("gen_frbuf", BasicTexture.class);
+			tex=TextureLoader.alocate("gen_frbuf_tex", BasicTexture.class);
 			int id=GL11.glGenTextures();
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
 			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
@@ -77,13 +110,23 @@ public class Fbo{
 			tex.load(id, width, height);
 		}
 		if(hasDepth){
-			depth=GL11.glGenTextures();
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, depth);
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT32, width, height, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer)null);
-			GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, depth, 0);
+			depth=TextureLoader.alocate("gen_frbuf_dph", BasicTexture.class);
+			int id=GL11.glGenTextures();
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
+			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL14.GL_DEPTH_COMPONENT24, width, height, 0, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer)null);
+			GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, id, 0);
+			depth.load(id, width, height);
 		}
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		return this;
+	}
+	
+	public void setSize(int width, int height){
+		if(width==this.width&&height==this.height) return;
+		delete();
+		this.width=width;
+		this.height=height;
+		create();
 	}
 	
 	public void delete(){
@@ -95,7 +138,8 @@ public class Fbo{
 	
 	private void delete0(){
 		GL30.glDeleteFramebuffers(id);
-		tex.delete();
+		if(tex!=null) tex.delete();
+		if(depth!=null) depth.delete();
 	}
 	
 	@Override
@@ -113,7 +157,7 @@ public class Fbo{
 		
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		GLUtil.DEPTH_TEST.set(false);
-		Shaders.POST.renderSingle(zero, FULL_SCREEN_MODEL);
+		Shaders.POST_COPY.renderSingle(zero, FULL_SCREEN_MODEL);
 		GLUtil.DEPTH_TEST.set(true);
 	}
 }

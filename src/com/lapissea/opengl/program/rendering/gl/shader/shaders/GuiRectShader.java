@@ -1,10 +1,8 @@
 package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
-
-import com.lapissea.opengl.program.rendering.gl.Fbo;
-import com.lapissea.opengl.program.rendering.gl.guis.GuiElement;
+import com.lapissea.opengl.program.rendering.gl.gui.GuiElement;
+import com.lapissea.opengl.program.rendering.gl.gui.GuiElementMaterial;
+import com.lapissea.opengl.program.rendering.gl.gui.GuiHandler;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
@@ -13,9 +11,7 @@ import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFl
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat4;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 
-public class GuiShader extends ShaderRenderer.Basic3D<GuiElement>{
-	
-	public Fbo mainBlur;
+public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 	
 	class RenderType{
 		
@@ -36,38 +32,25 @@ public class GuiShader extends ShaderRenderer.Basic3D<GuiElement>{
 			mouseRad.upload(mouse);
 		}
 		
+		
+		public void upload(GuiElementMaterial background){
+			upload(background.blurRad, background.color, background.mouseRad);
+		}
+		
 	}
 	
-	GuiElement foo=new GuiElement();
 	
 	UniformFloat1	borderWidth;
+	UniformFloat1	blurDiv;
 	UniformFloat2	size;
+	UniformFloat4	parentBg;
 	RenderType		background,border;
 	
-	public GuiShader(){
-		super("gui");
-	}
 	
-	@Override
-	public void render(){
-		if(mainBlur==null){
-			mainBlur=new Fbo(Display.getWidth(), Display.getHeight());
-			mainBlur.hasDepth=false;
-			
-			mainBlur.create();
-		}
-		mainBlur.bind();
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		getRenderer().fobMain.drawImg();
-		getRenderer().fobMain.bind();
-		
-		if(foo.model.getTextures().isEmpty()){
-			foo.model.getTextures().add(getRenderer().fobMain.tex);
-		}
-		foo.model.getTextures().set(0, getRenderer().fobMain.tex);
-		renderSingle(foo);
-		super.render();
+	public GuiRectShader(){
+		super("gui/rect");
 	}
+
 	
 	@Override
 	protected void setUpUniforms(){
@@ -77,20 +60,25 @@ public class GuiShader extends ShaderRenderer.Basic3D<GuiElement>{
 		background=new RenderType("background");
 		border=new RenderType("border");
 		borderWidth=getUniform(UniformFloat1.class, "borderWidth");
+		blurDiv=getUniform(UniformFloat1.class, "blurDiv");
+		parentBg=getUniform(UniformFloat4.class, "parentBg");
 	}
 	
 	@Override
-	protected void prepareGlobal(){
+	public void prepareGlobal(){
 		bind();
 		modulesGlobal.forEach(ShaderModule.Global::uploadUniformsGlobal);
+		if(blurDiv!=null)blurDiv.upload(GuiHandler.BLUR_DIV);
 	}
 	
 	@Override
 	protected void prepareInstance(GuiElement renderable){
 		super.prepareInstance(renderable);
-		background.upload(3, new ColorM(0, 0.5, 0.7, 0.5), -1);
-		border.upload(5, new ColorM(0.2, 0.1, 1, 0.5), 200);
+		background.upload(renderable.background);
+		border.upload(renderable.border);
 		size.upload(renderable.getSize());
-		borderWidth.upload(2);
+		borderWidth.upload(renderable.borderWidth);
+		parentBg.upload(renderable.getParentBg());
+		
 	}
 }
