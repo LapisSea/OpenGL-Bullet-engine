@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util;
+package com.lapissea.opengl.program.util.data;
 
 public class IntTree<T>{
 	

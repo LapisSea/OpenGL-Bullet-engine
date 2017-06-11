@@ -1,8 +1,10 @@
-package com.lapissea.opengl.program.util;
+package com.lapissea.opengl.program.util.data;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import com.lapissea.opengl.program.util.UtilM;
 
 public class PrefixTree<T>{
 	
