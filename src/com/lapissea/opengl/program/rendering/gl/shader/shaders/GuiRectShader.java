@@ -43,7 +43,6 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 	UniformFloat1	borderWidth;
 	UniformFloat1	blurDiv;
 	UniformFloat2	size;
-	UniformFloat4	parentBg;
 	RenderType		background,border;
 	
 	
@@ -61,7 +60,6 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 		border=new RenderType("border");
 		borderWidth=getUniform(UniformFloat1.class, "borderWidth");
 		blurDiv=getUniform(UniformFloat1.class, "blurDiv");
-		parentBg=getUniform(UniformFloat4.class, "parentBg");
 	}
 	
 	@Override
@@ -74,11 +72,10 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 	@Override
 	protected void prepareInstance(GuiElement renderable){
 		super.prepareInstance(renderable);
-		background.upload(renderable.background);
-		border.upload(renderable.border);
+		background.upload(renderable.getRenderBackground());
+		border.upload(renderable.getRenderBorder());
 		size.upload(renderable.getSize());
 		borderWidth.upload(renderable.borderWidth);
-		parentBg.upload(renderable.getParentBg());
 		
 	}
 }

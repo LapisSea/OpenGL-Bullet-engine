@@ -8,32 +8,31 @@ import com.lapissea.opengl.program.game.events.Renderable;
 import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
 import com.lapissea.opengl.window.api.events.FocusEvent;
-import com.lapissea.opengl.window.api.events.KeyEvent;
-import com.lapissea.opengl.window.api.events.MouseButtonEvent;
-import com.lapissea.opengl.window.api.events.MouseMoveEvent;
-import com.lapissea.opengl.window.api.events.MouseScrollEvent;
-import com.lapissea.opengl.window.api.events.ResizeEvent;
 import com.lapissea.opengl.window.api.events.FocusEvent.IFocusEventListener;
+import com.lapissea.opengl.window.api.events.KeyEvent;
 import com.lapissea.opengl.window.api.events.KeyEvent.IKeyEventListener;
+import com.lapissea.opengl.window.api.events.MouseButtonEvent;
 import com.lapissea.opengl.window.api.events.MouseButtonEvent.IMouseButtonEventListener;
+import com.lapissea.opengl.window.api.events.MouseMoveEvent;
 import com.lapissea.opengl.window.api.events.MouseMoveEvent.IMouseMoveEventListener;
+import com.lapissea.opengl.window.api.events.MouseScrollEvent;
 import com.lapissea.opengl.window.api.events.MouseScrollEvent.IMouseScrollEventListener;
+import com.lapissea.opengl.window.api.events.ResizeEvent;
 import com.lapissea.opengl.window.api.events.ResizeEvent.IResizeEventListener;
 import com.lapissea.opengl.window.api.events.util.InputEvents;
 import com.lapissea.opengl.window.api.events.util.WindowEvents;
 
 public class Registry implements Updateable,Initable,WindowEvents,InputEvents{
 	
-	private final List<Updateable>				updateModules		=new ArrayList<>();
-	private final List<Renderable>				renderModules		=new ArrayList<>();
-	private final List<Initable>				initModules			=new ArrayList<>();
-	private final List<WindowEvents>			windowEvents		=new ArrayList<>();
+	private final List<Updateable>					updateModules		=new ArrayList<>();
+	private final List<Renderable>					renderModules		=new ArrayList<>();
+	private final List<Initable>					initModules			=new ArrayList<>();
 	private final List<IKeyEventListener>			keyEvents			=new ArrayList<>();
-	private final List<IMouseButtonEventListener>		mouseKeyEvents		=new ArrayList<>();
+	private final List<IMouseButtonEventListener>	mouseKeyEvents		=new ArrayList<>();
 	private final List<IMouseMoveEventListener>		mousemoveEvents		=new ArrayList<>();
 	private final List<IMouseScrollEventListener>	mouseScrollEvents	=new ArrayList<>();
-	private final List<IFocusEventListener>				focusEvents			=new ArrayList<>();
-	private final List<IResizeEventListener>				resizeEvents		=new ArrayList<>();
+	private final List<IFocusEventListener>			focusEvents			=new ArrayList<>();
+	private final List<IResizeEventListener>		resizeEvents		=new ArrayList<>();
 	
 	public void bindWindow(ILWJGLCtx ctx){
 		ctx.getCtxWindow()
@@ -65,7 +64,7 @@ public class Registry implements Updateable,Initable,WindowEvents,InputEvents{
 	
 	@Override
 	public void onResize(ResizeEvent e){
-		windowEvents.forEach(e0->e0.onResize(e));
+		resizeEvents.forEach(e0->e0.onResize(e));
 	}
 	
 	@Override

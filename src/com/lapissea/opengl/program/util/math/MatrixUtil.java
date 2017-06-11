@@ -39,6 +39,15 @@ public class MatrixUtil{
 	public static Matrix4f rotate(Matrix4f mat, Vec3f rot){
 		return mat.rotate(rot.x(), X_AXIS).rotate(rot.y(), Y_AXIS).rotate(rot.z(), Z_AXIS);
 	}
+	public static Matrix4f rotateX(Matrix4f mat, float angle){
+		return mat.rotate(angle, X_AXIS);
+	}
+	public static Matrix4f rotateY(Matrix4f mat, float angle){
+		return mat.rotate(angle, Y_AXIS);
+	}
+	public static Matrix4f rotateZ(Matrix4f mat, float angle){
+		return mat.rotate(angle, Z_AXIS);
+	}
 	
 	public static Matrix4f rotateZXY(Matrix4f mat, Vec3f rot){
 		return mat.rotate(rot.z(), Z_AXIS).rotate(rot.x(), X_AXIS).rotate(rot.y(), Y_AXIS);

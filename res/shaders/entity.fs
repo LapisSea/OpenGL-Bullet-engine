@@ -10,9 +10,9 @@ out vec4 pixelColor;
 #include "Fog"
 
 void main(void){
-	checkFogVisibility();
+	initFog(wPos.xz);
 	pixelColor=mainTexture(uv);
-	if(pixelColor.a<1/256.0)discard;
+	if(pixelColor.a==0)discard;
 	pixelColor=applyLighting(pixelColor, getMaterial());
 	pixelColor=applyFog(pixelColor);
 	

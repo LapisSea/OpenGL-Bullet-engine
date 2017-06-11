@@ -5,7 +5,7 @@ import org.lwjgl.opengl.OpenGLException;
 
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.util.LogUtil;
+import com.lapissea.util.LogUtil;
 
 public abstract class AbstractUniform{
 	

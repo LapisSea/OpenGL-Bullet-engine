@@ -1,14 +1,22 @@
 
+#include "Noise2D"
+
 in float visibility;
 
 uniform vec3 skyColor;
 
-void checkFogVisibility(){
-	if(visibility<1/255.0){
+float fog_actual;
+
+void initFog(vec2 wPos){
+	float n=(1+snoise(wPos/200))/2;
+	n*=n;
+	fog_actual=visibility-n/5;
+	if(fog_actual<1/255.0){
+		fog_actual=0;
 		discard;
 	}
 }
 
 vec4 applyFog(vec4 initalColor){
-	return vec4(mix(skyColor,initalColor.rgb, visibility),initalColor.a);
+	return vec4(mix(skyColor,initalColor.rgb, fog_actual),initalColor.a);
 }

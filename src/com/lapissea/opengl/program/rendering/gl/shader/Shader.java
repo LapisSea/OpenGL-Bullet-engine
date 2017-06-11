@@ -22,9 +22,9 @@ import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.Shad
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
-import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.util.LogUtil;
 
 public abstract class Shader{
 	

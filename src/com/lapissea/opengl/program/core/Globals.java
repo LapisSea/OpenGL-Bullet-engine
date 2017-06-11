@@ -7,7 +7,7 @@ import java.net.URLDecoder;
 import java.util.jar.JarFile;
 
 import com.lapissea.opengl.launch.GameStart;
-import com.lapissea.opengl.program.util.LogUtil;
+import com.lapissea.util.LogUtil;
 
 public class Globals{
 	

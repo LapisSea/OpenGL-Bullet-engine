@@ -1,11 +1,12 @@
 package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.terrain.Terrain;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
+import com.lapissea.opengl.program.util.data.OffsetArray;
 
 public class TerrainShader extends ShaderRenderer.Basic3D<Terrain>{
 	
@@ -31,16 +32,20 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Terrain>{
 	
 	@Override
 	@Deprecated
-	public void renderBatch(List<? extends Terrain> entitysWithSameModel){}
+	public void renderBatch(Collection<? extends Terrain> entitysWithSameModel){}
 	
 	@Override
 	public void render(){
 		onRendered();
-		List<Terrain> terrains=Game.get().world.terrains;
+		OffsetArray<OffsetArray<Terrain>> terrains=Game.get().world.terrains;
 		if(terrains.isEmpty()) return;
 		
 		prepareGlobal();
-		terrains.forEach(this::renderChunk);
+		for(OffsetArray<Terrain> offsetArray:terrains){
+			for(Terrain terrain:offsetArray){
+				renderChunk(terrain);
+			}
+		}
 		unbind();
 	}
 	
@@ -48,7 +53,7 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Terrain>{
 		if(!ter.model.isLoaded()) return;
 		Renderer r=getRenderer();
 		r.notifyEntityRender();
-		if(!ter.model.getFrustrumShape().isVisibleAt(ter.x, -2, ter.z, r.frustrum)) return;
+		if(!ter.model.getFrustrumShape().isVisibleAt(ter.x*Terrain.SIZE, -2, ter.z*Terrain.SIZE, r.frustrum)) return;
 		r.notifyEntityActualRender();
 		
 		prepareModel(ter.model);

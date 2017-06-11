@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.OpenGLException;
 
+import com.lapissea.opengl.launch.GameStart;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
@@ -13,11 +14,14 @@ import com.lapissea.opengl.program.rendering.gl.gui.Gui;
 import com.lapissea.opengl.program.rendering.gl.gui.SplashScreen;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
-import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.program.util.config.Config;
+import com.lapissea.opengl.program.util.config.configs.WindowConfig;
 import com.lapissea.opengl.window.api.IGLWindow;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
+import com.lapissea.splashscreen.SplashScreenHost;
+import com.lapissea.util.LogUtil;
 
 public class Game{
 	
@@ -40,6 +44,8 @@ public class Game{
 	
 	private final List<PairM<Runnable,Exception>> openglLoadQueue=Collections.synchronizedList(new ArrayList<>());
 	
+	private boolean first=true;
+	
 	private Game(ILWJGLCtx glCtx){
 		this.glCtx=glCtx;
 	}
@@ -47,6 +53,8 @@ public class Game{
 	public void start(){
 		win().setEventHooks(registry);
 		
+		SplashScreenHost.sendMsg("Loading assets...!");
+		SplashScreenHost.sendPercent(0.8F);
 		ShaderModule.register();
 		SplashScreen screen=new SplashScreen();
 		timer=new Timer(20, 4000, screen::update, screen::render);
@@ -60,8 +68,10 @@ public class Game{
 			registry.postInit();
 			
 			world=new World();
+			SplashScreenHost.sendPercent(0.9F);
 			Shaders.load();
 			screen.end();
+			SplashScreenHost.sendPercent(0.9999F);
 			LogUtil.printWrapped("=======GAME_RUN=======");
 			timer.setUpdateHook(this::update);
 			timer.setRenderHook(this::render);
@@ -90,6 +100,17 @@ public class Game{
 			return;
 		}
 		loadGLData();
+		if(first){
+			first=false;
+			LogUtil.printWrapped("LOADED IN: "+(System.nanoTime()-GameStart.START_TIME)/1000_000_000D);
+			WindowConfig winCfg=Config.getConfig(WindowConfig.class, "win_startup");
+			win().setSize(winCfg.size);
+			win().setPos(winCfg.position);
+			new Thread(()->{
+				UtilM.sleep(100);
+				SplashScreenHost.close();
+			}).start();
+		}
 		try{
 			renderer.render();
 		}catch(OpenGLException e){

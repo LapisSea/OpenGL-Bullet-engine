@@ -1,67 +1,44 @@
 package com.lapissea.opengl.program.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.jar.JarFile;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.bulletphysics.collision.shapes.IndexedMesh;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.lapissea.opengl.program.core.Globals;
 import com.lapissea.opengl.window.api.util.MathUtil;
+import com.lapissea.util.UtilL;
 
-public class UtilM{
+public class UtilM extends UtilL{
 	
-	public static final double	SQRT2D	=Math.sqrt(2);
-	public static final float	SQRT2F	=(float)SQRT2D;
-	
-	public static String toString(Object...objs){
-		StringBuilder print=new StringBuilder();
-		
-		if(objs!=null) for(int i=0;i<objs.length;i++){
-			Object a=objs[i];
-			if(isArray(a)) print.append(unknownArrayToString(a));
-			else if(a instanceof FloatBuffer) print.append(floatBufferToString((FloatBuffer)a));
-			else print.append(toString(a)+(i==objs.length-1?"":" "));
-		}
-		else print.append("null");
-		
-		return print.toString();
-	}
-	
-	public static String toString(Object obj){
-		
-		if(obj instanceof Matrix4f){
-			Matrix4f mat=(Matrix4f)obj;
+	static{
+		__REGISTER_CUSTOM_TO_STRING(Matrix4f.class, mat->{
 			String m00=Float.toString(mat.m00),m01=Float.toString(mat.m01),m02=Float.toString(mat.m02),m03=Float.toString(mat.m03);
 			String m10=Float.toString(mat.m10),m11=Float.toString(mat.m11),m12=Float.toString(mat.m12),m13=Float.toString(mat.m13);
 			String m20=Float.toString(mat.m20),m21=Float.toString(mat.m21),m22=Float.toString(mat.m22),m23=Float.toString(mat.m23);
@@ -104,222 +81,8 @@ public class UtilM{
 			result.append("/");
 			
 			return result.toString();
-			
-		}
-		
-		StringBuilder print=new StringBuilder();
-		
-		if(obj!=null){
-			if(isArray(obj)) print.append(unknownArrayToString(obj));
-			else if(obj instanceof FloatBuffer) print.append(floatBufferToString((FloatBuffer)obj));
-			else print.append(obj.toString());
-		}
-		else print.append("null");
-		
-		return print.toString();
+		});
 	}
-	
-	public static boolean isArray(Object object){
-		return object!=null&&object.getClass().isArray();
-	}
-	
-	public static String floatBufferToString(FloatBuffer buff){
-		StringBuilder print=new StringBuilder("Buffer{");
-		
-		buff=buff.duplicate();
-		buff.limit(buff.capacity());
-		if(buff.capacity()>0){
-			int j=0;
-			print.append(buff.get(j));
-			for(j=1;j<buff.capacity();j++)
-				print.append(", ").append(buff.get(j));
-		}
-		print.append('}');
-		return print.toString();
-	}
-	
-	private static String unknownArrayToString(Object arr){
-		if(arr instanceof boolean[]) return Arrays.toString((boolean[])arr);
-		if(arr instanceof float[]) return Arrays.toString((float[])arr);
-		if(arr instanceof byte[]) return Arrays.toString((byte[])arr);
-		if(arr instanceof int[]) return Arrays.toString((int[])arr);
-		if(arr instanceof long[]) return Arrays.toString((long[])arr);
-		if(arr instanceof short[]) return Arrays.toString((short[])arr);
-		if(arr instanceof char[]) return Arrays.toString((char[])arr);
-		if(arr instanceof double[]) return Arrays.toString((double[])arr);
-		if(arr instanceof Object[]) return Arrays.toString((Object[])arr);
-		return "ERR: "+arr;
-	}
-	
-	public static boolean TRUE(){
-		return true;
-	}
-	
-	public static void sleep(long millis){
-		try{
-			Thread.sleep(millis);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	
-	public static void sleep(long millis, int nanos){
-		try{
-			Thread.sleep(millis, nanos);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	
-	public static String getTxtResource(String name){
-		try(InputStream is=getResource(name)){
-			
-			if(is==null) return null;
-			
-			ByteArrayOutputStream buffer=new ByteArrayOutputStream();
-			try{
-				int nRead;
-				byte[] data=new byte[16384];
-				while((nRead=is.read(data, 0, data.length))!=-1){
-					buffer.write(data, 0, nRead);
-				}
-				buffer.flush();
-			}catch(IOException e){
-				e.printStackTrace();
-			}
-			return new String(buffer.toByteArray());
-		}catch(IOException e1){
-			return null;
-		}
-		
-	}
-	
-	public static InputStream getResource(String...names){
-		for(String name:names){
-			InputStream s=getResource(name);
-			if(s!=null) return s;
-		}
-		return null;
-	}
-	
-	private static final Map<String,String[]>	FOLDER_CASH	=new HashMap<>();
-	private static final List<String>			FOLDER_NULL	=new ArrayList<>();
-	
-	public static String[] getResourceFolderContent(String name, Predicate<String> filter){
-		String[] result=getResourceFolderContent(name);
-		if(result==null) return null;
-		return Arrays.stream(result).filter(filter).toArray(String[]::new);
-	}
-	
-	public static String[] getResourceFolderContent(String name){
-		String name0=name.replaceAll("[\\\\/ ]*$|[\\\\/]+", "/");
-		Optional<Entry<String,String[]>> a=FOLDER_CASH.entrySet().stream().filter(e->e.getKey().equals(name0)).findFirst();
-		if(a.isPresent()) return a.get().getValue();
-		if(FOLDER_NULL.contains(name0)) return null;
-		
-		if(Globals.DEV_ENV) return new File("res/"+name0).list();
-		
-		JarFile jar=Globals.getJarFile();
-		List<String> list=new ArrayList<>();
-		stream(jar.entries())
-				.filter(e->e.getName().length()>name0.length()&&e.getName().startsWith(name0))
-				.forEach(e->list.add(e.getName().substring(name0.length())));
-		closeSilenty(jar);
-		
-		if(list.isEmpty()){
-			FOLDER_NULL.add(name0);
-			return null;
-		}
-		String[] result=array(list);
-		FOLDER_CASH.put(name0, result);
-		
-		return result;
-	}
-	
-	public static <T> Stream<T> stream(Enumeration<T> e){
-		return StreamSupport.stream(
-				new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED){
-					
-					@Override
-					public boolean tryAdvance(Consumer<? super T> action){
-						if(e.hasMoreElements()){
-							action.accept(e.nextElement());
-							return true;
-						}
-						return false;
-					}
-					
-					@Override
-					public void forEachRemaining(Consumer<? super T> action){
-						while(e.hasMoreElements()){
-							action.accept(e.nextElement());
-						}
-					}
-				}, false);
-	}
-	
-	public static <T> T[] array(List<T> list){
-		if(list.isEmpty()) return null;
-		
-		@SuppressWarnings("unchecked")
-		T[] a=(T[])UtilM.array(list.get(0).getClass(), list.size());
-		return list.toArray(a);
-	}
-	
-	public static InputStream getResource(String name){
-		if(Globals.DEV_ENV) name="res/"+name;
-		
-		InputStream src=UtilM.class.getResourceAsStream("/"+name);
-		if(src==null) try{
-			src=Files.newInputStream(new File(name).toPath());
-		}catch(IOException e){}
-		return src;
-	}
-	
-	public static <K,V> void doAndClear(Map<K,V> collection, BiConsumer<K,V> toDo){
-		if(collection.isEmpty()) return;
-		collection.forEach(toDo);
-		collection.clear();
-	}
-	
-	public static <T> void doAndClear(Collection<T> collection, Consumer<T> toDo){
-		if(collection.isEmpty()) return;
-		collection.stream().forEach(toDo);
-		collection.clear();
-	}
-	
-	public static void startDaemonThread(Runnable run, String name){
-		Thread t=new Thread(run, name);
-		t.setDaemon(true);
-		t.start();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static <T> T[] array(Class<T> componentType, int length){
-		return (T[])Array.newInstance(componentType, length);
-	}
-	
-	public static boolean instanceOf(Class<?> left, Class<?> right){
-		if(left==right) return true;
-		try{
-			left.asSubclass(right);
-			return true;
-		}catch(Exception ignored){}
-		return false;
-	}
-	
-	public static boolean instanceOf(Object left, Class<?> right){
-		return left!=null&&instanceOf(left.getClass(), right);
-	}
-	
-	public static boolean instanceOf(Class<?> left, Object right){
-		return instanceOf(left, right.getClass());
-	}
-	
-	public static boolean instanceOf(Object left, Object right){
-		return instanceOf(left.getClass(), right.getClass());
-	}
-	
 	
 	public static TriangleIndexVertexArray verticesToPhysicsMesh(float[] vts){
 		int[] ids=new int[vts.length/3];
@@ -347,42 +110,236 @@ public class UtilM{
 		return vertArray;
 	}
 	
-	public static Serializable fromString(String s){
-		//		byte[] data=Base64.getDecoder().decode(s);
-		byte[] data=s.getBytes();
-		Object o=null;
-		try{
-			ObjectInputStream ois=new ObjectInputStream(new ByteArrayInputStream(data));
+	public static InputStream getResource(String...names){
+		for(String name:names){
+			InputStream s=getResource(name);
+			if(s!=null) return s;
+		}
+		return null;
+	}
+	
+	public static String getTxtResource(String name){
+		try(InputStream is=getResource(name)){
+			
+			if(is==null) return null;
+			
+			ByteArrayOutputStream buffer=new ByteArrayOutputStream();
 			try{
-				o=ois.readObject();
-			}catch(ClassNotFoundException e){
+				int nRead;
+				byte[] data=new byte[16384];
+				while((nRead=is.read(data, 0, data.length))!=-1){
+					buffer.write(data, 0, nRead);
+				}
+				buffer.flush();
+			}catch(IOException e){
 				e.printStackTrace();
 			}
-			ois.close();
-		}catch(IOException e){
-			e.printStackTrace();
+			return new String(buffer.toByteArray());
+		}catch(IOException e1){
+			return null;
 		}
-		return (Serializable)o;
+		
 	}
 	
-	public static String toString(Serializable o) throws IOException{
-		ByteArrayOutputStream baos=new ByteArrayOutputStream();
-		ObjectOutputStream oos=new ObjectOutputStream(baos);
-		oos.writeObject(o);
-		oos.close();
-		//		return Base64.getEncoder().encodeToString(baos.toByteArray());
-		return new String(baos.toByteArray());
-	}
-	
-	public static void closeSilenty(Closeable closeable){
-		try{
-			closeable.close();
+	public static InputStream getResource(String name){
+		if(Globals.DEV_ENV) name="res/"+name;
+		
+		InputStream src=UtilL.class.getResourceAsStream("/"+name);
+		if(src==null) try{
+			src=Files.newInputStream(new File(name).toPath());
 		}catch(IOException e){}
+		return src;
 	}
 	
-	public static String stringFill(int length, char c){
-		char[] ch=new char[length];
-		Arrays.fill(ch, c);
-		return new String(ch);
+	private static final Map<String,String[]>	FOLDER_CASH	=new HashMap<>();
+	private static final List<String>			FOLDER_NULL	=new ArrayList<>();
+	
+	public static String[] getResourceFolderContent(String name, Predicate<String> filter){
+		String[] result=getResourceFolderContent(name);
+		if(result==null) return null;
+		return Arrays.stream(result).filter(filter).toArray(String[]::new);
 	}
+	
+	public static String[] getResourceFolderContent(String name){
+		String name0=name.replaceAll("[\\\\/ ]*$|[\\\\/]+", "/");
+		Optional<Entry<String,String[]>> a=FOLDER_CASH.entrySet().stream().filter(e->e.getKey().equals(name0)).findFirst();
+		if(a.isPresent()) return a.get().getValue();
+		if(FOLDER_NULL.contains(name0)) return null;
+		
+		if(Globals.DEV_ENV) return new File("res/"+name0).list();
+		
+		JarFile jar=Globals.getJarFile();
+		List<String> list=new ArrayList<>();
+		UtilL.stream(jar.entries())
+				.filter(e->e.getName().length()>name0.length()&&e.getName().startsWith(name0))
+				.forEach(e->list.add(e.getName().substring(name0.length())));
+		UtilL.closeSilenty(jar);
+		
+		if(list.isEmpty()){
+			FOLDER_NULL.add(name0);
+			return null;
+		}
+		String[] result=UtilL.array(list);
+		FOLDER_CASH.put(name0, result);
+		
+		return result;
+	}
+	
+	
+	private static final List<Class<?>> WRAPPER_TYPES=new ArrayList<>();
+	static{
+		WRAPPER_TYPES.add(Boolean.class);
+		WRAPPER_TYPES.add(Character.class);
+		WRAPPER_TYPES.add(Byte.class);
+		WRAPPER_TYPES.add(Short.class);
+		WRAPPER_TYPES.add(Integer.class);
+		WRAPPER_TYPES.add(Long.class);
+		WRAPPER_TYPES.add(Float.class);
+		WRAPPER_TYPES.add(Double.class);
+		WRAPPER_TYPES.add(Void.class);
+	}
+	
+	public static boolean isWrapperType(Object type){
+		return isWrapperType(type.getClass());
+	}
+	
+	public static boolean isWrapperType(Class<?> type){
+		return WRAPPER_TYPES.contains(type);
+	}
+	
+	private static void jsonAddTo(Object obj, Consumer<Object> target){
+		if(isWrapperType(obj)||obj instanceof String){
+			target.accept(JSONObject.wrap(obj));
+			return;
+		}
+		target.accept(obj.getClass().isArray()?jsonArr(obj):jsonObj(obj));
+	}
+	
+	public static String objToJson(Object obj){
+		if(obj.getClass().isArray()) return jsonArr(obj).toString();
+		return jsonObj(obj).toString(4);
+	}
+	
+	public static JSONArray jsonArr(Object array){
+		if(!array.getClass().isArray()) return null;
+		
+		JSONArray json=new JSONArray();
+		int length=Array.getLength(array);
+		for(int i=0;i<length;i++){
+			jsonAddTo(Array.get(array, i), obj->json.put(obj));
+		}
+		return json;
+	}
+	
+	public static JSONObject compressTypes(JSONObject obj){
+		Map<String,List<Consumer<String>>> data=new HashMap<>();
+		compressTypes0(obj, data);
+		if(data.isEmpty()) return obj;
+		
+		
+		JSONObject dictionary=new JSONObject();
+		obj.put("~c", dictionary);
+		
+		Iterator<Entry<String,List<Consumer<String>>>> dat=data.entrySet().iterator();
+		int i=0;
+		while(dat.hasNext()){
+			Entry<String,List<Consumer<String>>> e=dat.next();
+			if(e.getValue().size()==1) continue;
+			String key=String.valueOf((char)('a'+i));
+			dictionary.put(key, e.getKey());
+			e.getValue().forEach(hook->hook.accept("~"+key));
+			
+			i++;
+		}
+		return obj;
+	}
+	
+	private static void compressTypes0(JSONObject obj, Map<String,List<Consumer<String>>> data){
+		
+		if(obj.has("~t")){
+			String str=obj.getString("~t");
+			List<Consumer<String>> type=data.get(str);
+			if(type==null) data.put(str, type=new ArrayList<>());
+			type.add(s->obj.put("~t", s));
+		}
+		for(String key:obj.keySet()){
+			Object o=obj.get(key);
+			if(o instanceof JSONObject) compressTypes0((JSONObject)o, data);
+		}
+	}
+	
+	public static JSONObject jsonObj(Object obj){
+		Class<?> type=obj.getClass();
+		JSONObject json=new JSONObject();
+		json.put("~t", type.getName());
+		
+		if(obj instanceof Collection){
+			Collection<?> c=(Collection<?>)obj;
+			JSONArray arr=new JSONArray();
+			for(Object object:c){
+				jsonAddTo(object, o->arr.put(o));
+			}
+			json.put("~d", arr);
+		}
+		else if(obj instanceof Map){
+			Map<?,?> c=(Map<?,?>)obj;
+			JSONObject mp=new JSONObject();
+			c.forEach((k, v)->jsonAddTo(v, o->mp.put(k.toString(), o)));
+			json.put("~d", mp);
+		}
+		else for(Field field:getAllFields(type)){
+			int mod=field.getModifiers();
+			if(Modifier.isFinal(mod)||Modifier.isStatic(mod)||Modifier.isTransient(mod)) continue;
+			field.setAccessible(true);
+			try{
+				jsonAddTo(field.get(obj), value->json.put(field.getName(), value));
+			}catch(Exception e){
+				throw new RuntimeException(e);
+			}
+		}
+		return json;
+	}
+	
+	public static Object parseJson(Object json){
+		try{
+			Map<String,Class<?>> types=new HashMap<>();
+			if(json instanceof JSONObject){
+				JSONObject json0=(JSONObject)json;
+				if(json0.has("~c")){
+					json0=json0.getJSONObject("~c");
+					for(String s:json0.keySet()){
+						types.put("~"+s, Class.forName(json0.getString(s)));
+					}
+				}
+			}
+			return parseJson0(json, types);
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private static Object parseJson0(Object object, Map<String,Class<?>> types) throws ClassNotFoundException,JSONException,InstantiationException,IllegalAccessException{
+		if(object instanceof JSONArray) return ((JSONArray)object).toList().toArray();
+		JSONObject json=(JSONObject)object;
+		if(json.has("~t")){
+			String s=json.getString("~t");
+			Class<?> type=types.get(s);
+			if(type==null)type=Class.forName(s);
+			
+			Object o=type.newInstance();
+			
+//			for(String s:json0.keySet()){
+//				types.put("~"+s, Class.forName(json0.getString(s)));
+//			}
+			
+		}
+		
+		if(isWrapperType(object)||object instanceof String) return object;
+		
+		
+		
+		return null;
+	}
+	
 }
+

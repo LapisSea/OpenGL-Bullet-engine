@@ -63,7 +63,7 @@ public class SplashScreen{
 		
 		@Override
 		protected void bindAttributes(){
-			bindAttribute(ModelAttribute.VERTEX_ATTR);
+			bindAttribute(ModelAttribute.VERTEX_ATTR_3D);
 			bindAttribute(ModelAttribute.NORMAL_ATTR);
 		}
 		

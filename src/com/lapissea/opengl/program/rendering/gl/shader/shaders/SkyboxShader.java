@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -16,13 +16,11 @@ import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat4;
-import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
-import com.lapissea.opengl.window.impl.assets.BasicTextureCube;
-import com.lapissea.opengl.window.impl.assets.Model;
 
 public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	
@@ -62,7 +60,7 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 		
 	}
 	
-	private Model cube=ModelLoader.buildModel("Skybox", GL11.GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false, "textures", TextureLoader.loadTexture("skybox/test", BasicTextureCube.class));
+	private IModel cube=ModelLoader.buildModel("Skybox", GL11.GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false/*, "textures", TextureLoader.loadTexture("skybox/test", BasicTextureCube.class)*/);
 	
 	UniformFloat3	sunPos;
 	UniformFloat4	sunColor;
@@ -75,10 +73,10 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	@Override
 	@Deprecated
 	public void renderSingle(ModelTransformed renderable){}
-	
+
 	@Override
 	@Deprecated
-	public void renderBatch(List<? extends ModelTransformed> entitysWithSameModel){}
+	public void renderBatch(Collection<? extends ModelTransformed> entitysWithSameModel){}
 	
 	@Override
 	public void render(){
@@ -104,7 +102,7 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	
 	@Override
 	protected synchronized void bindAttributes(){
-		bindAttribute(ModelAttribute.VERTEX_ATTR);
+		bindAttribute(ModelAttribute.VERTEX_ATTR_3D);
 	}
 	
 	@Override

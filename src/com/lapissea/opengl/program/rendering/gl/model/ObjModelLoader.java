@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
-import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
@@ -15,6 +14,8 @@ import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.impl.assets.Material;
 import com.lapissea.opengl.window.impl.assets.Model;
+import com.lapissea.util.LogUtil;
+import com.lapissea.util.UtilL;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
@@ -344,7 +345,7 @@ public class ObjModelLoader{
 	
 	public static <T extends Model> T[] loadAndBuildArr(Class<T> type, String name){
 		String[] mds=UtilM.getResourceFolderContent("models/"+name, s->s.endsWith(".obj")&&Character.isDigit(s.charAt(0)));
-		T[] arr=UtilM.array(type, mds.length);
+		T[] arr=UtilL.array(type, mds.length);
 		for(int i=0;i<arr.length;i++){
 			arr[i]=loadAndBuild(type, name+"/"+mds[i]);
 		}

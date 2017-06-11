@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.vecmath.Vector3f;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
@@ -28,15 +28,19 @@ import com.lapissea.opengl.program.rendering.gl.gui.GuiHandler;
 import com.lapissea.opengl.program.rendering.gl.gui.guis.GuiPause;
 import com.lapissea.opengl.program.rendering.gl.model.DynamicModel;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
+import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
-import com.lapissea.opengl.program.rendering.gl.shader.light.DirectionalLight;
+import com.lapissea.opengl.program.rendering.gl.shader.light.DirLight;
+import com.lapissea.opengl.program.rendering.gl.shader.light.LightSource;
+import com.lapissea.opengl.program.rendering.gl.shader.light.LineLight;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.shaders.SkyboxShader;
 import com.lapissea.opengl.program.util.NanoTimer;
-import com.lapissea.opengl.program.util.PairM;
+import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.events.KeyEvent;
 import com.lapissea.opengl.window.api.events.KeyEvent.KeyAction;
@@ -51,8 +55,7 @@ import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.opengl.window.assets.ModelAttribute;
-
-import it.unimi.dsi.fastutil.floats.FloatList;
+import com.lapissea.opengl.window.impl.assets.Model;
 
 public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
@@ -60,17 +63,18 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		ShaderModule.register();
 	}
 	
-	public static boolean RENDER_FRUSTRUM=true;
+	public static boolean	RENDER_FRUSTRUM			=true;
+	public static int		SKY_RESOLUTION_DEVIDER	=1;
 	
 	private final Matrix4f	projection	=new Matrix4f(),view=new Matrix4f();
 	private Camera			camera		=new Camera();
-	public ColorM			skyColor	=new ColorM(0.05, 0.05, 0.1);
 	public Fog				worldFog	=new Fog();
 	public final Frustum	frustrum	=new Frustum();
 	
 	private final List<ShaderRenderer<?>>	toRender	=new ArrayList<>();
 	public final List<PointLight>			pointLights	=new ArrayList<>();
-	public final List<DirectionalLight>		dirLights	=new ArrayList<>();
+	public final List<LineLight>			lineLights	=new ArrayList<>();
+	public final List<DirLight>				dirLights	=new ArrayList<>();
 	
 	public final FontFamily fontComfortaa=new FontFamily("Comfortaa");
 	
@@ -83,13 +87,18 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	private NanoTimer renderBuildBechmark=new NanoTimer(),renderBechmark=new NanoTimer();
 	
 	
-	public DynamicModel	lines			=ModelLoader.buildModel(DynamicModel.class, "lines", GL11.GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
-	public DynamicModel	fontDynamicModel=ModelLoader.buildModel(DynamicModel.class, "lines", GL11.GL_TRIANGLES, "vertices", new float[9], "uvs", new float[6], "primitiveColor", new float[12], "genNormals", false).culface(false);
-	//	private Model		moon			=ObjModelLoader.loadAndBuild("moon");
-	public Fbo			worldFob	=new Fbo(0, 0);
-	public GuiHandler	guiHandler	=new GuiHandler();
+	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL11.GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
+	private Model			moon		=ObjModelLoader.loadAndBuild("moon");
+	public FboRboTextured	worldFbo	=new FboRboTextured();
+	public Fbo				skyFbo		=new Fbo();
+	public GuiHandler		guiHandler	=new GuiHandler();
+	
+	private boolean renderWorldFlag=true;
 	
 	public Renderer(){
+		skyFbo.setDepth(false);
+		
+		worldFbo.initHook=()->renderWorldFlag=true;
 		fpsCounter.activate();
 		particleHandler=new ParticleHandler<>((parent, pos)->new ParticleFoo(parent, pos));
 		particleHandler.models.add(ModelLoader.buildModel("ParticleQuad", GL11.GL_TRIANGLES, "genNormals", false, "vertices", new float[]{
@@ -100,7 +109,16 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 				-0.5F,-0.5F,0,
 				+0.5F,+0.5F,0,
 				-0.5F,+0.5F,0,
-		}));
+		}, "uvs", new float[]{
+				0,0,
+				1,0,
+				1,1,
+				
+				0,0,
+				1,1,
+				0,1,
+		},"textures","particle/SoftBloom"));
+		
 	}
 	
 	
@@ -128,10 +146,28 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	@Override
 	public void update(){
+		guiHandler.update();
 		if(Game.isPaused()) return;
 		camera.update();
 		particleHandler.update();
-		particleHandler.spawn(new Vec3f(10, 10, 10));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
 	}
 	
 	@Override
@@ -142,10 +178,10 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		if(e.action==Action.DOWN){
 			if(Shaders.ENTITY!=null){
-				//Shaders.ENTITY.load();
-				//Shaders.TERRAIN.load();
-				//Shaders.SKYBOX.load();
-				//Shaders.GUI_RECT.load();
+				Shaders.ENTITY.load();
+				Shaders.TERRAIN.load();
+				//				Shaders.SKYBOX.load();
+				Shaders.GUI_RECT.load();
 				//Shaders.POST_COPY.load();
 			}
 		}
@@ -157,7 +193,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void onKey(KeyEvent e){
 		Gui openGui=guiHandler.getOpenGui();
 		if(openGui==null){
-			if(e.code==1){
+			if(e.code==Keyboard.KEY_ESCAPE){
 				if(e.action==KeyAction.RELEASE) guiHandler.openGui(new GuiPause());
 			}
 			return;
@@ -189,140 +225,157 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	public void render(){
-		worldFob.setSize(Display.getWidth(), Display.getHeight());
-		worldFob.bind();
+		renderBechmark.start();
+		
 		
 		//PREPARE 
 		RENDER_FRUSTRUM=false;
 		fpsCounter.newFrame();
-		if(!Game.isPaused()){
-			World world=Game.get().world;
-			float pt=Game.getPartialTicks();
-			double sunPos=world.getSunPos(pt)*Math.PI*2;
-			float bright=(float)world.getSunBrightness(pt);
-			
-			ColorM moonCol=new ColorM(0.15, 0.15, 0.3);
-			
-			PairM<FloatList,FloatList> data=fontComfortaa.build(10,
-					"FPS:\t\t\t\t"+fpsCounter+
-							"\nOn screen:\t"+actualRenders+"/"+potentialRenders+
-							"\nBuild:\t\t\t"+renderBuildBechmark.msAvrg100()+"ms"+
-							"\nRender:\t\t"+renderBechmark.msAvrg100()+"ms");
-			if(fontDynamicModel.getTextures().isEmpty()) fontDynamicModel.addTexture(fontComfortaa.letters);
-			
-			for(int i=0;i<data.obj1.size()/2;i++){
-				fontDynamicModel.add(ModelAttribute.VERTEX_ATTR, data.obj1.getFloat(i*2)/100, data.obj1.getFloat(i*2+1)/100, 0);
-				fontDynamicModel.add(ModelAttribute.UV_ATTR, data.obj2.getFloat(i*2), data.obj2.getFloat(i*2+1));
-				fontDynamicModel.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, 1, 1, 1, 1);
-			}
-			
-			List<Entity> entitys=Game.get().world.getAll();
-			
-			worldFog.density=0.006F;
-			worldFog.gradient=3;
-			
-			moonCol.a(1.1F-bright*bright);
-			float cos=(float)Math.cos(sunPos);
-			Vec3f sunDir=new Vec3f(cos/3, (float)Math.sin(sunPos), cos);
-			float h=10;
-			float worldSiz=Math.max(0, 6371e3F/Math.max(1, 1+h*h/100));
-			Vec3f v=SkyboxShader.atmosphere(
-					sunDir.clone().y(Math.max(sunDir.y(), 0.04F)),
-					new Vec3f(0, worldSiz, 0),
-					sunDir.clone().y(Math.max(sunDir.y(), 0.04F)),
-					30,
-					worldSiz,
-					worldSiz+100e3F,
-					new Vec3f(5.5e-6F, 13.0e-6F, 22.4e-6F),
-					21e-6F,
-					7e3F,
-					1.2e3F,
-					0.998F);
-			if(Float.isNaN(v.x)) v.set(0, 0, 0);
-			if(v.lengthSquared()>0) v.normalise();
-			ColorM sunCol=new ColorM(v);
-			sunCol.a(bright+0.1F);
-			
-			
-			skyColor=moonCol.mix(sunCol, bright, 1-bright);
-			
-			
-			dirLights.add(new DirectionalLight(sunDir, sunCol));
-			sunPos-=Math.PI;
-			
-			cos=(float)Math.cos(sunPos);
-			dirLights.add(new DirectionalLight(new Vec3f(cos/3, (float)Math.sin(sunPos), cos), moonCol));
-			
-			getCamera().createProjection(projection);
-			setView();
-			
-			potentialRenders=actualRenders=0;
-			
-			
-			GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
-			GLUtil.CULL_FACE.set(CullFace.BACK);
-			GLUtil.DEPTH_TEST.set(true);
-			GLUtil.CULL_FACE.set(true);
-			GLUtil.BLEND.set(true);
-			
-			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-			
-			//BACKGROUND 
-			
-			GL11.glDepthMask(false);
-			Shaders.SKYBOX.render();
-			GL11.glDepthMask(true);
-			
-			
-			//BUILD
-			addShader(Shaders.TERRAIN);
-			
-			renderBuildBechmark.start();
-			entitys.forEach(e->e.preRender());
-			entitys.forEach(e->e.render());
-			renderBuildBechmark.end();
-			
-			renderBechmark.start();
-			
-			//RENDER
-			UtilM.doAndClear(toRender, ShaderRenderer::render);
-			Shaders.ENTITY.renderSingle(new EntityStatic(world, fontDynamicModel, new Vec3f(0, 2, 0)));
-			particleHandler.render();
-			GL11.glLineWidth(GL11.GL_LINE_WIDTH_RANGE);
-			GL11.glEnable(GL11.GL_LINE_SMOOTH);
-			GL11.glEnable(GL11.GL_LINE_WIDTH);
-			
-			GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-			Shaders.LINE.renderSingle(new EntityStatic(world, lines, new Vec3f()));
-			Shaders.LINE.render();
-			renderBechmark.end();
-		}
+		
+		if(renderWorldFlag) renderWorld();
+		renderWorldFlag=!Game.isPaused();
 		
 		Fbo.bindDefault();
-		worldFob.drawImg();
+		worldFbo.copyColorToScreen();
 		
 		guiHandler.render();
-		
+		renderBechmark.end();
 		
 		pointLights.clear();
 		dirLights.clear();
+		lineLights.clear();
+		
+	}
+	
+	public void renderWorld(){
+		worldFbo.setRenderBufferType(true).setSample(4);
+		
+		worldFbo.setSize(Game.win().getSize());
+		worldFbo.bind();
+		
+		World world=Game.get().world;
+		float pt=Game.getPartialTicks();
+		double sunPos=world.getSunPos(pt)*Math.PI*2;
+		float bright=(float)world.getSunBrightness(pt);
+		
+		ColorM moonCol=new ColorM(0,0,0);
+		
+		
+		List<Entity> entitys=Game.get().world.getAll();
+		
+		worldFog.density=0.006F;
+		worldFog.gradient=3;
+		
+		moonCol.a(1.1F-bright*bright);
+		float cos=(float)Math.cos(sunPos);
+		Vec3f sunDir=new Vec3f(cos/3, (float)Math.sin(sunPos), cos);
+		float h=10;
+		float worldSiz=Math.max(0, 6371e3F/Math.max(1, 1+h*h/100));
+		Vec3f v=SkyboxShader.atmosphere(
+				sunDir.clone().y(Math.max(sunDir.y(), 0.04F)),
+				new Vec3f(0, worldSiz, 0),
+				sunDir.clone().y(Math.max(sunDir.y(), 0.04F)),
+				30,
+				worldSiz,
+				worldSiz+100e3F,
+				new Vec3f(5.5e-6F, 13.0e-6F, 22.4e-6F),
+				21e-6F,
+				7e3F,
+				1.2e3F,
+				0.998F);
+		if(Float.isNaN(v.x)) v.set(0, 0, 0);
+		if(v.lengthSquared()>0) v.normalise();
+		ColorM sunCol=new ColorM(v);
+		sunCol.a(bright+0.1F);
+		
+		
+		worldFog.color.set(moonCol.mix(sunCol, bright, 1-bright));
+		
+		
+		dirLights.add(new DirLight(sunDir, sunCol));
+		sunPos-=Math.PI;
+		
+		cos=(float)Math.cos(sunPos);
+		Vec3f moonRot=new Vec3f(cos/3, (float)Math.sin(sunPos), cos);
+		dirLights.add(new DirLight(moonRot, moonCol));
+		
+		getCamera().createProjection(projection);
+		setView();
+		
+		potentialRenders=actualRenders=0;
+		
+		
+		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
+		GLUtil.CULL_FACE.set(CullFace.BACK);
+		GLUtil.CULL_FACE.set(true);
+		//		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+		GLUtil.BLEND.set(true);
+		
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		
+		//BACKGROUND
+		
+		GL11.glDepthMask(false);
+		GLUtil.DEPTH_TEST.set(false);
+		
+		
+		if(SKY_RESOLUTION_DEVIDER>1){
+			skyFbo.setSize(worldFbo.getWidth()/SKY_RESOLUTION_DEVIDER, worldFbo.getHeight()/SKY_RESOLUTION_DEVIDER);
+			skyFbo.bind();
+			Shaders.SKYBOX.render();
+			worldFbo.bind();
+			skyFbo.copyTo(worldFbo, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_LINEAR);
+		}
+		else{
+			skyFbo.delete();
+			Shaders.SKYBOX.render();
+		}
+		moon.getMaterial(0).getAmbient().set(0.4F, 0.4F, 0.5F, 1);
+		Matrix4f mat=new Matrix4f();
+		mat.translate(moonRot.mul(25).add(PartialTick.calc(new Vec3f(), camera.prevPos, camera.pos)));
+		Shaders.ENTITY.renderSingle(mat, moon);
+		
+		GLUtil.DEPTH_TEST.set(true);
+		GL11.glDepthMask(true);
+		
+		
+		//BUILD
+		addShader(Shaders.TERRAIN);
+		
+		renderBuildBechmark.start();
+		entitys.forEach(e->e.preRender());
+		entitys.forEach(e->e.render());
+		renderBuildBechmark.end();
+		
+		//RENDER
+		UtilM.doAndClear(toRender, ShaderRenderer::render);
+		//		Shaders.ENTITY.renderSingle(new EntityStatic(world, fontDynamicModel, new Vec3f(0, 2, 0)));
+		particleHandler.render();
+		GL11.glLineWidth(GL11.GL_LINE_WIDTH_RANGE);
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		GL11.glEnable(GL11.GL_LINE_WIDTH);
+		
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		Shaders.LINE.renderSingle(new EntityStatic(world, lines, new Vec3f()));
+		Shaders.LINE.render();
+		worldFbo.process();
 		
 	}
 	
 	public void drawLine(Vector3f from, Vector3f to, Vector3f color){
-		lines.add(ModelAttribute.VERTEX_ATTR, from.x, from.y, from.z);
-		lines.add(ModelAttribute.VERTEX_ATTR, to.x, to.y, to.z);
+		lines.add(ModelAttribute.VERTEX_ATTR_3D, from.x, from.y, from.z);
+		lines.add(ModelAttribute.VERTEX_ATTR_3D, to.x, to.y, to.z);
 		
-		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.x, color.y, color.z, 1);
-		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.x, color.y, color.z, 1);
+		lines.add(ModelAttribute.COLOR_ATTR, color.x, color.y, color.z, 1);
+		lines.add(ModelAttribute.COLOR_ATTR, color.x, color.y, color.z, 1);
 	}
 	
 	public void drawLine(Vec3f from, Vec3f to, IColorM color){
-		lines.add(ModelAttribute.VERTEX_ATTR, from.x, from.y, from.z);
-		lines.add(ModelAttribute.VERTEX_ATTR, to.x, to.y, to.z);
+		lines.add(ModelAttribute.VERTEX_ATTR_3D, from.x, from.y, from.z);
+		lines.add(ModelAttribute.VERTEX_ATTR_3D, to.x, to.y, to.z);
 		
-		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.r(), color.g(), color.b(), 1);
-		lines.add(ModelAttribute.PRIMITIVE_COLOR_ATTR, color.r(), color.g(), color.b(), 1);
+		lines.add(ModelAttribute.COLOR_ATTR, color.r(), color.g(), color.b(), 1);
+		lines.add(ModelAttribute.COLOR_ATTR, color.r(), color.g(), color.b(), 1);
 	}
 	
 	public void addShader(ShaderRenderer<?> shader){
@@ -337,5 +390,19 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		actualRenders++;
 	}
 	
+	
+	public String getDebugInfo(){
+		return "FPS:\t\t\t\t"+fpsCounter.getFps()+
+				"\nOn screen:\t"+actualRenders+"/"+potentialRenders+
+				(Game.isPaused()?"":"\nWorld build:\t"+renderBuildBechmark.msAvrg100()+"ms")+
+				"\nRender:\t\t"+renderBechmark.msAvrg100()+"ms"+
+				"\nSee bounds:\t"+RENDER_FRUSTRUM;
+	}
+	
+	public void addLight(LightSource light){
+		if(light instanceof PointLight) pointLights.add((PointLight)light);
+		else if(light instanceof LineLight) lineLights.add((LineLight)light);
+		else if(light instanceof DirLight) dirLights.add((DirLight)light);
+	}
 	
 }

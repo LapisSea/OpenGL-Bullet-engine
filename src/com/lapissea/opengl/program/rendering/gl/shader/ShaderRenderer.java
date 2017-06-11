@@ -1,6 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.shader;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL30;
@@ -11,8 +12,8 @@ import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
-import com.lapissea.opengl.program.util.MapOfLists;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.program.util.data.MapOfLists;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
 
@@ -67,19 +68,25 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		}
 	}
 	
-	public void renderBatch(List<? extends RenderType> entitysWithSameModel){
+	public void renderBatch(Collection<? extends RenderType> entitysWithSameModel){
 		if(!isLoaded()) return;
 		if(entitysWithSameModel.isEmpty()) return;
+		Iterator<? extends RenderType> i=entitysWithSameModel.iterator();
+		RenderType type=i.next();
+		IModel model=type.getModel();
+		
+		if(!model.isLoaded()) return;
 		
 		prepareGlobal();
-		IModel model=entitysWithSameModel.get(0).getModel();
-		if(!model.isLoaded()) return;
 		prepareModel(model);
 		
-		entitysWithSameModel.forEach(renderable->{
-			prepareInstance(renderable);
+		do{
+			prepareInstance(type);
 			model.drawCall();
-		});
+			if(!i.hasNext())break;
+			type=i.next();
+		}while(true);
+		
 		unbindModel(model);
 		unbind();
 		
@@ -198,10 +205,10 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		
 		@Override
 		protected synchronized void bindAttributes(){
-			bindAttribute(ModelAttribute.VERTEX_ATTR);
+			bindAttribute(ModelAttribute.VERTEX_ATTR_3D);
 			bindAttribute(ModelAttribute.UV_ATTR);
 			bindAttribute(ModelAttribute.NORMAL_ATTR);
-			bindAttribute(ModelAttribute.PRIMITIVE_COLOR_ATTR);
+			bindAttribute(ModelAttribute.COLOR_ATTR);
 		}
 		
 	}

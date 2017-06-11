@@ -6,9 +6,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.OpenGLException;
 
-import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.window.api.util.IVec2i;
 import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.util.LogUtil;
 
 public class GLUtil{
 	

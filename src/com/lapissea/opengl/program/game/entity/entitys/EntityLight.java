@@ -10,13 +10,13 @@ import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.color.ColorM;
-import com.lapissea.opengl.window.impl.assets.Model;
+import com.lapissea.opengl.window.assets.IModel;
 
 public class EntityLight extends EntityUpd{
 	
-	public static Model MODEL;
+	public static IModel MODEL;
 	
-	private static Model getModel0(){
+	private static IModel getModel0(){
 		if(MODEL==null){
 			
 			float[] vertices={

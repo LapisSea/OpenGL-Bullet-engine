@@ -1,5 +1,6 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
+import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelUniforms;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
@@ -44,7 +45,7 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 	
 	@Override
 	public void uploadUniformsModel(IModel model){
-		if(tim!=null)tim.upload((float)((System.currentTimeMillis()/400D)%(Math.PI*2)));
+		if(tim!=null)tim.upload((float)(((Game.get().world.time()+(double)Game.getPartialTicks())/20D)%(Math.PI*2)));
 		for(int i=0, j=Math.min(model.getMaterialCount(), ambient.length-1);i<j;i++){
 			IMaterial mat=model.getMaterial(i);
 			uploadMaterial(mat.getId(), mat);

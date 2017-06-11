@@ -23,10 +23,6 @@ public class Gui extends IngameDisplay{
 		}
 	};
 	
-	public Gui(){
-		super(null);
-	}
-	
 	@Override
 	public Vec2f getPos(){
 		return Vec2f.ZERO;
@@ -36,6 +32,10 @@ public class Gui extends IngameDisplay{
 	public Vec2f getSize(){
 		return SCREEN_SIZE_F;
 	}
+	@Override
+	public Vec2f getElementSize(){
+		return SCREEN_SIZE_F;
+	}
 	
 	public boolean pausesGame(){
 		return false;
@@ -43,10 +43,17 @@ public class Gui extends IngameDisplay{
 	
 	@Override
 	public void onKey(KeyEvent e){
+		super.onKey(e);
 		if(e.code==1&&e.action==KeyAction.RELEASE) close();
 	}
 	
 	public void close(){
 		Game.get().renderer.guiHandler.closeOpenGui();
+	}
+	
+	@Override
+	public void update(){
+		super.update();
+		updateFlow();
 	}
 }

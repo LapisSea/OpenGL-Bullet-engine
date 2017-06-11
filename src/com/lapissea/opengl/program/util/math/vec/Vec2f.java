@@ -1,6 +1,7 @@
 package com.lapissea.opengl.program.util.math.vec;
 
 import com.lapissea.opengl.window.api.util.Calculateable;
+import com.lapissea.opengl.window.api.util.IVec2i;
 
 public class Vec2f implements Calculateable<Vec2f>{
 	
@@ -52,12 +53,15 @@ public class Vec2f implements Calculateable<Vec2f>{
 		this.y=y;
 		return this;
 	}
-	
+
+	public Vec2f add(float x,float y){
+		x(x()+x);
+		y(y()+y);
+		return this;
+	}
 	@Override
 	public Vec2f add(Vec2f c){
-		x(x()+c.x());
-		y(y()+c.y());
-		return this;
+		return add(c.x(), c.y());
 	}
 	
 	@Override
@@ -130,6 +134,12 @@ public class Vec2f implements Calculateable<Vec2f>{
 	
 	@Override
 	public String toString(){
-		return "Vec2f{x="+x+", y="+y+"}";
+		return "Vec2f{x="+x()+", y="+y()+"}";
+	}
+
+	public Vec2f set(IVec2i src){
+		x(src.x());
+		y(src.y());
+		return this;
 	}
 }

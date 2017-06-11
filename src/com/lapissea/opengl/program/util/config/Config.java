@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lapissea.opengl.program.util.OperatingSystem;
 
 public class Config{
@@ -20,11 +17,6 @@ public class Config{
 	
 	private static final List<Config> CONFIG_CASH=new ArrayList<>();
 	
-	private static final ObjectMapper MAPPER=new ObjectMapper();
-	static{
-		MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-		MAPPER.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-	}
 	
 	public static <T extends Config> T getConfig(Class<T> type, String name){
 		return getConfig(type, name, t->{});
@@ -51,7 +43,7 @@ public class Config{
 			}
 			else{
 				try{
-					config=MAPPER.readValue(src, type);
+					config=type.getConstructor(String.class).newInstance(name);
 				}catch(Exception e){
 					e.printStackTrace();
 					try{
@@ -77,11 +69,11 @@ public class Config{
 	
 	public void save(){
 		new File(CONFIG_ROOT).mkdir();
-		try{
-			Files.write(path(name), MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(this));
-		}catch(IOException e){
-			e.printStackTrace();
-		}
+//		try{
+//			Files.write(path(name), MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(this));
+//		}catch(IOException e){
+//			e.printStackTrace();
+//		}
 	}
 	
 	private static File file(String name){

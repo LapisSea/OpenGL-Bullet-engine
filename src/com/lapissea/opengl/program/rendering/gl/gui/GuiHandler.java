@@ -6,29 +6,38 @@ import java.util.List;
 import java.util.Stack;
 
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.GLUtil.BlendFunc;
 import com.lapissea.opengl.program.rendering.gl.Fbo;
+import com.lapissea.opengl.program.rendering.gl.FboRboTextured;
+import com.lapissea.opengl.program.rendering.gl.gui.guis.DebugDisplay;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.rendering.gl.shader.shaders.GuiRectShader;
+import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.window.assets.ITexture;
 
 public class GuiHandler{
 	
-	private Stack<Gui>					guiStack=new Stack<>();
-	private LinkedList<IngameDisplay>	displays=new LinkedList<>();
+	public static int BLUR_DIV=2;
+	
+	private Stack<Gui>					guiStack	=new Stack<>();
+	private LinkedList<IngameDisplay>	displays	=new LinkedList<>();
+	private FboRboTextured				drawFbo		=new FboRboTextured();
+	private Fbo							lastZLayer	=new Fbo();
+	private boolean						first		=true;
 	
 	
-	public static int	BLUR_DIV=2;
-	public Fbo			mainBlur=new Fbo(0, 0);
-	
+	public GuiHandler(){
+		lastZLayer.setDepth(false);
+		Game.glCtx(()->displays.add(new DebugDisplay()));
+	}
 	
 	public void openGui(Gui gui){
+		drawFbo.setDepth(false);
+		
 		if(guiStack.contains(gui)) throw new IllegalStateException();
 		guiStack.add(gui);
 		Mouse.setGrabbed(false);
@@ -49,8 +58,13 @@ public class GuiHandler{
 	
 	public void render(){
 		Gui g=getOpenGui();
-		if(g!=null) render(g);
-		displays.forEach(this::render);
+		if(g!=null) addRender(g);
+		displays.forEach(this::addRender);
+		
+		if(renderList.size()>0&&renderList.get(0).size()>0){
+			render0();
+		}
+		
 	}
 	
 	
@@ -61,46 +75,56 @@ public class GuiHandler{
 	}
 	
 	
-	private List<GuiElement> renderList=new ArrayList<>();
+	private List<List<GuiElement>> renderList=new ArrayList<>();
 	
-	private void render(IngameDisplay disp){
+	private void render0(){
+		drawFbo.setRenderBufferType(false).setSample(8);
 		
-		copyMain();
+		drawFbo.setSize(Game.win().getSize());
+		lastZLayer.setSize(Game.win().getSize());
 		
+		drawFbo.bind();
+		GL11.glClearColor(0, 0, 0, 0);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);
 		GLUtil.BLEND.set(true);
-		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
-		GLUtil.DEPTH_TEST.set(false);
+		GLUtil.DEPTH_TEST.set(true);
+		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
 		
-		addRender(disp);
-		renderList.sort((x, y)->-Integer.compare(y.getZ(), x.getZ()));
 		
 		GuiRectShader rect=Shaders.GUI_RECT;
 		
 		rect.prepareGlobal();
-		renderList.forEach(e->{
-			List<ITexture> tx=e.getModel().getTextures();
-			if(tx.isEmpty()) tx.add(mainBlur.getTex());
-			else tx.set(0, mainBlur.getTex());
-			rect.renderSingleBare(e);
+		first=true;
+		renderList.forEach(l->{
+			(first?Game.get().renderer.worldFbo:drawFbo).copyColorTo(lastZLayer);
+			if(first)first=false;
+			drawFbo.bind();
+			
+			
+			UtilM.doAndClear(l, e->{
+				List<ITexture> tx=e.getModel().getTextures();
+				if(tx.isEmpty()) tx.add(lastZLayer.getTexture());
+				else tx.set(0, lastZLayer.getTexture());
+				rect.renderSingleBare(e);
+			});
 		});
 		rect.unbind();
-		renderList.clear();
 		
+		drawFbo.bind();
+		drawFbo.process();
+		Fbo.bindDefault();
+		drawFbo.drawImg();
 		GLUtil.DEPTH_TEST.set(true);
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
 	}
 	
 	private void addRender(GuiElement e){
-		renderList.add(e);
+		int z=e.getZ();
+		while(renderList.size()<=z){
+			renderList.add(new ArrayList<>());
+		}
+		renderList.get(z).add(e);
 		e.children.forEach(this::addRender);
-	}
-	
-	private void copyMain(){
-		
-		mainBlur.setSize(Display.getWidth()/BLUR_DIV, Display.getHeight()/BLUR_DIV);
-		mainBlur.bind();
-		Game.get().renderer.worldFob.drawImg();
-		Fbo.bindDefault();
 	}
 	
 }

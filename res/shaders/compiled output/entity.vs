@@ -47,20 +47,14 @@ ModelMaterial getMaterial(){
 
 out vec3 normal;
 out vec3 toCamera;
+out vec3 wPos;
 
-out vec3 vecToPointLight[5];
-uniform vec3 pointLightPos[5];
-uniform int numberOfPointLights;
 
 
 void lightingSetUp(mat4 transformMat, vec4 worldPos, vec3 rawNormal, vec3 cameraPos){
 	if(rawNormal.x!=0||rawNormal.y!=0||rawNormal.z!=0)normal=(transformMat*vec4(rawNormal,0)).xyz;
 	else normal=rawNormal;
-	
-	for(int i=0;i<numberOfPointLights;i++){
-		vecToPointLight[i]=pointLightPos[i]-worldPos.xyz;
-	}
-	
+	wPos=worldPos.xyz;
 	toCamera=cameraPos - worldPos.xyz;
 	
 }
@@ -76,7 +70,6 @@ void applyFog(vec3 worldViewPos){
 	float dist= length(worldViewPos);
 	
 	visibility=clamp(exp(-pow((dist*fogDensity),fogGradient)),0,1);
-
 }
 
 

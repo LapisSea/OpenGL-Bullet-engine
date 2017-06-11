@@ -66,7 +66,8 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 			notInit=false;
 			if(texturesUsed!=null){
 				for(int i=0;i<texturesUsed.length;i++){
-					getUniform(UniformInt1.class, "MDL_TEXTURE"+i).upload(i);
+					UniformInt1 u=getUniform(UniformInt1.class, "MDL_TEXTURE"+i);
+					if(u!=null) u.upload(i);
 				}
 			}
 		}

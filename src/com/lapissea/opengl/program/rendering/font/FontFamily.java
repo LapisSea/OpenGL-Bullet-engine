@@ -15,15 +15,22 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.lapissea.opengl.program.interfaces.FloatConsumer;
+import org.lwjgl.opengl.GL11;
+
+import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.interfaces.Float2Consumer;
+import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.rendering.gl.texture.UvArea;
-import com.lapissea.opengl.program.util.IntTree;
-import com.lapissea.opengl.program.util.LogUtil;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.TextureTiled;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.program.util.data.IntTree;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
+import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.opengl.window.impl.assets.Model;
+import com.lapissea.util.LogUtil;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
@@ -38,12 +45,12 @@ public class FontFamily{
 	
 	@SuppressWarnings("unused")
 	private float	xOrigin,yOrigin,x,y,xMargin,yMargin;
-	private boolean	quad=false;
-	public int tabSize=4;
+	private boolean	quad	=false;
+	public int		tabSize	=4;
 	
 	
 	private IntTree<LetterUv>	data	=new IntTree<>();
-	public final TextureFont	letters	=TextureLoader.loadTexture("letters", new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), TextureFont.class/*, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST*/);
+	public final TextureFont	letters	=TextureLoader.loadTexture("letters", new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), TextureFont.class, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 	
 	public static class TextureFont extends TextureTiled<LetterUv>{
 		
@@ -57,8 +64,9 @@ public class FontFamily{
 		
 		public final char	c;
 		public final int	height,width,topMar,bottomMar,leftMar,rightMar;
+		public final float	fontSize;
 		
-		public LetterUv(char c, Vec2f min, Vec2f max, int height, int width, int topMar, int bottomMar, int leftMar, int rightMar){
+		public LetterUv(char c, Vec2f min, Vec2f max, int height, int width, int topMar, int bottomMar, int leftMar, int rightMar, float fontSize){
 			super(min, max);
 			this.c=c;
 			this.height=height;
@@ -67,6 +75,7 @@ public class FontFamily{
 			this.bottomMar=bottomMar;
 			this.leftMar=leftMar;
 			this.rightMar=rightMar;
+			this.fontSize=fontSize;
 		}
 		
 	}
@@ -133,7 +142,7 @@ public class FontFamily{
 		//		for(int i=0;i<j;i++){
 		//			toBuild.append((char)i);
 		//		}
-		toBuild.append("?0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._,;:!(){}[]|7\\%'\"/\\");
+		toBuild.append("?0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._,;:!(){}[]|7\\%'\"/\\>=");
 		
 		//		long start=System.currentTimeMillis();
 		
@@ -245,9 +254,7 @@ public class FontFamily{
 			Graphics2D g=img.createGraphics();
 			//			g.setColor(Color.CYAN);
 			//			g.fillRect(0, 0, xSize, ySize);
-			tiles.forEach(t->{
-				g.drawImage(t.img, (int)t.pos.x, (int)t.pos.y, null);
-			});
+			tiles.forEach(t->g.drawImage(t.img, (int)t.pos.x, (int)t.pos.y, null));
 			g.dispose();
 		}
 		letters.tiles.clear();
@@ -257,7 +264,8 @@ public class FontFamily{
 			LetterUv newUv=new LetterUv(l.c,
 					new Vec2f(l.pos.x/xSize, l.pos.y/ySize), new Vec2f((l.pos.x+l.pos.width-2)/xSize, (l.pos.y+l.pos.height-2)/ySize),
 					l.img.getHeight(), l.img.getWidth(),
-					l.topMar, l.bottomMar, l.leftMar, l.rightMar);
+					l.topMar, l.bottomMar, l.leftMar, l.rightMar,
+					metrics.getHeight());
 			
 			letters.tiles.add(newUv);
 			data.set(l.c, newUv);
@@ -267,12 +275,12 @@ public class FontFamily{
 		
 		TextureLoader.reloadTexture(letters, img);
 		
-//		File outputfile=new File("image.png");
-//		try{
-//			ImageIO.write(img, "png", outputfile);
-//		}catch(IOException e){
-//			e.printStackTrace();
-//		}
+		//		File outputfile=new File("image.png");
+		//		try{
+		//			ImageIO.write(img, "png", outputfile);
+		//		}catch(IOException e){
+		//			e.printStackTrace();
+		//		}
 		
 	}
 	
@@ -369,42 +377,65 @@ public class FontFamily{
 		}
 	}
 	
-	public void build(float size, String toBuild, FloatConsumer vert, FloatConsumer uv){
+	public void build(float size, String toBuild, Float2Consumer vert, Float2Consumer uv){
 		build(0, 0, size, toBuild, vert, uv);
+	}
+	
+	public IModel buildAsModel(float size, String toBuild, boolean genNormals){
+		return buildAsModel(size, toBuild, Model.class, genNormals);
+	}
+	
+	public <T extends IModel> T buildAsModel(float size, String toBuild, Class<T> type, boolean genNormals){
+		PairM<FloatList,FloatList> data=Game.get().renderer.fontComfortaa.build(size, toBuild);
+		T model=ModelLoader.buildModel(type, "Gen_TextModel:"+toBuild, GL11.GL_TRIANGLES, "vertices", data.obj1.toFloatArray(), "uvs", data.obj2.toFloatArray(), "genNormals", genNormals, "vertexType", ModelAttribute.VERTEX_ATTR_2D);
+		model.culface(false);
+		return model;
 	}
 	
 	public PairM<FloatList,FloatList> build(float size, String toBuild){
 		return build(0, 0, size, toBuild);
 	}
 	
-	public void build(float x, float y, float size, char toBuild, FloatConsumer vert, FloatConsumer uv){
+	public void build(float x, float y, float size, char toBuild, Float2Consumer vert, Float2Consumer uv){
 		this.xOrigin=this.x=x;
 		this.yOrigin=this.y=y;
-		addChar(toBuild, vert, uv);
+		addChar(toBuild, size, vert, uv);
 	}
 	
 	public PairM<FloatList,FloatList> build(float x, float y, float size, char toBuild){
 		FloatList vert=new FloatArrayList(),uv=new FloatArrayList();
-		build(x, y, size, toBuild, vert::add, uv::add);
+		build(x, y, size, toBuild, (x0, z0)->{
+			vert.add(x0);
+			vert.add(z0);
+		}, (u, v)->{
+			uv.add(u);
+			uv.add(v);
+		});
 		return new PairM<FloatList,FloatList>(vert, uv);
 	}
 	
-	public void build(float x, float y, float size, String toBuild, FloatConsumer vert, FloatConsumer uv){
+	public void build(float x, float y, float size, String toBuild, Float2Consumer vert, Float2Consumer uv){
 		this.xOrigin=this.x=x;
-		this.yOrigin=this.y=y;
+		this.yOrigin=this.y=y-metrics.getHeight();
 		for(char c:toBuild.toCharArray()){
-			addChar(c, vert, uv);
+			addChar(c, size, vert, uv);
 		}
 	}
 	
 	public PairM<FloatList,FloatList> build(float x, float y, float size, String toBuild){
 		FloatList vert=new FloatArrayList(),uv=new FloatArrayList();
-		build(x, y, size, toBuild, vert::add, uv::add);
+		build(x, y, size, toBuild, (x0, z0)->{
+			vert.add(x0);
+			vert.add(z0);
+		}, (u, v)->{
+			uv.add(u);
+			uv.add(v);
+		});
 		return new PairM<FloatList,FloatList>(vert, uv);
 	}
 	
-	private void addChar(char toBuild, FloatConsumer vert, FloatConsumer uv){
-
+	private void addChar(char toBuild, float size, Float2Consumer vert, Float2Consumer uv){
+		
 		if(toBuild=='\n'){
 			x=xOrigin;
 			y-=metrics.getHeight()+yMargin;
@@ -418,10 +449,11 @@ public class FontFamily{
 		}
 		LetterUv tile=data.get(toBuild);
 		if(tile==null) LogUtil.printlnEr("Cant find", toBuild);
-		float w=tile.width,h=tile.height;
+		float mul=size/tile.fontSize;
+		float w=tile.width*mul,h=tile.height*mul;
 		
 		if(!Character.isWhitespace(toBuild)){
-			float x=this.x+tile.leftMar,y=this.y+tile.bottomMar;
+			float x=(this.x+tile.leftMar)*mul,y=(this.y+tile.bottomMar)*mul;
 			if(quad){
 				add(vert, uv, x, y, tile.topLeftX(), tile.topLeftY());
 				add(vert, uv, x, y+h, tile.bottomLeftX(), tile.bottomLeftY());
@@ -439,13 +471,11 @@ public class FontFamily{
 			}
 		}
 		
-		this.x+=w+xMargin+tile.leftMar+tile.rightMar;
+		this.x+=tile.width+xMargin+tile.leftMar+tile.rightMar;
 	}
 	
-	private void add(FloatConsumer vert, FloatConsumer uv, float x, float y, float u, float v){
-		vert.accept(x);
-		vert.accept(y);
-		uv.accept(u);
-		uv.accept(v);
+	private void add(Float2Consumer vert, Float2Consumer uv, float x, float y, float u, float v){
+		vert.accept(x, y);
+		uv.accept(u, v);
 	}
 }

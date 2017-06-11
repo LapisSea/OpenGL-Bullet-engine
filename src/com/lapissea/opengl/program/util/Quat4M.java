@@ -132,23 +132,22 @@ public class Quat4M extends Quat4f implements IRotation{
 	}
 	
 	public static Quat4M interpolate(Quat4M dest, Quat4M a, Quat4M b, float blend){
-		Quat4M result=new Quat4M(0, 0, 0, 1);
 		float dot=a.w*b.w+a.x*b.x+a.y*b.y+a.z*b.z;
 		float blendI=1f-blend;
 		if(dot<0){
-			result.w=blendI*a.w+blend*-b.w;
-			result.x=blendI*a.x+blend*-b.x;
-			result.y=blendI*a.y+blend*-b.y;
-			result.z=blendI*a.z+blend*-b.z;
+			dest.w=blendI*a.w+blend*-b.w;
+			dest.x=blendI*a.x+blend*-b.x;
+			dest.y=blendI*a.y+blend*-b.y;
+			dest.z=blendI*a.z+blend*-b.z;
 		}
 		else{
-			result.w=blendI*a.w+blend*b.w;
-			result.x=blendI*a.x+blend*b.x;
-			result.y=blendI*a.y+blend*b.y;
-			result.z=blendI*a.z+blend*b.z;
+			dest.w=blendI*a.w+blend*b.w;
+			dest.x=blendI*a.x+blend*b.x;
+			dest.y=blendI*a.y+blend*b.y;
+			dest.z=blendI*a.z+blend*b.z;
 		}
-		result.normalize();
-		return result;
+		dest.normalize();
+		return dest;
 	}
 	
 	public void set(Vec3f euler){
@@ -220,6 +219,44 @@ public class Quat4M extends Quat4f implements IRotation{
 		dest.y(ry);
 		dest.z(rz);
 		
+		return dest;
+	}
+	
+	public Quat4M fromMatrix(org.lwjgl.util.vector.Matrix4f matrix){
+		return fromMatrix(this, matrix);
+	}
+	public static Quat4M fromMatrix(Quat4M dest, org.lwjgl.util.vector.Matrix4f matrix){
+		float w,x,y,z;
+		float diagonal=matrix.m00+matrix.m11+matrix.m22;
+		if(diagonal>0){
+			float w4=(float)(Math.sqrt(diagonal+1f)*2f);
+			w=w4/4f;
+			x=(matrix.m21-matrix.m12)/w4;
+			y=(matrix.m02-matrix.m20)/w4;
+			z=(matrix.m10-matrix.m01)/w4;
+		}
+		else if((matrix.m00>matrix.m11)&&(matrix.m00>matrix.m22)){
+			float x4=(float)(Math.sqrt(1f+matrix.m00-matrix.m11-matrix.m22)*2f);
+			w=(matrix.m21-matrix.m12)/x4;
+			x=x4/4f;
+			y=(matrix.m01+matrix.m10)/x4;
+			z=(matrix.m02+matrix.m20)/x4;
+		}
+		else if(matrix.m11>matrix.m22){
+			float y4=(float)(Math.sqrt(1f+matrix.m11-matrix.m00-matrix.m22)*2f);
+			w=(matrix.m02-matrix.m20)/y4;
+			x=(matrix.m01+matrix.m10)/y4;
+			y=y4/4f;
+			z=(matrix.m12+matrix.m21)/y4;
+		}
+		else{
+			float z4=(float)(Math.sqrt(1f+matrix.m22-matrix.m00-matrix.m11)*2f);
+			w=(matrix.m10-matrix.m01)/z4;
+			x=(matrix.m02+matrix.m20)/z4;
+			y=(matrix.m12+matrix.m21)/z4;
+			z=z4/4f;
+		}
+		dest.set(x, y, z, w);
 		return dest;
 	}
 }

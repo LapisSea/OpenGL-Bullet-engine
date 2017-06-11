@@ -16,6 +16,13 @@ struct ModelMaterial{
 struct PointLight{
 	vec4 color;
 	vec3 attenuation;
+	vec3 pos;
+};
+struct LineLight{
+	vec4 color;
+	vec3 attenuation;
+	vec3 pos1;
+	vec3 pos2;
 };
 struct DirectionalLight{
 	vec4 color;
@@ -24,10 +31,13 @@ struct DirectionalLight{
 
 in vec3 normal;
 in vec3 toCamera;
+in vec3 wPos;
 
 uniform PointLight pointLights["<MAX_POINT_LIGHT>"];
-in vec3 vecToPointLight["<MAX_POINT_LIGHT>"];
 uniform int numberOfPointLights;
+
+uniform LineLight lineLights["<MAX_LINE_LIGHT>"];
+uniform int numberOfLineLights;
 
 uniform DirectionalLight dirLights["<MAX_DIR_LIGHT>"];
 uniform int numberOfDirLights;
@@ -44,7 +54,70 @@ vec4 light_specularTotal=vec4(0,0,0,0);
 
 #endif
 
-void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 unitToLight, vec3 lightColor, ModelMaterial material){
+#define EPSILON 2.220446049250313e-16
+
+vec3 getClosetPoint(vec3 vA, vec3 vB, vec3 vPoint)
+{
+    vec3 vVector1 = vPoint - vA;
+    vec3 vVector2 = normalize(vB - vA);
+ 
+    float d = length(vA-vB);
+    float t = dot(vVector2, vVector1);
+ 
+    if (t <= 0)return vA;
+ 
+    if (t >= d)return vB;
+ 
+    vec3 vVector3 = vVector2 * t;
+	
+    vec3 vClosestPoint = vA + vVector3;
+ 
+    return vClosestPoint;
+}
+
+float lengthSqr(vec3 vec){
+	return vec.x*vec.x+vec.y*vec.y+vec.z*vec.z;
+}
+
+vec3 calculateLineLineIntersection(vec3 line1Point1, vec3 line1Point2, vec3 line2Point1, vec3 line2Point2){
+ 
+	vec3 p1 = line1Point1;
+	vec3 p2 = line1Point2;
+	vec3 p3 = line2Point1;
+	vec3 p4 = line2Point2;
+	vec3 p13 = p1 - p3;
+	vec3 p43 = p4 - p3;
+ 
+	if (lengthSqr(p43) < EPSILON)return vec3(0);
+	vec3 p21 = p2 - p1;
+	if (lengthSqr(p21) < EPSILON)return vec3(0);
+ 
+	float d1343 = p13.x * p43.x + p13.y * p43.y + p13.z * p43.z;
+	float d4321 = p43.x * p21.x + p43.y * p21.y + p43.z * p21.z;
+	float d1321 = p13.x * p21.x + p13.y * p21.y + p13.z * p21.z;
+	float d4343 = p43.x * p43.x + p43.y * p43.y + p43.z * p43.z;
+	float d2121 = p21.x * p21.x + p21.y * p21.y + p21.z * p21.z;
+ 
+	float denom = d2121 * d4343 - d4321 * d4321;
+	if (abs(denom) < EPSILON)return vec3(0);
+	float numer = d1343 * d4321 - d1321 * d4343;
+ 
+	float mua = numer / denom;
+	float mub = (d1343 + d4321 * (mua)) / d4343;
+	vec3 resultSegmentPoint=vec3(0);
+	resultSegmentPoint.x = (p1.x + mua * p21.x);
+	resultSegmentPoint.y = (p1.y + mua * p21.y);
+	resultSegmentPoint.z = (p1.z + mua * p21.z);
+	/*resultSegmentPoint.x = (p3.x + mub * p43.x);
+	resultSegmentPoint.y = (p3.y + mub * p43.y);
+	resultSegmentPoint.z = (p3.z + mub * p43.z);
+	*/
+	return resultSegmentPoint;
+}
+
+
+void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 toLight, vec3 lightColor, ModelMaterial material){
+	vec3 unitToLight=normalize(toLight);
 	float cutOff=6/256.0;
 	attFact-=cutOff;
 	if(attFact<0)return;
@@ -54,13 +127,16 @@ void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 un
 	if(abs(unitNormal.x)+abs(unitNormal.y)+abs(unitNormal.z)>0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
 	
 	if(brightness<0)return;
-	//if(attFact<0.0001)light_diffuseTotal.rgb+=1;
 	vec3 col=lightColor*attFact;
 	
 	light_diffuseTotal.rgb+=brightness*col;
 	
 	if(material.reflectivity>0){
+		vec3 camreaReflect=reflect(unitToCamera,unitNormal);
+		
+		
 		vec3 lightDir=-unitToLight; 
+		
 		vec3 reflectedDir=reflect(lightDir,unitNormal);
 		
 		float sepcularFact=max(0, dot(reflectedDir, unitToCamera));
@@ -69,16 +145,66 @@ void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 un
 		light_specularTotal.rgb+=dampedSpecular*brightness*material.reflectivity*col;
 	}
 }
-
-void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, vec3 toLightVec, PointLight light, ModelMaterial material){
-	
-	float dist=length(toLightVec);
+void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, ModelMaterial material){
+	vec3 toLight=light.pos-wPos;
+	float dist=length(toLight);
 	float attFact= 
 		 light.attenuation.x+
 		(light.attenuation.y*dist)+
 		(light.attenuation.z * dist*dist)
 	;
-	if(attFact>0)calcGenericLight(unitToCamera, unitNormal, 1/attFact, normalize(toLightVec), light.color.rgb*light.color.a,material);
+	calcGenericLight(unitToCamera, unitNormal, 1/attFact, toLight, light.color.rgb*light.color.a,material);
+}
+void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, ModelMaterial material){
+	vec3 toLight=getClosetPoint(light.pos1,light.pos2, wPos)-wPos;
+	
+	float dist=length(toLight);
+	float attFact= 
+		 light.attenuation.x+
+		(light.attenuation.y*dist)+
+		(light.attenuation.z * dist*dist)
+	;
+	attFact=1/attFact;
+	vec3 lightColor=light.color.rgb*light.color.a;
+	
+	vec3 unitToLight=normalize(toLight);
+	
+	float cutOff=6/256.0;
+	attFact-=cutOff;
+	if(attFact<0)return;
+	attFact*=1+cutOff;
+	
+	float brightness=1;
+	if(abs(unitNormal.x)+abs(unitNormal.y)+abs(unitNormal.z)>0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
+	
+	if(brightness<0)return;
+	vec3 col=lightColor*attFact;
+	
+	light_diffuseTotal.rgb+=brightness*col;
+	
+	if(material.reflectivity>0){
+		vec3 onLightPoint=light.pos1;
+		if(light.pos1!=light.pos2){
+			vec3 reflectedCam=reflect(unitToCamera,unitNormal);
+			onLightPoint=calculateLineLineIntersection(light.pos1,light.pos2, wPos, wPos+reflectedCam*100);
+			int axis=0;
+			if(light.pos1[axis]==light.pos2[axis])axis++;
+			if(light.pos1[axis]==light.pos2[axis])axis++;
+			bool bigger1=light.pos1[axis]>light.pos2[axis];
+			
+			if((bigger1?light.pos2[axis]:light.pos1[axis])>onLightPoint[axis])onLightPoint=bigger1?light.pos2:light.pos1;
+			else if(onLightPoint[axis]>(bigger1?light.pos1[axis]:light.pos2[axis]))onLightPoint=bigger1?light.pos1:light.pos2;
+		}
+		
+		vec3 lightDir=-normalize(onLightPoint-wPos); 
+		
+		vec3 reflectedDir=reflect(lightDir,unitNormal);
+		
+		float sepcularFact=max(0, dot(reflectedDir, unitToCamera));
+		float dampedSpecular=pow(sepcularFact,material.shineDamper);
+		
+		light_specularTotal.rgb+=dampedSpecular*brightness*material.reflectivity*col;
+	}
 }
 
 void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, ModelMaterial material){
@@ -91,10 +217,14 @@ vec4 applyLighting(vec4 baseColor, ModelMaterial material){
 	vec3 unitNormal=normalize(normal);
 	if(!gl_FrontFacing)unitNormal*=-1;
 	
-	for(int i=0;i<numberOfPointLights;i++){
-		calcPointLightColor(unitToCamera,unitNormal,vecToPointLight[i],pointLights[i],material);
+	int i=0;
+	for(i=0;i<numberOfPointLights;i++){
+		calcPointLightColor(unitToCamera,unitNormal,pointLights[i],material);
 	}
-	for(int i=0;i<numberOfDirLights;i++){
+	for(i=0;i<numberOfLineLights;i++){
+		calcLineLightColor(unitToCamera,unitNormal,lineLights[i],material);
+	}
+	for(i=0;i<numberOfDirLights;i++){
 		calcDirLightColor(unitToCamera,unitNormal,dirLights[i],material);
 	}
 	
@@ -102,6 +232,5 @@ vec4 applyLighting(vec4 baseColor, ModelMaterial material){
 	light_diffuseTotal.rgb+=material.ambient;
 	light_specularTotal.rgb*=material.specular*baseColor.a;
 	
-	vec4 result=max(vec4(minBrightness),light_diffuseTotal)*baseColor+light_specularTotal;
-	return result;
+	return max(vec4(minBrightness),light_diffuseTotal)*baseColor+light_specularTotal;
 }

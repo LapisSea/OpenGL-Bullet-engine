@@ -19,7 +19,6 @@ import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
-import com.lapissea.opengl.program.util.math.SimplexNoise;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.assets.IModel;
@@ -36,10 +35,10 @@ public class Terrain implements ModelTransformed{
 	
 	public static ModelData[] grass=ObjModelLoader.loadArr("Grass");
 	
-	public static final int		SIZE	=32,RESOLUTION=6;
-	public static final float	WORLD_H	=5;
+	public static final float	SIZE		=32;
+	public static int			RESOLUTION	=6,WORLD_H=5,GRASS_MIN=50,GRASS_RAND=50;
 	
-	public final float	x,z;
+	public final int	x,z;
 	public IModel		model	=ModelLoader.EMPTY_MODEL;
 	public RigidBody	chunkBody;
 	
@@ -48,32 +47,27 @@ public class Terrain implements ModelTransformed{
 	
 	public final double seed=Math.random();
 	
-	public Terrain(int gridX, int gridZ){
+	public Terrain(int gridX, int gridZ, IHeightMapProvider hMap){
 		
-		x=gridX*SIZE;
-		z=gridZ*SIZE;
-		mat.translate(new Vec3f(x, -2, z));
-		model=generateModel(gridX, gridZ);
+		x=gridX;
+		z=gridZ;
+		mat.translate(new Vec3f(x*SIZE, -2, z*SIZE));
+		model=generateModel(gridX, gridZ, hMap);
 		model.getMaterial(0).setShineDamper(50).setReflectivity(0.2F).setDiffuse(0.2F, 1, 0.25F, 1).setSpecular(1, 1, 1, 1);
 	}
 	
-	private IModel generateModel(int gridX, int gridZ){
+	private IModel generateModel(int gridX, int gridZ, IHeightMapProvider hMap){
 		int r1=RESOLUTION+1;
 		
 		FloatList vertices=new FloatArrayList(),mats=new FloatArrayList();
 		
 		IntList indices=new IntArrayList();
 		
-		float mul=SIZE/(float)RESOLUTION;
+		float mul=SIZE/RESOLUTION;
 		for(int z=0;z<r1;z++){
 			for(int x=0;x<r1;x++){
-				double h=SimplexNoise.noise((x/(float)RESOLUTION+gridX), (z/(float)RESOLUTION+gridZ));
-				h-=0.5;
-				
-				h+=(SimplexNoise.noise(x/(float)RESOLUTION+gridX, z/(float)RESOLUTION+gridZ)-0.5)/10;
-				
 				vertices.add(x*mul);
-				vertices.add((float)(h*WORLD_H));
+				vertices.add(hMap.getHeightAt((x/(double)RESOLUTION+gridX), (z/(double)RESOLUTION+gridZ)));
 				vertices.add(z*mul);
 				mats.add(0);
 				//				uvs.add(x/(float)RESOLUTION);
@@ -101,7 +95,7 @@ public class Terrain implements ModelTransformed{
 			}
 		}
 		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(vertices.toFloatArray(), indices.toIntArray()), true);
-		MotionState ballMotionState=new DefaultMotionState(new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x, 0, z), 1)));
+		MotionState ballMotionState=new DefaultMotionState(new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x*SIZE, 0, z*SIZE), 1)));
 		RigidBodyConstructionInfo ballConstructionInfo=new RigidBodyConstructionInfo(0, ballMotionState, trimeshshape, new Vector3f());
 		ballConstructionInfo.restitution=0F;
 		chunkBody=new RigidBody(ballConstructionInfo);
@@ -109,7 +103,7 @@ public class Terrain implements ModelTransformed{
 		
 		Quat4M q=new Quat4M();
 		Vec3f rot=new Vec3f(),vRot=new Vec3f();
-		for(int i=0, j=100+RandUtil.RI(200);i<j;i++){
+		for(int i=0, j=GRASS_MIN+RandUtil.RI(GRASS_RAND);i<j;i++){
 			float x=RandUtil.RF(mul*RESOLUTION);
 			float z=RandUtil.RF(mul*RESOLUTION);
 			float y;
@@ -161,13 +155,13 @@ public class Terrain implements ModelTransformed{
 			IMaterial mat=model.createMaterial("grass");
 			mat.setDiffuse(0.2F, 1, 0.25F, 1).setLightTroughput(0.5F).setJelly(0.3F);
 			
-			model.getMaterial(0).setShineDamper(80).setReflectivity(10F);
+			model.getMaterial(0).setShineDamper(50).setReflectivity(1F);
 		}
 		
 		TRANSFORM.setIdentity();
-		POS.x=x;
+		POS.x=x*SIZE;
 		POS.y=0;
-		POS.z=z;
+		POS.z=z*SIZE;
 		TRANSFORM.translate(POS);
 		return TRANSFORM;
 	}

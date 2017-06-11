@@ -2,6 +2,7 @@ package com.lapissea.opengl.program.rendering.gl.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -9,6 +10,8 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
+import com.lapissea.opengl.program.rendering.gl.gui.GuiFlow.ISizeCalc;
+import com.lapissea.opengl.program.rendering.gl.gui.GuiFlow.SizeCalcStatic;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
@@ -20,10 +23,15 @@ import com.lapissea.opengl.window.api.events.MouseScrollEvent;
 import com.lapissea.opengl.window.api.util.IVec2i;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.window.assets.ModelAttribute;
 
 public class GuiElement implements ModelTransformed{
 	
-	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel("UNIT_QUAD", GL11.GL_TRIANGLE_STRIP, "genNormals", false, "vertices", new float[]{0,0,0,0,1,0,1,0,0,1,1,0});
+	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel("UNIT_QUAD", GL11.GL_TRIANGLE_STRIP, "genNormals", false, "vertices", new float[]{
+			0,0,
+			0,1,
+			1,0,
+			1,1}, "vertexType", ModelAttribute.VERTEX_ATTR_2D);
 	protected static final Matrix4f	_MAT		=new Matrix4f();
 	protected static final Vec3f	_POS		=new Vec3f(),_ROT=new Vec3f();
 	protected static final Vec2f	VEC2		=new Vec2f();
@@ -51,18 +59,60 @@ public class GuiElement implements ModelTransformed{
 		}
 	};
 	
-	protected Vec2f				pos			=new Vec2f(),size=new Vec2f(100, 100);
-	protected IModel			model		=UNIT_QUAD;
-	public GuiElementMaterial	border		=new GuiElementMaterial();
-	public GuiElementMaterial	background	=new GuiElementMaterial();
-	public float				borderWidth;
-	
-	public GuiElement		parent;
-	public List<GuiElement>	children=new ArrayList<>();
-	
-	public GuiElement(GuiElement parent){
-		this.parent=parent;
+	public static class Margin{
+		
+		public float top,bottom,left,right;
 	}
+	
+	public static enum Align{
+		STATIC((e, axis)->axis?e.pos.x():e.pos.y()),
+		NEGATIVE((e, axis)->{
+			if(e.parent==null) return axis?e.pos.x():e.pos.y();
+			return axis?e.margin.left:e.margin.top;
+		}),
+		CENTER((e, axis)->{
+			if(e.parent==null) return axis?e.pos.x():e.pos.y();
+			return (axis?e.parent.getElementSize().x()-e.getElementSize().x():e.parent.getElementSize().y()-e.getElementSize().y())/2;
+		}),
+		POSITIVE((e, axis)->{
+			if(e.parent==null) return axis?e.pos.x():e.pos.y();
+			return axis?e.parent.getElementSize().x()-e.getElementSize().x()-e.margin.right:e.parent.getElementSize().y()-e.getElementSize().y()-e.margin.bottom;
+		});
+		
+		public static interface Aligner{
+			
+			float calc(GuiElement e, boolean axis);
+		}
+		
+		private final Aligner aligner;
+		
+		public float calc(GuiElement e, boolean axis){
+			return aligner.calc(e, axis);
+		}
+		
+		private Align(Aligner aligner){
+			this.aligner=aligner;
+		}
+		
+	}
+	
+	protected Vec2f				pos				=new Vec2f();
+	protected Vec2f				size			=new Vec2f();
+	protected Vec2f				elementSize		=new Vec2f();
+	protected IModel			model			=UNIT_QUAD;
+	public GuiElementMaterial	border			=new GuiElementMaterial();
+	public GuiElementMaterial	background		=new GuiElementMaterial();
+	public float				borderWidth		=0;
+	public ISizeCalc			preferedWidth	=new SizeCalcStatic(100);
+	public ISizeCalc			preferedHeight	=new SizeCalcStatic(100);
+	public Align				preferedX		=Align.NEGATIVE;
+	public Align				preferedY		=Align.NEGATIVE;
+	public Margin				margin			=new Margin();
+	
+	public GuiElement			parent;
+	protected List<GuiElement>	children=new ArrayList<>();
+	
+	public GuiElement(){}
 	
 	@Override
 	public IModel getModel(){
@@ -85,6 +135,10 @@ public class GuiElement implements ModelTransformed{
 		return size;
 	}
 	
+	public Vec2f getElementSize(){
+		return elementSize;
+	}
+	
 	
 	public void update(){
 		children.forEach(GuiElement::update);
@@ -92,18 +146,22 @@ public class GuiElement implements ModelTransformed{
 	
 	public boolean isMouseOver(){
 		getAbsolutePos(VEC2);
-		return VEC2.x()<=MOUSE.x()&&
-				VEC2.y()<=MOUSE.y()&&
-				VEC2.x()+size.x()>=MOUSE.x()&&
-				VEC2.y()+size.y()>=MOUSE.y();
+		return intersectsMouse(VEC2.x(), VEC2.y(), VEC2.x()+size.x(), VEC2.y()+size.y());
+	}
+	
+	public static boolean intersectsMouse(float minX, float minY, float maxX, float maxY){
+		return MOUSE.x()>=minX&&
+				MOUSE.y()>=minY&&
+				MOUSE.x()<=maxX&&
+				MOUSE.y()<=maxY;
 	}
 	
 	@Override
 	public Matrix4f getTransform(){
 		_MAT.setIdentity();
-		Vec2f pos=getPos();
+		Vec2f pos=getAbsolutePos(new Vec2f());
 		
-		float rot=0*(float)((Game.get().world.time()+Game.getPartialTicks())/100D);
+		float rot=0;//*(float)((Game.get().world.time()+Game.getPartialTicks())/100D);
 		
 		_POS.add(pos.x(), pos.y(), 0);
 		_MAT.translate(_POS);
@@ -121,6 +179,15 @@ public class GuiElement implements ModelTransformed{
 		return parent!=null;
 	}
 	
+	protected void deepChildForEach(Consumer<GuiElement> consumer){
+		children.forEach(ch->ch.deepChildForEach(ch, consumer));
+	}
+	
+	protected void deepChildForEach(GuiElement e, Consumer<GuiElement> consumer){
+		consumer.accept(this);
+		children.forEach(ch->ch.deepChildForEach(ch, consumer));
+	}
+	
 	public void onKey(KeyEvent e){}
 	
 	public void onMouseButton(MouseButtonEvent e){}
@@ -128,4 +195,24 @@ public class GuiElement implements ModelTransformed{
 	public void onMouseMove(MouseMoveEvent e){}
 	
 	public void onMouseScroll(MouseScrollEvent e){}
+	
+	public GuiElementMaterial getRenderBackground(){
+		return background;
+	}
+	
+	public GuiElementMaterial getRenderBorder(){
+		return border;
+	}
+	
+	public void updateFlow(){
+		//		this.elementSize.set(preferedWidth!=null?preferedWidth.calc(parent!=null?parent.size.x():Game.win().getSize().x()):elementSize.x(), preferedHeight!=null?preferedHeight.calc(parent!=null?parent.size.y():Game.win().getSize().y()):elementSize.y());
+		this.pos.set(preferedX.calc(this, true), preferedY.calc(this, false));
+		children.forEach(GuiElement::updateFlow);
+	}
+	
+	public GuiElement addChild(GuiElement child){
+		child.parent=this;
+		children.add(child);
+		return child;
+	}
 }

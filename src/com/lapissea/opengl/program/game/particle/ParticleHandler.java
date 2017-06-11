@@ -1,29 +1,39 @@
 package com.lapissea.opengl.program.game.particle;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
 
+import org.lwjgl.opengl.GL11;
+
+import com.lapissea.opengl.program.rendering.GLUtil;
+import com.lapissea.opengl.program.rendering.GLUtil.BlendFunc;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
+import com.lapissea.opengl.program.util.NanoTimer;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
-import com.lapissea.opengl.window.impl.assets.Model;
+import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.util.LogUtil;
 
+@SuppressWarnings("unchecked")
 public class ParticleHandler<T extends Particle<T>>{
 	
-	private final LinkedList<T>			particles	=new LinkedList<>();
+	private final List<T>			particles	=new ArrayList<>();
 	public final Class<T>				type;
 	private boolean						deadDirty;
 	private final ParticleFactory<T>	factory;
 	
-	public final List<Model>				models	=new ArrayList<>();
-	private final List<List<Particle<?>>>	toRender=new ArrayList<>();
+	public final List<IModel>	models	=new ArrayList<>();
+	private Queue<Particle<?>>[]	toRender=new Queue[0];
+	
+	NanoTimer upd=new NanoTimer(),rend=new NanoTimer();
 	
 	public interface ParticleFactory<T extends Particle<T>>{
 		
 		T create(ParticleHandler<T> parent, Vec3f pos);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public ParticleHandler(ParticleFactory<T> factory){
 		this.type=(Class<T>)factory.create(this, new Vec3f()).getClass();
 		this.factory=factory;
@@ -36,6 +46,7 @@ public class ParticleHandler<T extends Particle<T>>{
 	}
 	
 	public void update(){
+		upd.start();
 		if(deadDirty){
 			particles.removeIf(p->{
 				if(p.isDead()) return true;
@@ -45,24 +56,28 @@ public class ParticleHandler<T extends Particle<T>>{
 			deadDirty=false;
 		}
 		else particles.forEach(Particle::update);
+		upd.end();
+		LogUtil.println(upd.msAvrg100(),rend.msAvrg100());
 	}
 	
 	public void render(){
-		if(models.size()!=toRender.size()){
-			while(models.size()>toRender.size()){
-				toRender.add(new ArrayList<>());
-			}
-			while(models.size()<toRender.size()){
-				toRender.remove(toRender.size()-1);
-			}
+		if(models.size()!=toRender.length){
+			toRender=new Queue[models.size()];
+			Arrays.fill(toRender, new ArrayDeque<>());
 		}
 		
-		particles.forEach(p->toRender.get(p.getModelIndex()).add(p));
-		toRender.forEach(batch->{
+		rend.start();
+		particles.forEach(p->toRender[p.getModelIndex()].add(p));
+		GLUtil.BLEND.set(true);
+		GLUtil.BLEND_FUNC.set(BlendFunc.ADD);
+		GL11.glDepthMask(false);
+		for(Queue<Particle<?>> batch:toRender){
 			Shaders.ENTITY.renderBatch(batch);
 			batch.clear();
-		});
-		
+		}
+		rend.end();
+		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
+		GL11.glDepthMask(true);
 	}
 	
 	public void notifyDeath(){

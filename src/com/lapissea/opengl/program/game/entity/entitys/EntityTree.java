@@ -17,14 +17,14 @@ import com.lapissea.opengl.program.util.RigidBodyEntity;
 import com.lapissea.opengl.program.util.TransformOgl;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
-import com.lapissea.opengl.window.impl.assets.Model;
+import com.lapissea.opengl.window.assets.IModel;
 
 public class EntityTree extends EntityUpd{
 	
-	public static Model		MODEL;
+	public static IModel	MODEL;
 	public static float[]	VERT;
 	
-	private static Model getModel0(){
+	private static IModel getModel0(){
 		if(MODEL==null){
 			ModelData data=ObjModelLoader.load("TreeSmall/2");
 			VERT=data.getVert();

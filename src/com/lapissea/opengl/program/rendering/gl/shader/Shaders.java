@@ -62,7 +62,9 @@ public class Shaders{
 	
 	public static void load(){
 		ENTITY=new ShaderRenderer.Basic3D<>("entity");
+		
 		TERRAIN=new TerrainShader();
+		
 		LINE=new ShaderRenderer.Basic3D<>("line");
 		POST_COPY=new ShaderRenderer.Basic3D<>("post/copy");
 		SKYBOX=new SkyboxShader();

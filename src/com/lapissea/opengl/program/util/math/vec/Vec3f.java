@@ -6,6 +6,7 @@ import org.lwjgl.util.vector.Vector3f;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.window.api.util.Calculateable;
 import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.opengl.window.api.util.MathUtil;
 
 public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 	
@@ -37,6 +38,10 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 	
 	public Vec3f(float x, float y, float z){
 		set(x, y, z);
+	}
+	
+	public Vec3f add(IVec3f vec){
+		return add(vec.x(), vec.y(), vec.z());
 	}
 	
 	public Vec3f add(float f){
@@ -90,7 +95,11 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 	
 	@Override
 	public Vec3f sub(Vec3f c){
-		return sub(c.x, c.y, c.z);
+		return sub(c.x(), c.y(), c.z());
+	}
+	
+	public Vec3f sub(IVec3f c){
+		return sub(c.x(), c.y(), c.z());
 	}
 	
 	@Override
@@ -186,6 +195,13 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 		return this;
 	}
 	
+	public Vec3f set(IVec3f src){
+		x=src.x();
+		y=src.y();
+		z=src.z();
+		return this;
+	}
+	
 	@Override
 	public Vec3f clone(){
 		return new Vec3f(x(), y(), z());
@@ -274,6 +290,19 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 		y=(float)Math.atan2(2*q1.y*q1.w-2*q1.x*q1.z, sqx-sqy-sqz+sqw);
 		z=(float)Math.asin(2*test/unit);
 		x=(float)Math.atan2(2*q1.x*q1.w-2*q1.y*q1.z, -sqx+sqy-sqz+sqw);
+		
+		return this;
+	}
+	
+	public Vec3f normalize(){
+		super.normalise();
+		return this;
+	}
+	
+	public Vec3f toAngular(){
+		float distanceX=-x(),distanceY=-y(),distanceZ=-z();
+		x((float)-Math.atan2(distanceY, MathUtil.length(-distanceX, -distanceZ)));
+		y((float)Math.atan2(distanceX, -distanceZ));
 		
 		return this;
 	}

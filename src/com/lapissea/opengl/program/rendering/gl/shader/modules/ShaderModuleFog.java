@@ -37,7 +37,7 @@ public class ShaderModuleFog extends ShaderModule implements Global{
 		}else{
 			fogDensity.upload(r.worldFog.density);
 			fogGradient.upload(r.worldFog.gradient);
-			skyColor.upload(r.skyColor);
+			skyColor.upload(r.worldFog.color);
 		}
 	}
 	

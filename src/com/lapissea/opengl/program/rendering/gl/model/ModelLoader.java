@@ -1,9 +1,12 @@
 package com.lapissea.opengl.program.rendering.gl.model;
 
+import static com.lapissea.opengl.window.assets.ModelAttribute.*;
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -13,37 +16,36 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.rendering.frustrum.FrustrumBool;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
-import com.lapissea.opengl.program.util.LogUtil;
-import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
 import com.lapissea.opengl.window.api.util.BufferUtil;
-import com.lapissea.opengl.window.api.util.IRotation;
-import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ITexture;
 import com.lapissea.opengl.window.assets.ModelAttribute;
 import com.lapissea.opengl.window.impl.assets.Model;
+import com.lapissea.util.LogUtil;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
 public class ModelLoader{
 	
-	private static final List<Model>			MODELS			=new ArrayList<>();
+	private static final List<IModel>			MODELS			=new ArrayList<>();
 	private static final HashMap<String,Object>	MODEL_BUILD_DATA=new HashMap<>();
 	
 	public static final IModel EMPTY_MODEL=new Model("EMPTY_MODEL"){
 		
 		@Override
-		public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute[] attributeIds, com.lapissea.opengl.window.api.frustrum.IFrustrumShape<? extends IVec3f,? extends IRotation> shape) {
+		public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute vertexType, ModelAttribute[] attributeIds, IFrustrumShape shape){
 			throw new UnsupportedOperationException();
 		}
+		
 		@Override
 		public IModel drawCall(){
 			return this;
@@ -62,15 +64,15 @@ public class ModelLoader{
 	
 	private static final Vec3f V0=new Vec3f(),V1=new Vec3f(),V2=new Vec3f(),V01=new Vec3f(),V12=new Vec3f(),NORMAL=new Vec3f();
 	
-	public static Model[] buildModels(ModelData...modelsData){
-		Model[] models=new Model[modelsData.length];
+	public static IModel[] buildModels(ModelData...modelsData){
+		IModel[] models=new IModel[modelsData.length];
 		for(int i=0;i<modelsData.length;i++){
 			models[i]=buildModel(modelsData[0]);
 		}
 		return models;
 	}
 	
-	public static <T extends Model> T[] buildModels(Class<T> type, ModelData...modelsData){
+	public static <T extends IModel> T[] buildModels(Class<T> type, ModelData...modelsData){
 		T[] models=UtilM.array(type, modelsData.length);
 		for(int i=0;i<modelsData.length;i++){
 			models[i]=buildModel(type, modelsData[0]);
@@ -78,11 +80,11 @@ public class ModelLoader{
 		return models;
 	}
 	
-	public static Model buildModel(ModelData modelData){
+	public static IModel buildModel(ModelData modelData){
 		return buildModel(Model.class, modelData);
 	}
 	
-	public static <T extends Model> T buildModel(Class<T> type, ModelData modelData){
+	public static <T extends IModel> T buildModel(Class<T> type, ModelData modelData){
 		return buildModel(type, modelData.name, modelData.format, "vertices", modelData.getVert(), "uvs", modelData.getUv(), "normals", modelData.getNorm(), "materialIds", modelData.getMat(), "materials", modelData.materials);
 	}
 	
@@ -99,8 +101,9 @@ public class ModelLoader{
 	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
 	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
 	 * <br>primitiveColor = float[] (rgba)
+	 * <br>vertexType = ModelAttribute
 	 */
-	public synchronized static Model buildModel(String name, int format, Object...data){
+	public synchronized static IModel buildModel(String name, int format, Object...data){
 		return buildModel(Model.class, name, format, data);
 	}
 	
@@ -117,8 +120,9 @@ public class ModelLoader{
 	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
 	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
 	 * <br>primitiveColor = float[] (rgba)
+	 * <br>vertexType = ModelAttribute
 	 */
-	public synchronized static <T extends Model> T buildModel(Class<T> type, String name, int format, Object...data){
+	public synchronized static <T extends IModel> T buildModel(Class<T> type, String name, int format, Object...data){
 		if(data==null||data.length==0) return null;
 		if(data.length%2!=0) throw new IllegalArgumentException("Bad data!");
 		
@@ -145,15 +149,22 @@ public class ModelLoader{
 	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
 	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
 	 * <br>primitiveColor = float[] (rgba)
+	 * <br>vertexType = ModelAttribute
 	 */
-	public static <T extends Model> T buildModel(Class<T> type, String name, int format, HashMap<String,Object> data){
+	public static <T extends IModel> T buildModel(Class<T> type, String name, int format, Map<String,Object> data){
 		
 		data.keySet().stream().filter(key->data.get(key)==null).collect(Collectors.toList()).forEach(key->data.remove(key));
 		
 		//PROCESS DATA
 		int[] indices=(int[])data.get("indices");
 		boolean hasIds=indices!=null;
-		float[] vert=(float[])Objects.requireNonNull(data.get("vertices"));
+		
+		ModelAttribute vertexType=(ModelAttribute)data.get("vertexType");
+		if(vertexType==null) vertexType=ModelAttribute.VERTEX_ATTR_3D;
+		
+		Object vertObj=Objects.requireNonNull(data.get("vertices"));
+		float[] vert=vertObj instanceof Number&&((Number)vertObj).intValue()==0?new float[(format==GL11.GL_QUADS?4:3)*vertexType.size]:(float[])vertObj;
+		
 		
 		Object killSmoothObj=data.get("killSmooth");
 		boolean killSmooth=hasIds&&(killSmoothObj==null||(boolean)killSmoothObj);
@@ -163,17 +174,6 @@ public class ModelLoader{
 		if(!killSmooth&&genNormal) data.put("normals", hasIds?generateNormals(vert, indices):generateNormals(vert));
 		
 		float[] uvs=(float[])data.get("uvs"),normals=(float[])data.get("normals"),materialIds=(float[])data.get("materialIds"),primitiveColor=(float[])data.get("primitiveColor");
-		
-		T model;
-		try{
-			Constructor<T> ctr=type.getConstructor(String.class);
-			ctr.setAccessible(true);
-			model=ctr.newInstance(Objects.requireNonNull(name));
-		}catch(NoSuchMethodException e){
-			throw new RuntimeException("Missing "+type.getName()+".<init>(String)", e);
-		}catch(Exception e){
-			throw new RuntimeException(e);
-		}
 		
 		if(killSmooth){
 			float[] vert0=vert,uvs0=uvs,normals0=normals,materialIds0=materialIds,primitiveColor0=primitiveColor;
@@ -355,70 +355,64 @@ public class ModelLoader{
 			if(genNormal) normals=generateNormals(vert);
 		}
 		
-		//INJECT TEXTURE
-		Object textures=data.get("textures");
-		if(textures!=null){
-			if(textures instanceof ITexture) model.addTexture((ITexture)textures);
-			if(textures instanceof String) model.addTexture(TextureLoader.loadTexture((String)textures));
-			else if(textures instanceof Iterable){
-				((Iterable<?>)textures).forEach(tx->model.addTexture(tx instanceof ITexture?(ITexture)tx:TextureLoader.loadTexture((String)tx)));
-			}
-			else if(textures.getClass().isArray()){
-				Class<?> typeTx=textures.getClass().getComponentType();
-				
-				if(UtilM.instanceOf(typeTx, ITexture.class)){
-					for(ITexture tx:(ITexture[])textures){
-						model.addTexture(tx);
-					}
-				}
-				else if(typeTx==String.class){
-					for(String txName:(String[])textures){
-						synchronized(TextureLoader.class){
-							model.addTexture(TextureLoader.loadTexture(txName));
-						}
-					}
-				}
-			}
-		}
+		if(vert.length%vertexType.size!=0) throw new IllegalArgumentException(vert.length+" is not a valid vertex count for dimensions of "+vertexType.size+" in model "+name);
 		
-		Object materials=data.get("materials");
-		if(materials!=null){
-			if(materials instanceof IMaterial) model.addMaterial((IMaterial)materials);
-			else if(materials instanceof Iterable){
-				((Iterable<?>)materials).forEach(mat->model.addMaterial((IMaterial)mat));
-			}
-			else if(materials.getClass().isArray()){
-				Class<?> typeTx=materials.getClass().getComponentType();
-				
-				if(UtilM.instanceOf(typeTx, IMaterial.class)){
-					for(IMaterial tx:(IMaterial[])materials){
-						model.addMaterial(tx);
-					}
-				}
-			}
-		}
+		T model=create(type, name, format, hasIds?indices:null, vertexType, vert, new float[][]{uvs,normals,materialIds,primitiveColor}, UV_ATTR, NORMAL_ATTR, MAERIAL_ID_ATTR, COLOR_ATTR);
+		
+		//INJECT TEXTURE
+		UtilM.iterate(data.get("textures"), obj->model.addTexture(obj instanceof ITexture?(ITexture)obj:TextureLoader.loadTexture((String)obj)));
+		
+		UtilM.iterate(data.get("materials"), IMaterial.class, model::addMaterial);
 		if(model.getMaterialCount()==0) model.createMaterial();
 		
-		float[] vertF=vert,uvsF=uvs,normalsF=normals,materialIdsF=materialIds,primitiveColorF=primitiveColor;
-		boolean hasIdsF=hasIds;
-		int[] indicesF=indices;
+		return model;
+	}
+	
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, float[] vertex, float[][] data, ModelAttribute...attrs){
+		return create(type, name, format, indices, vertex, true, data, attrs);
+	}
+	
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, float[] vertex, boolean print, float[][] data, ModelAttribute...attrs){
+		return create(type, name, format, indices, ModelAttribute.VERTEX_ATTR_3D, vertex, data, attrs);
+	}
+	
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, ModelAttribute vertexType, float[] vertex, float[][] data, ModelAttribute...attrs){
+		return create(type, name, format, indices, vertexType, vertex, true, data, attrs);
+	}
+	
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, ModelAttribute vertexType, float[] vertex, boolean print, float[][] data, ModelAttribute...attrs){
+		if(attrs.length!=data.length) throw new RuntimeException("Attributes not equal size as data!");
 		
-		//CALL BUILD
+		T model;
+		try{
+			Constructor<T> ctr=type.getConstructor(String.class);
+			ctr.setAccessible(true);
+			model=ctr.newInstance(Objects.requireNonNull(name));
+		}catch(NoSuchMethodException e){
+			throw new RuntimeException("Missing "+type.getName()+".<init>(String)", e);
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
+		
+		IFrustrumShape shape=calcShape(vertex, vertexType.size);
+		
 		Game.glCtx(()->{
 			int vao=createVao();
 			IntList vbos=new IntArrayList();
 			List<ModelAttribute> attributes=new ArrayList<>();
-			if(hasIdsF) bindIndices(indicesF);
 			
-			putAttribute(vbos, attributes, ModelAttribute.VERTEX_ATTR, vertF);
-			putAttribute(vbos, attributes, ModelAttribute.UV_ATTR, uvsF);
-			putAttribute(vbos, attributes, ModelAttribute.NORMAL_ATTR, normalsF);
-			putAttribute(vbos, attributes, ModelAttribute.MAERIAL_ID_ATTR, materialIdsF);
-			putAttribute(vbos, attributes, ModelAttribute.PRIMITIVE_COLOR_ATTR, primitiveColorF);
+			boolean hasIds=indices!=null;
+			
+			if(hasIds) bindIndices(indices);
+			if(vertex!=null) putAttribute(vbos, attributes, vertexType, vertex);
+			for(int i=0;i<data.length;i++){
+				putAttribute(vbos, attributes, attrs[i], data[i]);
+			}
+			
 			unbindVao();
-
-			model.load(vao, hasIdsF?indicesF.length:vertF.length, hasIdsF, format, vbos.toIntArray(), attributes.toArray(new ModelAttribute[attributes.size()]), calcShape(vertF));
-			if(!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
+			
+			model.load(vao, hasIds?indices.length:vertex.length, hasIds, format, vbos.toIntArray(), vertexType, attributes.toArray(new ModelAttribute[attributes.size()]), shape);
+			if(print&&!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 		});
 		return model;
 	}
@@ -471,17 +465,27 @@ public class ModelLoader{
 	//		return model;
 	//	}
 	
-	private static IFrustrumShape<Vec3f,Quat4M> calcShape(float[] vert){
+	public static IFrustrumShape calcShape(float[] vert, int dimensions){
+		if(vert.length==0) return new FrustrumBool(false);
+		
 		Vec3f start=new Vec3f(),end=new Vec3f();
 		
-		for(int i=0;i<vert.length;i+=3){
-			float p1=vert[i+0],p2=vert[i+1],p3=vert[i+2];
+		for(int i=0;i<vert.length;i+=dimensions){
+			float p1=vert[i+0];
 			start.x(Math.min(start.x(), p1));
-			start.y(Math.min(start.y(), p2));
-			start.z(Math.min(start.z(), p3));
 			end.x(Math.max(end.x(), p1));
-			end.y(Math.max(end.y(), p2));
-			end.z(Math.max(end.z(), p3));
+			
+			if(dimensions>1){
+				float p2=vert[i+1];
+				start.y(Math.min(start.y(), p2));
+				end.y(Math.max(end.y(), p2));
+				
+				if(dimensions>2){
+					float p3=vert[i+2];
+					start.z(Math.min(start.z(), p3));
+					end.z(Math.max(end.z(), p3));
+				}
+			}
 		}
 		return new FrustrumCube(start, end);
 	}
@@ -546,7 +550,7 @@ public class ModelLoader{
 	}
 	
 	public static void deleteAll(){
-		UtilM.doAndClear(MODELS, Model::delete);
+		UtilM.doAndClear(MODELS, IModel::delete);
 	}
 	
 }

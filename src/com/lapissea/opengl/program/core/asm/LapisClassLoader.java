@@ -4,18 +4,17 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.URLClassLoader;
 
-import com.lapissea.opengl.program.util.LogUtil;
-import com.lapissea.opengl.program.util.PrefixTree;
+import com.lapissea.opengl.program.util.data.PrefixTree;
+import com.lapissea.util.LogUtil;
 
 public class LapisClassLoader extends URLClassLoader{
 	
 	private final PrefixTree<ClassTransformer> transformers=new PrefixTree<>();
 	
-	public LapisClassLoader(URL[] urls){
-		super(((URLClassLoader)LapisClassLoader.class.getClassLoader()).getURLs(), null);
+	public LapisClassLoader(URLClassLoader parent){
+		super(parent.getURLs(), parent);
 	}
 	
 	public void registerTransformer(String domain, ClassTransformer transformer){

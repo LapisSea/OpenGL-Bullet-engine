@@ -50,7 +50,7 @@ public abstract class ShaderModule{
 	}
 	
 	public static void register(){
-		registerModule("Light", ShaderModuleLight.class, null, "MAX_POINT_LIGHT", String.valueOf(ShaderModuleLight.MAX_POINT_LIGHT), "MAX_DIR_LIGHT", String.valueOf(ShaderModuleLight.MAX_DIR_LIGHT));
+		registerModule("Light", ShaderModuleLight.class, null, "MAX_POINT_LIGHT", String.valueOf(ShaderModuleLight.MAX_POINT_LIGHT), "MAX_DIR_LIGHT", String.valueOf(ShaderModuleLight.MAX_DIR_LIGHT), "MAX_LINE_LIGHT", String.valueOf(ShaderModuleLight.MAX_LINE_LIGHT));
 		registerModule("Fog", ShaderModuleFog.class, null);
 		registerModule("Material", ShaderModuleMaterial.class, null, "MATERIAL_MAX_COUNT", String.valueOf(ShaderModuleMaterial.MATERIAL_MAX_COUNT));
 		registerModule("Texture", ShaderModuleTexture.class, new ShaderModuleTexture.Loader());

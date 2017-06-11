@@ -1,14 +1,18 @@
 package com.lapissea.opengl.program.rendering.frustrum;
 
+import javax.vecmath.Quat4f;
+
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
+import com.lapissea.opengl.window.api.util.IRotation;
+import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 
-public class FrustrumCube implements IFrustrumShape<Vec3f,Quat4M>{
+public class FrustrumCube implements IFrustrumShape{
 	
 	private static final Vec3f START=new Vec3f(),END=new Vec3f(),VEC=new Vec3f(),SS=new Vec3f(),CP=new Vec3f();
 	
@@ -23,7 +27,6 @@ public class FrustrumCube implements IFrustrumShape<Vec3f,Quat4M>{
 	
 	
 	public FrustrumCube(Vec3f start, Vec3f end){
-		rotation.set(new Vec3f());
 		size.set(end).sub(start).mul(0.5F);
 		offset.set(start).add(end).mul(0.5F);
 	}
@@ -90,8 +93,8 @@ public class FrustrumCube implements IFrustrumShape<Vec3f,Quat4M>{
 	
 	
 	@Override
-	public boolean isVisibleAt(Vec3f pos, Frustum frustrum){
-
+	public boolean isVisibleAt(IVec3f pos, Frustum frustrum){
+		
 		
 		Vec3f scaledSize=SS.set(this.size).mul(scale);
 		
@@ -136,15 +139,27 @@ public class FrustrumCube implements IFrustrumShape<Vec3f,Quat4M>{
 	}
 	
 	@Override
-	public IFrustrumShape<Vec3f,Quat4M> withTransform(float x, float y, float z, Quat4M quat){
+	public IFrustrumShape withTransform(float x, float y, float z, IRotation quat){
 		scale.set(x, y, z);
-		this.rotation.set(quat);
+		this.rotation.set((Quat4f)quat);
 		return this;
 	}
 	
 	@Override
 	public String toString(){
 		return "Cube{size="+size+"}";
+	}
+	
+	public float getSizeX(){
+		return size.x();
+	}
+	
+	public float getSizeY(){
+		return size.y();
+	}
+	
+	public float getSizeZ(){
+		return size.z();
 	}
 	
 }
