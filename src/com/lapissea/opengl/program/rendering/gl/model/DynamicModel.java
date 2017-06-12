@@ -1,5 +1,9 @@
 package com.lapissea.opengl.program.rendering.gl.model;
 
+import java.nio.FloatBuffer;
+import java.util.function.Consumer;
+
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
@@ -12,14 +16,12 @@ import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
 import com.lapissea.opengl.window.impl.assets.Model;
 
-import it.unimi.dsi.fastutil.floats.FloatArrayList;
-import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 
 public class DynamicModel extends Model{
 	
-	private FloatList	data[];
+	private FloatBuffer	data[];
 	private boolean		dirty;
 	private Int2IntMap	vtIds	=new Int2IntArrayMap();
 	
@@ -28,14 +30,29 @@ public class DynamicModel extends Model{
 	}
 	
 	@Override
-	public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute vertexType, ModelAttribute[] attributeIds, IFrustrumShape shape){
-		if(data==null||data.length!=vbos.length) data=new FloatList[vbos.length];
-		vtIds.clear();
-		for(int i=0;i<attributeIds.length;i++){
-			vtIds.put(attributeIds[i].id, i);
-			data[i]=new FloatArrayList();
+	public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute vertexType, ModelAttribute[] attributes, IFrustrumShape shape){
+		if(onload!=null){
+			Consumer<IModel> onload0=onload;
+			onload=null;
+			super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributes, shape);
+			onload=onload0;
 		}
-		return super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributeIds, shape);
+		else super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributes, shape);
+		
+		if(data==null||data.length!=vbos.length) data=new FloatBuffer[vbos.length];
+		vtIds.clear();
+		for(int i=0;i<this.attributes.length;i++){
+			ModelAttribute att=this.attributes[i];
+			vtIds.put(att.id, i);
+			buf(i, att.size*3);
+		}
+		
+		if(onload!=null) onload.accept(this);
+		return this;
+	}
+	
+	private void buf(int i, int size){
+		data[i]=BufferUtils.createFloatBuffer(size);
 	}
 	
 	public DynamicModel pos(IVec3f vec){
@@ -72,44 +89,35 @@ public class DynamicModel extends Model{
 	
 	public DynamicModel add(ModelAttribute type, float f1, float f2, float f3, float f4){
 		if(!isLoaded()) return this;
-		FloatList buffer=add0(type, 4);
-		buffer.add(f1);
-		buffer.add(f2);
-		buffer.add(f3);
-		buffer.add(f4);
+		add0(type, 4).put(f1).put(f2).put(f3).put(f4);
 		return this;
 	}
 	
 	public DynamicModel add(ModelAttribute type, float f1, float f2, float f3){
 		if(!isLoaded()) return this;
-		FloatList buffer=add0(type, 3);
-		buffer.add(f1);
-		buffer.add(f2);
-		buffer.add(f3);
+		add0(type, 3).put(f1).put(f2).put(f3);
 		return this;
 	}
 	
 	public DynamicModel add(ModelAttribute type, float f1, float f2){
 		if(!isLoaded()) return this;
-		FloatList buffer=add0(type, 2);
-		buffer.add(f1);
-		buffer.add(f2);
+		add0(type, 2).put(f1).put(f2);
 		return this;
 	}
 	
 	public DynamicModel add(ModelAttribute type, float f){
 		if(!isLoaded()) return this;
-		add0(type, 1).add(f);
+		add0(type, 1).put(f);
 		return this;
 	}
 	
-	private FloatList add0(ModelAttribute type, int toAdd){
+	private FloatBuffer add0(ModelAttribute type, int toAdd){
 		if(type.size!=toAdd) throw new IllegalAccessError("Bad attibute size!"+type.size+"/"+toAdd);
 		int id=vtIds.get(type.id);
-		
-		//		ensureSize((buff[id]==null?0:buff[id].capacity())/type.size+1);
+		FloatBuffer b=data[id];
+		if(b.capacity()<=b.position()+toAdd) b=data[id]=BufferUtil.expand(b, b.position()+toAdd);
 		dirty=true;
-		return data[id];
+		return b;
 	}
 	
 	@Override
@@ -125,27 +133,34 @@ public class DynamicModel extends Model{
 	}
 	
 	private void upload(){
-		vertexCount=data[0].size()/getAttribute(0).size;
+		vertexCount=data[0].position()/getAttribute(0).size;
+		
+		if(glDrawId!=GL11.GL_LINES){
+			data[0].flip();
+			shape=ModelLoader.calcShape(data[0], getVertexType().size);
+			data[0].position(data[0].limit());
+		}
+		
 		for(int i=1;i<getAttributeCount();i++){
-			int size=data[i].size()/getAttribute(i).size;
+			int size=data[i].position()/getAttribute(i).size;
+			
 			if(size!=vertexCount){
 				StringBuilder b=new StringBuilder("bad size ").append(size).append('/').append(vertexCount).append(" on ").append(getAttribute(i)).append("\nList of all attributes:\n");
 				for(int j=0;j<getAttributeCount();j++){
-					b.append('\t').append(getAttribute(j)).append(": \t").append(data[j].size()).append(" - ").append(data[j].size()/(float)getAttribute(j).size).append('\n');
+					b.append('\t').append(getAttribute(j)).append(": \t").append(data[j].position()).append(" - ").append(data[j].position()/(float)getAttribute(j).size).append('\n');
 				}
 				throw new IllegalStateException(b.toString());
 			}
 		}
+		
 		GL30.glBindVertexArray(vao);
 		for(int i=0;i<getAttributeCount();i++){
-			float[] f=data[i].toFloatArray();
-			
-			if(glDrawId!=GL11.GL_LINES&&getAttribute(i).attributeName.startsWith("VERTEX_")) shape=ModelLoader.calcShape(f, getVertexType().size);
-			
+			FloatBuffer f=data[i];
+			f.flip();
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbos[i]);
-			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, BufferUtil.store(f), GL15.GL_STREAM_DRAW);
-			data[i].clear();
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, f, GL15.GL_STREAM_DRAW);
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+			f.clear();
 		}
 		dirty=false;
 	}

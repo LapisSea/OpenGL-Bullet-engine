@@ -10,10 +10,13 @@ public class GameStart{
 	public static LapisClassLoader GAME_LOADER;
 	
 	public static final long START_TIME=System.nanoTime();
+	static{
+		System.err.println(START_TIME);
+	}
 	
 	public static void main(String[] args) throws Exception{
-//		JSONObject o=UtilM.jsonObj(new WindowConfig("lel"));
-//		System.out.println(UtilM.compressTypes(o).toString(4));
+		//		JSONObject o=UtilM.jsonObj(new WindowConfig("lel"));
+		//		System.out.println(UtilM.compressTypes(o).toString(4));
 		
 		SplashScreenHost.open("Splash.jar", "LWJGL 2 game");
 		Thread.sleep(1);
@@ -27,7 +30,7 @@ public class GameStart{
 		SplashScreenHost.sendMsg("Init loader!");
 		SplashScreenHost.sendPercent(0.2F);
 		
-		Class.forName(GameStart.class.getPackage().getName()+".Launch", true, GAME_LOADER).getDeclaredMethod("main", String[].class).invoke(null, new Object[]{args});
+		Class.forName(GameStart.class.getPackage().getName()+".Launch", true, GAME_LOADER).getDeclaredMethod("start", String[].class).invoke(null, new Object[]{args});
 	}
 	
 }

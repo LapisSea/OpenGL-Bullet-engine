@@ -117,7 +117,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 				0,0,
 				1,1,
 				0,1,
-		},"textures","particle/SoftBloom"));
+		}, "textures", "particle/SoftBloom"));
 		
 	}
 	
@@ -248,17 +248,13 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	public void renderWorld(){
-		worldFbo.setRenderBufferType(true).setSample(4);
-		
-		worldFbo.setSize(Game.win().getSize());
-		worldFbo.bind();
 		
 		World world=Game.get().world;
 		float pt=Game.getPartialTicks();
 		double sunPos=world.getSunPos(pt)*Math.PI*2;
 		float bright=(float)world.getSunBrightness(pt);
 		
-		ColorM moonCol=new ColorM(0,0,0);
+		ColorM moonCol=new ColorM(0, 0, 0);
 		
 		
 		List<Entity> entitys=Game.get().world.getAll();
@@ -305,12 +301,18 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		potentialRenders=actualRenders=0;
 		
 		
+//		worldFbo.setRenderBufferType(false).setSample(4);
+		
+		worldFbo.setSize(Game.win().getSize());
+		worldFbo.bind();
+		
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
 		GLUtil.CULL_FACE.set(CullFace.BACK);
 		GLUtil.CULL_FACE.set(true);
 		//		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
 		GLUtil.BLEND.set(true);
-		
+
+		worldFbo.bind();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
 		//BACKGROUND
@@ -318,13 +320,13 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		GL11.glDepthMask(false);
 		GLUtil.DEPTH_TEST.set(false);
 		
-		
-		if(SKY_RESOLUTION_DEVIDER>1){
+		if(worldFbo.getRenderBufferType()&&SKY_RESOLUTION_DEVIDER>1){
+			GLUtil.MULTISAMPLE.set(false);
 			skyFbo.setSize(worldFbo.getWidth()/SKY_RESOLUTION_DEVIDER, worldFbo.getHeight()/SKY_RESOLUTION_DEVIDER);
 			skyFbo.bind();
 			Shaders.SKYBOX.render();
-			worldFbo.bind();
 			skyFbo.copyTo(worldFbo, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_LINEAR);
+			GLUtil.MULTISAMPLE.set(true);
 		}
 		else{
 			skyFbo.delete();

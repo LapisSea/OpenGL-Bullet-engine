@@ -103,7 +103,6 @@ public class Fbo{
 	
 	public void bind(){
 		create();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, id);
 		GLUtil.viewport(getWidth(), getHeight());
 	}
@@ -229,7 +228,7 @@ public class Fbo{
 		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, id);
 		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, dest.id);
 		GL30.glBlitFramebuffer(0, 0, getWidth(), getHeight(), 0, 0, dest.getWidth(), dest.getHeight(), what, how);
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, dest.id);
+		dest.bind();
 	}
 	
 	public void copyColorToScreen(){

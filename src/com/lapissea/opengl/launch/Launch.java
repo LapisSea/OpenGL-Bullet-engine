@@ -16,7 +16,14 @@ import com.lapissea.util.LogUtil;
 public class Launch{
 	
 	
-	public static void main(String[] args){
+	public static void start(String[] args){
+		try{
+			new Test().lel();
+		}catch(Throwable e){
+			e.printStackTrace();
+		}
+		System.exit(0);
+		
 		try{
 			LogUtil.__.INJECT_FILE_LOG(OperatingSystem.APP_DATA+"/OpenGL engine/log.txt");
 			SingleInstanceProgram.check();
@@ -57,7 +64,7 @@ public class Launch{
 			SplashScreenHost.sendPercent(0.4F);
 			try{
 				SplashScreenHost.sendMsg("Creating window...");
-				window.setPos(new Vec2i(-10000,-10000));
+				window.setPos(new Vec2i(-10000, -10000));
 				window.setSize(new Vec2i());
 				
 				window.setTitle("LWJGL 2 game");

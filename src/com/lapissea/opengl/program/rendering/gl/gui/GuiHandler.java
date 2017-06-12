@@ -100,7 +100,6 @@ public class GuiHandler{
 			if(first)first=false;
 			drawFbo.bind();
 			
-			
 			UtilM.doAndClear(l, e->{
 				List<ITexture> tx=e.getModel().getTextures();
 				if(tx.isEmpty()) tx.add(lastZLayer.getTexture());

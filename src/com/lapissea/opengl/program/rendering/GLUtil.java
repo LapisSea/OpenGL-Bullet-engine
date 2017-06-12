@@ -3,6 +3,7 @@ package com.lapissea.opengl.program.rendering;
 import java.util.function.Consumer;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.OpenGLException;
 
@@ -122,6 +123,7 @@ public class GLUtil{
 	
 	public static final IGlStateBool			DEPTH_TEST	=new GlBool(GL11.GL_DEPTH_TEST);
 	public static final IGlStateBool			BLEND		=new GlBool(GL11.GL_BLEND);
+	public static final IGlStateBool			MULTISAMPLE	=new GlBool(GL13.GL_MULTISAMPLE);
 	public static final IGlStateMix<CullFace>	CULL_FACE	=new GlMix<>(GL11.GL_CULL_FACE, v->GL11.glCullFace(v.key));
 	public static final IGlStateObj<BlendFunc>	BLEND_FUNC	=new GlObj<>(v->GL11.glBlendFunc(v.sfactor, v.dfactor));
 	public static final IGlStateObj<IColorM>	CLEAR_COLOR	=new GlObj<>(v->GL11.glClearColor(v.r(), v.g(), v.b(), v.a()));

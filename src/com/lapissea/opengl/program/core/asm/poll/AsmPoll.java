@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 public class AsmPoll{
 	
-	@Retention(RetentionPolicy.RUNTIME)
+	@Retention(RetentionPolicy.CLASS)
 	@Target(ElementType.TYPE)
 	public static @interface AsmPolling{}
 	

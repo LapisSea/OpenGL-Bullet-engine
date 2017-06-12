@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.lapissea.opengl.program.util.UtilM;
-
 public class PrefixTree<T>{
 	
 	private class Node{
@@ -143,9 +141,8 @@ public class PrefixTree<T>{
 		void getStartMatchesReverse(String name, int start, Consumer<T> hook){
 			int end=start+l,len=name.length();
 			boolean match=name.regionMatches(start, namePart, 0, Math.min(len, end)-start);
-			System.out.println(UtilM.stringFill(start, ' ')+namePart+"\n"+name+" "+(len>end)+" "+match);
 			
-			if(len>end&&match){
+			if(len>=end&&match){
 				if(hasValue) hook.accept(value);
 			}
 			else if(!match) return;
@@ -167,13 +164,6 @@ public class PrefixTree<T>{
 		
 		@Override
 		void getStartMatches(String name, int start, Consumer<T> hook){
-			for(Node node:children){
-				node.getStartMatches(name, start, hook);
-			}
-		}
-		
-		@Override
-		void getStartMatchesReverse(String name, int start, Consumer<T> hook){
 			for(Node node:children){
 				node.getStartMatches(name, start, hook);
 			}

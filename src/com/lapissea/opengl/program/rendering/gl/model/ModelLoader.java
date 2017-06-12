@@ -3,6 +3,7 @@ package com.lapissea.opengl.program.rendering.gl.model;
 import static com.lapissea.opengl.window.assets.ModelAttribute.*;
 
 import java.lang.reflect.Constructor;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -404,7 +405,7 @@ public class ModelLoader{
 			boolean hasIds=indices!=null;
 			
 			if(hasIds) bindIndices(indices);
-			if(vertex!=null) putAttribute(vbos, attributes, vertexType, vertex);
+			putAttribute(vbos, attributes, vertexType, vertex);
 			for(int i=0;i<data.length;i++){
 				putAttribute(vbos, attributes, attrs[i], data[i]);
 			}
@@ -464,6 +465,32 @@ public class ModelLoader{
 	//		
 	//		return model;
 	//	}
+	
+	public static IFrustrumShape calcShape(FloatBuffer vert, int dimensions){
+		if(vert.limit()==0) return new FrustrumBool(false);
+		
+		Vec3f start=new Vec3f(),end=new Vec3f();
+		
+		for(int i=0;i<vert.limit();i+=dimensions){
+			float p1=vert.get(i+0);
+			start.x(Math.min(start.x(), p1));
+			end.x(Math.max(end.x(), p1));
+			
+			if(dimensions>1){
+				float p2=vert.get(i+1);
+				start.y(Math.min(start.y(), p2));
+				end.y(Math.max(end.y(), p2));
+				
+				if(dimensions>2){
+					float p3=vert.get(i+2);
+					start.z(Math.min(start.z(), p3));
+					end.z(Math.max(end.z(), p3));
+				}
+			}
+		}
+		
+		return new FrustrumCube(start, end);
+	}
 	
 	public static IFrustrumShape calcShape(float[] vert, int dimensions){
 		if(vert.length==0) return new FrustrumBool(false);
