@@ -1,21 +1,13 @@
 package com.lapissea.opengl.program.core.asm.poll;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 public class AsmPoll{
 	
-	@Retention(RetentionPolicy.CLASS)
-	@Target(ElementType.TYPE)
-	public static @interface AsmPolling{}
-	
 	/**
-	 * NOT MULTI THREAD SAFE
+	 * <b>NOT MULTI THREAD SAFE</b> <br>
+	 * Example:<br><code>FooBar fobr=AsmPoll.get(FooBar.class);</code>
 	 */
 	public static <T> T get(Class<T> c){
-		throw new RuntimeException("ASM FAILED TO REPLACE! (did you add @AsmPolling to class?)");
+		throw new RuntimeException("ASM FAILED TO REPLACE! (did you add @Asmfied to class and used a compile know type?)");
 	}
 	
 	//LDC L__CLASS_NAME__.class

@@ -2,10 +2,13 @@ package com.lapissea.opengl.program.core.asm;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
 import com.lapissea.opengl.program.core.asm.poll.TransformerAsmPoll;
 import com.lapissea.opengl.program.util.data.PrefixTree;
@@ -24,19 +27,6 @@ public class LapisClassLoader extends URLClassLoader{
 		transformers.put(domain, transformer);
 	}
 	
-	private byte[] loadClassData(String name) throws IOException{
-		// Opening the file
-		InputStream stream=ClassLoader.getSystemClassLoader().getResourceAsStream(name);
-		int size=stream.available();
-		byte buff[]=new byte[size];
-		DataInputStream in=new DataInputStream(stream);
-		// Reading the binary data
-		in.readFully(buff);
-		in.close();
-		return buff;
-	}
-	
-	
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException{
 		synchronized(getClassLoadingLock(name)){
@@ -52,20 +42,42 @@ public class LapisClassLoader extends URLClassLoader{
 	
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException{
-		String file=name.replace('.', File.separatorChar)+".class";
 		try{
-			byte[] classData=loadClassData(file);
+			InputStream stream=ClassLoader.getSystemClassLoader().getResourceAsStream(name.replace('.', File.separatorChar)+".class");
+			
+			int size=stream.available();
+			byte[] classData=new byte[size];
+			DataInputStream in=new DataInputStream(stream);
+			in.readFully(classData);
+			stream.close();
+			
 			searchResult.clear();
-			for(ClassTransformer classTransformer:transformers.getStartMatchesReverse(name, searchResult)){
-				try{
-					classData=classTransformer.transform(name, classData);
-				}catch(Throwable e){
-					e.printStackTrace();
-					System.exit(2);
+			transformers.getStartMatchesReverse(name, searchResult);
+			if(searchResult.size()>0){
+				ClassReader reader=new ClassReader(classData);
+				ClassNode node=new ClassNode();
+				reader.accept(node, ClassReader.EXPAND_FRAMES);
+				
+				if(AsmUtil.hasAnnotation(node, Asmfied.class)){
+					boolean dirty=false;
+					
+					for(ClassTransformer classTransformer:searchResult){
+						try{
+							if(classTransformer.transform(name, node)) dirty=true;
+						}catch(Throwable e){
+							e.printStackTrace();
+							System.exit(2);
+						}
+					}
+					if(dirty){
+						ClassWriter writer=new ClassWriter(ClassWriter.COMPUTE_FRAMES|ClassWriter.COMPUTE_MAXS);
+						node.accept(writer);
+						classData=writer.toByteArray();
+						
+					}
 				}
 			}
 			Class<?> c=defineClass(name, classData, 0, classData.length);
-			classData=null;
 			resolveClass(c);
 			return c;
 		}catch(Exception e){

@@ -10,9 +10,6 @@ public class GameStart{
 	public static LapisClassLoader GAME_LOADER;
 	
 	public static final long START_TIME=System.nanoTime();
-	static{
-		System.err.println(START_TIME);
-	}
 	
 	public static void main(String[] args) throws Exception{
 		//		JSONObject o=UtilM.jsonObj(new WindowConfig("lel"));

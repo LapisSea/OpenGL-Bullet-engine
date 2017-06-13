@@ -307,4 +307,18 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 		return this;
 	}
 	
+	@Override
+	public String toString(){
+		StringBuilder sb = new StringBuilder(20);
+
+		sb.append("Vec3f[");
+		sb.append(x);
+		sb.append(", ");
+		sb.append(y);
+		sb.append(", ");
+		sb.append(z);
+		sb.append(']');
+		return sb.toString();
+	}
+	
 }
