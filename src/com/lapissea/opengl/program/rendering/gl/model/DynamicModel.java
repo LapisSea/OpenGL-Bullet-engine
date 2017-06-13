@@ -76,15 +76,15 @@ public class DynamicModel extends Model{
 	}
 	
 	public DynamicModel mater(int id){
-		return add(ModelAttribute.MAERIAL_ID_ATTR, id);
+		return add(ModelAttribute.MATERIAL_ID_ATTR, id);
 	}
 	
 	public DynamicModel coler(IColorM color){
-		return add(ModelAttribute.MAERIAL_ID_ATTR, color.r(), color.g(), color.b(), color.a());
+		return add(ModelAttribute.MATERIAL_ID_ATTR, color.r(), color.g(), color.b(), color.a());
 	}
 	
 	public DynamicModel coler(float r, float g, float b, float a){
-		return add(ModelAttribute.MAERIAL_ID_ATTR, r, g, b, a);
+		return add(ModelAttribute.MATERIAL_ID_ATTR, r, g, b, a);
 	}
 	
 	public DynamicModel add(ModelAttribute type, float f1, float f2, float f3, float f4){

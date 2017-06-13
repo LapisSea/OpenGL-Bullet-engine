@@ -358,7 +358,7 @@ public class ModelLoader{
 		
 		if(vert.length%vertexType.size!=0) throw new IllegalArgumentException(vert.length+" is not a valid vertex count for dimensions of "+vertexType.size+" in model "+name);
 		
-		T model=create(type, name, format, hasIds?indices:null, vertexType, vert, new float[][]{uvs,normals,materialIds,primitiveColor}, UV_ATTR, NORMAL_ATTR, MAERIAL_ID_ATTR, COLOR_ATTR);
+		T model=create(type, name, format, hasIds?indices:null, vertexType, vert, new float[][]{uvs,normals,materialIds,primitiveColor}, UV_ATTR, NORMAL_ATTR, MATERIAL_ID_ATTR, COLOR_ATTR);
 		
 		//INJECT TEXTURE
 		UtilM.iterate(data.get("textures"), obj->model.addTexture(obj instanceof ITexture?(ITexture)obj:TextureLoader.loadTexture((String)obj)));

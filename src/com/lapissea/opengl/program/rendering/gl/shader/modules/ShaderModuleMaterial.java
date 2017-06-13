@@ -40,7 +40,7 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 	
 	@Override
 	public void bindAttributes(){
-		bindAttribute(ModelAttribute.MAERIAL_ID_ATTR);
+		bindAttribute(ModelAttribute.MATERIAL_ID_ATTR);
 	}
 	
 	@Override
