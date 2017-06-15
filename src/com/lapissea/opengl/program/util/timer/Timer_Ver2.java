@@ -1,6 +1,5 @@
-package com.lapissea.opengl.program;
+package com.lapissea.opengl.program.util.timer;
 
-import com.lapissea.opengl.program.core.GameTimer;
 import com.lapissea.util.LogUtil;
 
 public class Timer_Ver2 extends GameTimer{
