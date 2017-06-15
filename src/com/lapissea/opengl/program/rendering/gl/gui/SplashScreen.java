@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
+import com.lapissea.opengl.program.rendering.gl.Fbo;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
@@ -72,6 +73,7 @@ public class SplashScreen{
 			super.setUpUniforms();
 			tim=getUniform(UniformFloat1.class, "tim");
 		}
+		
 		@Override
 		public void prepareGlobal(){
 			super.prepareGlobal();
@@ -121,7 +123,10 @@ public class SplashScreen{
 			}
 		}
 		
+		GLUtil.checkError();
+		Fbo.bindDefault();
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GLUtil.checkError();
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK);
 		double tim=System.currentTimeMillis();
@@ -129,8 +134,8 @@ public class SplashScreen{
 				(float)Math.sin((tim/500)%(Math.PI*2))*0.1F,
 				(float)Math.sin((tim/1500)%(Math.PI*2))*0.1F,
 				(float)Math.sin((tim/2000)%(Math.PI*2))*0.1F, 1), new Vec3f(scale, scale, scale)), model);
-		Game.win().swapBuffers(60);
-		//Game.get().loadGLData();
+		GLUtil.checkError();
+		Game.win().swapBuffers();
 		GLUtil.checkError();
 	}
 	

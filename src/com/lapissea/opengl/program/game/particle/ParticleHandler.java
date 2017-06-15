@@ -14,13 +14,12 @@ import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.util.NanoTimer;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
-import com.lapissea.util.LogUtil;
 
 @SuppressWarnings("unchecked")
 public class ParticleHandler<T extends Particle<T>>{
 	
 	private final List<T>			particles	=new ArrayList<>();
-	public final Class<T>				type;
+//	public final Class<T>				type;
 	private boolean						deadDirty;
 	private final ParticleFactory<T>	factory;
 	
@@ -35,7 +34,6 @@ public class ParticleHandler<T extends Particle<T>>{
 	}
 	
 	public ParticleHandler(ParticleFactory<T> factory){
-		this.type=(Class<T>)factory.create(this, new Vec3f()).getClass();
 		this.factory=factory;
 	}
 	
@@ -57,7 +55,7 @@ public class ParticleHandler<T extends Particle<T>>{
 		}
 		else particles.forEach(Particle::update);
 		upd.end();
-		LogUtil.println(upd.msAvrg100(),rend.msAvrg100());
+//		LogUtil.println(upd.msAvrg100(),rend.msAvrg100());
 	}
 	
 	public void render(){

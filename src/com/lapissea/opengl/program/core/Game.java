@@ -7,6 +7,7 @@ import java.util.List;
 import org.lwjgl.opengl.OpenGLException;
 
 import com.lapissea.opengl.launch.GameStart;
+import com.lapissea.opengl.program.Timer_Ver2;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
@@ -37,7 +38,7 @@ public class Game{
 	}
 	
 	public final Registry	registry=new Registry();
-	public Timer			timer;
+	public GameTimer		timer;
 	public Renderer			renderer;
 	public World			world;
 	public final ILWJGLCtx	glCtx;
@@ -56,11 +57,15 @@ public class Game{
 		SplashScreenHost.sendMsg("Loading assets...!");
 		SplashScreenHost.sendPercent(0.8F);
 		ShaderModule.register();
-		SplashScreen screen=new SplashScreen();
-		timer=new Timer(20, 4000, screen::update, screen::render);
 		
-		UtilM.startDaemonThread(timer, "Timer thread");
+		timer=new Timer_Ver2(20, 60);
+		timer.setInfiniteFps(!win().getVSync());
+		
 		new Thread(()->{
+			SplashScreen screen=new SplashScreen();
+			timer.setUpdate(screen::update);
+			timer.setRender(screen::render);
+			
 			renderer=new Renderer();
 			initContent();
 			registry.preInit();
@@ -73,12 +78,14 @@ public class Game{
 			screen.end();
 			SplashScreenHost.sendPercent(0.9999F);
 			LogUtil.printWrapped("=======GAME_RUN=======");
-			timer.setUpdateHook(this::update);
-			timer.setRenderHook(this::render);
+			timer.setUpdate(this::update);
+			timer.setRender(this::render);
 		}, "Loading thread").start();
 		
 		while(timer.isRunning()){
-			timer.runUpdateRender();
+			timer.runUpdate();
+			timer.runRender();
+			UtilM.sleep(1);
 		}
 		
 	}
@@ -95,17 +102,20 @@ public class Game{
 	}
 	
 	private void render(){
+		//		Display.sync(60);
+		timer.setInfiniteFps(false);
 		if(win().isClosed()){
 			timer.end();
 			return;
 		}
 		loadGLData();
+		win().updateInput();
 		if(first){
 			first=false;
 			LogUtil.printWrapped("LOADED IN: "+(System.nanoTime()-GameStart.START_TIME)/1000_000_000D);
 			WindowConfig winCfg=Config.getConfig(WindowConfig.class, "win_startup");
-			win().setSize(winCfg.size);
-			win().setPos(winCfg.position);
+			//			win().setSize(winCfg.size);
+			//			win().setPos(winCfg.position);
 			new Thread(()->{
 				UtilM.sleep(100);
 				SplashScreenHost.close();
@@ -116,7 +126,7 @@ public class Game{
 		}catch(OpenGLException e){
 			e.printStackTrace();
 		}
-		win().swapBuffers(timer.getTargetedFps());
+		win().swapBuffers();
 	}
 	
 	public synchronized void loadGLData(){

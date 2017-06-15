@@ -32,7 +32,7 @@ public class EntityPlayer extends EntityUpd{
 	@Override
 	public void update(){
 		updatePrevs();
-		if(!model.getFrustrumShape().withTransform(scale, rot).isVisibleAt(pos, Game.get().renderer.frustrum)){
+		if(model.isLoaded()&&!model.getFrustrumShape().withTransform(scale, rot).isVisibleAt(pos, Game.get().renderer.frustrum)){
 			Vec3f vec=new Vec3f(0,-((FrustrumCube)model.getFrustrumShape()).getSizeY()*scale.y()*2,0);
 			rot.rotate(vec);
 			

@@ -42,6 +42,7 @@ import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.events.FocusEvent;
 import com.lapissea.opengl.window.api.events.KeyEvent;
 import com.lapissea.opengl.window.api.events.KeyEvent.KeyAction;
 import com.lapissea.opengl.window.api.events.MouseButtonEvent;
@@ -151,23 +152,23 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		camera.update();
 		particleHandler.update();
 		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
 	}
 	
 	@Override
@@ -203,6 +204,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	@Override
 	public void onMouseMove(MouseMoveEvent e){
+		if(!Game.isPaused()) getCamera().onMouseMove(e);
 		Gui openGui=guiHandler.getOpenGui();
 		if(openGui==null) return;
 		openGui.onMouseMove(e);
@@ -218,6 +220,10 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	
+	@Override
+	public void onFocus(FocusEvent e){
+		if(!e.focused) Mouse.setGrabbed(false);
+	}
 	
 	@Override
 	public void onResize(ResizeEvent e){
@@ -301,7 +307,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		potentialRenders=actualRenders=0;
 		
 		
-//		worldFbo.setRenderBufferType(false).setSample(4);
+		worldFbo.setRenderBufferType(false).setSample(4);
 		
 		worldFbo.setSize(Game.win().getSize());
 		worldFbo.bind();
@@ -311,7 +317,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		GLUtil.CULL_FACE.set(true);
 		//		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
 		GLUtil.BLEND.set(true);
-
+		
 		worldFbo.bind();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
@@ -320,7 +326,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		GL11.glDepthMask(false);
 		GLUtil.DEPTH_TEST.set(false);
 		
-		if(worldFbo.getRenderBufferType()&&SKY_RESOLUTION_DEVIDER>1){
+		if(!worldFbo.getRenderBufferType()&&SKY_RESOLUTION_DEVIDER>1){
 			GLUtil.MULTISAMPLE.set(false);
 			skyFbo.setSize(worldFbo.getWidth()/SKY_RESOLUTION_DEVIDER, worldFbo.getHeight()/SKY_RESOLUTION_DEVIDER);
 			skyFbo.bind();

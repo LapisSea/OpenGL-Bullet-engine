@@ -4,9 +4,7 @@ import java.util.Objects;
 
 import com.lapissea.opengl.program.util.UtilM;
 
-public class Timer implements Runnable{
-	
-	private static final int SECOND=1000_000_000;
+public class TimerOld extends GameTimer{
 	
 	private long		lastTimeUpdated;
 	private long		lastTimeRendered;
@@ -24,20 +22,15 @@ public class Timer implements Runnable{
 	private int			ctxFrames;
 	private boolean		render;
 	private boolean		running		=true;
-	private boolean		restrictFps	=true;
+	private boolean		infiniteFps	=true;
 	private float		partialUpdate;
 	private Runnable	updateHook;
 	private Runnable	renderHook;
 	
-	public Timer(int ups, int fps, Runnable updateHook, Runnable renderHook){
-		setUPS(ups);
-		setFPS(fps);
-		setUpdateHook(updateHook);
-		setRenderHook(renderHook);
-	}
 	
-	private long time(){
-		return System.nanoTime();
+	
+	public TimerOld(int ups, int fps, Runnable update, Runnable render){
+		super(ups, fps, update, render);
 	}
 	
 	private void update(){
@@ -48,7 +41,7 @@ public class Timer implements Runnable{
 			updateQueue++;
 		}
 		time=time();
-		if(!restrictFps||time-lastTimeRendered>=fp){
+		if(!infiniteFps||time-lastTimeRendered>=fp){
 			render=true;
 		}
 		time=time();
@@ -63,73 +56,64 @@ public class Timer implements Runnable{
 		//UtilM.sleep(0, 500000);
 	}
 	
-	public void runUpdateRender(){
-		while(updateQueue>0){
-			updateHook.run();
-			updateQueue--;
-			updatesCount++;
-		}
-		
-		if(!restrictFps) render();
-		else if(render){
-			render=false;
-			render();
-			lastTimeRendered=time();
-			throttleLooping();
-		}
-		UtilM.sleep(0, 500000);
-	}
-	
 	private void render(){
 		partialUpdate=(float)(((double)(time())-lastTimeUpdated)/SECOND*ups);
 		renderHook.run();
 		framesCount++;
 	}
 	
-	@Override
-	public void run(){
+	public GameTimer run(){
 		running=true;
 		while(running){
 			update();
 			throttleLooping();
 		}
+		return this;
 	}
 	
 	/**
 	 * Save CPU from checking if anything should update many times in a millisecond
 	 */
 	private void throttleLooping(){
-		if(restrictFps&&fps<ctxFrames*1.2&&ups<ctxUpdates*1.2) UtilM.sleep(0, 500000);
+		if(infiniteFps&&fps<ctxFrames*1.2&&ups<ctxUpdates*1.2) UtilM.sleep(0, 500000);
 	}
 	
+	@Override
 	public void end(){
 		running=false;
 	}
 	
-	public void setUPS(int ups){
+	@Override
+	public GameTimer setUps(int ups){
 		this.ups=ups;
 		up=SECOND/ups;
+		return this;
 	}
 	
-	public void setFPS(int fps){
+	@Override
+	public GameTimer setFps(int fps){
 		this.fps=fps;
 		fp=SECOND/fps;
+		return this;
 	}
 	
+	@Override
 	public int getFps(){
 		return ctxFrames;
 	}
 	
+	@Override
 	public int getUps(){
 		return ctxUpdates;
 	}
 	
+	@Override
 	public float getPartialTick(){
 		return partialUpdate;
 	}
 	
 	public int getTargetedFps(){
-		return restrictFps?fps:(int)Double.POSITIVE_INFINITY;
+		return infiniteFps?fps:(int)Double.POSITIVE_INFINITY;
 	}
 	
 	public int getTargetedUps(){
@@ -137,21 +121,71 @@ public class Timer implements Runnable{
 	}
 	
 	public void setFpsRestriction(boolean restrict){
-		restrictFps=restrict;
+		infiniteFps=restrict;
 	}
 	
+	@Override
 	public boolean isRunning(){
 		return running;
 	}
-
 	
-	public void setUpdateHook(Runnable updateHook){
+	
+	@Override
+	public GameTimer setUpdate(Runnable updateHook){
 		this.updateHook=Objects.requireNonNull(updateHook);
+		return this;
 	}
-
 	
-	public void setRenderHook(Runnable renderHook){
+	
+	@Override
+	public GameTimer setRender(Runnable renderHook){
 		this.renderHook=Objects.requireNonNull(renderHook);
+		return this;
 	}
+	
+	@Override
+	public float getSpeed(){
+		return 1;
+	}
+	
+	@Override
+	public GameTimer setSpeed(int fps){
+		return this;
+	}
+	
+	@Override
+	public GameTimer runUpdate(){
+		while(updateQueue>0){
+			updateHook.run();
+			updateQueue--;
+			updatesCount++;
+		}
+		return this;
+	}
+	
+	@Override
+	public GameTimer runRender(){
+		if(infiniteFps) render();
+		else if(render){
+			render=false;
+			render();
+			lastTimeRendered=time();
+			throttleLooping();
+		}
+		return this;
+		
+	}
+	
+	@Override
+	public GameTimer setInfiniteFps(boolean flag){
+		infiniteFps=flag;
+		return this;
+	}
+	
+	@Override
+	public boolean getInfiniteFps(){
+		return infiniteFps;
+	}
+	
 	
 }

@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.core;
 
-import com.lapissea.opengl.program.game.terrain.Terrain;
+import com.lapissea.opengl.program.game.terrain.Chunk;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
@@ -30,10 +30,10 @@ public class GameSettings extends Config{
 		World.PHYSICS_CUBE_AMMOUNT=physicsCubeAmmount;
 		World.CHUNK_GRID_SIZE=chunkGridSize;
 		
-		Terrain.GRASS_MIN=perChunkGrassMin;
-		Terrain.GRASS_RAND=perChunkGrassRand;
-		Terrain.RESOLUTION=chunkResolution;
-		Terrain.WORLD_H=chunkHeight;
+		Chunk.GRASS_MIN=perChunkGrassMin;
+		Chunk.GRASS_RAND=perChunkGrassRand;
+		Chunk.RESOLUTION=chunkResolution;
+		Chunk.WORLD_H=chunkHeight;
 	}
 	
 	
@@ -62,10 +62,10 @@ public class GameSettings extends Config{
 		World.PHYSICS_CUBE_AMMOUNT=physicsCubeAmmount;
 		World.CHUNK_GRID_SIZE=chunkGridSize;
 		
-		Terrain.GRASS_MIN=perChunkGrassMin;
-		Terrain.GRASS_RAND=perChunkGrassRand;
-		Terrain.RESOLUTION=chunkResolution;
-		Terrain.WORLD_H=chunkHeight;
+		Chunk.GRASS_MIN=perChunkGrassMin;
+		Chunk.GRASS_RAND=perChunkGrassRand;
+		Chunk.RESOLUTION=chunkResolution;
+		Chunk.WORLD_H=chunkHeight;
 	}
 	
 	

@@ -567,7 +567,6 @@ public class ModelLoader{
 		int vbo=GL15.glGenBuffers();
 		
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vbo);
-		
 		GL15.glBufferSubData(GL15.GL_ELEMENT_ARRAY_BUFFER, 0, BufferUtil.store(indicies));
 		
 	}

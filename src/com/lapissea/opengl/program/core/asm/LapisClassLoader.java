@@ -10,7 +10,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
-import com.lapissea.opengl.program.core.asm.poll.TransformerAsmPoll;
 import com.lapissea.opengl.program.util.data.PrefixTree;
 
 public class LapisClassLoader extends URLClassLoader{
@@ -20,25 +19,26 @@ public class LapisClassLoader extends URLClassLoader{
 	
 	public LapisClassLoader(URLClassLoader parent){
 		super(parent.getURLs(), parent);
-		TransformerAsmPoll.register(this);
+		//		TransformerAsmPoll.register(this);
 	}
 	
 	public void registerTransformer(String domain, ClassTransformer transformer){
 		transformers.put(domain, transformer);
 	}
 	
-	@Override
-	public Class<?> loadClass(String name) throws ClassNotFoundException{
-		synchronized(getClassLoadingLock(name)){
-			Class<?> c=findLoadedClass(name);
-			
-			if(c==null){
-				if(name.startsWith("com.lapissea")) return findClass(name);
-				return super.loadClass(name);
-			}
-			return c;
-		}
-	}
+//	@Override
+//	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+//		synchronized(getClassLoadingLock(name)){
+//			Class<?> c=findLoadedClass(name);
+//			if(c==null){
+//				if(name.startsWith("com.lapissea")){
+//					return findClass(name);
+//				}
+//				return super.loadClass(name, resolve);
+//			}
+//			return c;
+//		}
+//	}
 	
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException{

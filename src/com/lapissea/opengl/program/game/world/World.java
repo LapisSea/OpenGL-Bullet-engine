@@ -36,8 +36,8 @@ import com.lapissea.opengl.program.game.entity.entitys.EntityCrazyCube;
 import com.lapissea.opengl.program.game.entity.entitys.EntityPlayer;
 import com.lapissea.opengl.program.game.entity.entitys.EntityTree;
 import com.lapissea.opengl.program.game.events.Updateable;
+import com.lapissea.opengl.program.game.terrain.Chunk;
 import com.lapissea.opengl.program.game.terrain.IHeightMapProvider;
-import com.lapissea.opengl.program.game.terrain.Terrain;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
@@ -56,7 +56,7 @@ public class World{
 	private long			ticksPassed;
 	private double			dayDuration			=1000;
 	
-	public final OffsetArray<OffsetArray<Terrain>> terrains=new OffsetArray<>();
+	public final OffsetArray<OffsetArray<Chunk>> chunks=new OffsetArray<>();
 	
 	public World(){
 		setUpPhysics();
@@ -130,7 +130,7 @@ public class World{
 			y/=2;
 			x*=img.getWidth();
 			y*=img.getHeight();
-			return new Color(img.getRGB((int)Math.abs(x)%img.getWidth(), (int)Math.abs(y)%img.getHeight())).getRed()*Terrain.WORLD_H/26F;
+			return new Color(img.getRGB((int)Math.abs(x)%img.getWidth(), (int)Math.abs(y)%img.getHeight())).getRed()*Chunk.WORLD_H/26F;
 			//			double h=SimplexNoise.noise(x, y);
 			//			h-=0.5;
 			//			
@@ -142,15 +142,15 @@ public class World{
 		
 		
 		IntStream.range(0, CHUNK_GRID_SIZE).parallel().forEach(x->IntStream.range(0, CHUNK_GRID_SIZE).forEach(z->{
-			Terrain t=new Terrain(x-CHUNK_GRID_SIZE/2, z-CHUNK_GRID_SIZE/2, hMap);
-			synchronized(terrains){
+			Chunk t=new Chunk(x-CHUNK_GRID_SIZE/2, z-CHUNK_GRID_SIZE/2, hMap);
+			synchronized(chunks){
 				addChunk(t);
 			}
 		}));
 		
 		LogUtil.println("Done!");
 		
-		int worldSize=(int)(CHUNK_GRID_SIZE*Terrain.SIZE);
+		int worldSize=(int)(CHUNK_GRID_SIZE*Chunk.SIZE);
 		
 		//		for(int i=0;i<100;i++){
 		//			spawn(new EntityGrass(this, new Vec3f(RandUtil.CRF(worldSize), 0, RandUtil.CRF(worldSize))));
@@ -179,7 +179,7 @@ public class World{
 		
 		t.forEach(this::spawn);
 		
-		spawn(new EntityPlayer(this, new Vec3f(0,50,0)));
+		spawn(new EntityPlayer(this, new Vec3f(0, 50, 0)));
 		
 		//		for(int i=0, j=10;i<j;i++){
 		//			spawn(new EntityLight(this, new Vec3f(RandUtil.CRF(worldSize*1.5), 2, RandUtil.CRF(worldSize*1.5)), IColorM.randomRGB()));
@@ -187,16 +187,16 @@ public class World{
 		//spawn(new EntityPlayer(this, new Vec3f(0, 0, 0)));
 	}
 	
-	private void addChunk(Terrain t){
+	private void addChunk(Chunk t){
 		
-		OffsetArray<Terrain> zLine=terrains.get(t.x);
-		if(zLine==null) terrains.set(t.x, zLine=new OffsetArray<>());
+		OffsetArray<Chunk> zLine=chunks.get(t.x);
+		if(zLine==null) chunks.set(t.x, zLine=new OffsetArray<>());
 		zLine.set(t.z, t);
 		bulletWorld.addRigidBody(t.chunkBody);
 	}
 	
-	private void removeChunk(Terrain t){
-		OffsetArray<Terrain> zLine=terrains.get(t.x);
+	private void removeChunk(Chunk t){
+		OffsetArray<Chunk> zLine=chunks.get(t.x);
 		if(zLine==null) return;
 		zLine.remove(t.z);
 		
@@ -215,13 +215,8 @@ public class World{
 		entitys.add(e);
 	}
 	
-	private int startup=10;
 	
 	public void update(){
-		if(startup!=0){
-			startup--;
-			return;
-		}
 		//		if(terrains.size()==64)removeChunk(terrains.get(0));
 		int steps=1;
 		float step=1F/Game.get().timer.getUps()/steps;
@@ -337,6 +332,28 @@ public class World{
 	
 	public double getSunBrightness(float pt){
 		return getSunBrightnessPos(getSunPos(pt));
+	}
+	
+	public Vec3f putHeightAt(Vec3f vec){
+		vec.setY(getHeightAt(vec.x, vec.z));
+		return vec;
+	}
+	
+	public float getHeightAt(float x, float z){
+		
+		Chunk chunk=getChunk((int)Math.floor(x/Chunk.SIZE), (int)Math.floor(z/Chunk.SIZE));
+		if(chunk==null) return 0;
+		
+		float xOnChunk=Math.abs(x)%Chunk.SIZE;
+		float zOnChunk=Math.abs(z)%Chunk.SIZE;
+		if(x<0) xOnChunk=Chunk.SIZE-xOnChunk;
+		if(z<0) zOnChunk=Chunk.SIZE-zOnChunk;
+		return chunk.getHeightAt(xOnChunk, zOnChunk);
+	}
+	
+	public Chunk getChunk(int x, int z){
+		OffsetArray<Chunk> zLine=chunks.get(x);
+		return zLine==null?null:zLine.get(z);
 	}
 	
 }

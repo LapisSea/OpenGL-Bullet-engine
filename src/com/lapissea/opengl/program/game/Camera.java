@@ -11,24 +11,25 @@ import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.events.MouseMoveEvent;
+import com.lapissea.opengl.window.api.events.MouseMoveEvent.IMouseMoveEventListener;
 
-public class Camera{
+public class Camera implements IMouseMoveEventListener{
 	
 	private static final Vec3f EFF_POS=new Vec3f(),MOVE=new Vec3f();
 	
-	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f(),prevRot=new Vec3f();
+	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();		//,prevRot=new Vec3f();
 	public float	zoom=1,farPlane=1000,nearPlane=0.1F,fov=80,lastRenderFow;
 	
 	private final Matrix4f	projection		=new Matrix4f();
 	protected boolean		projectionDirty	=true;
 	public boolean			noMouseMode		=false;
-	public Vec3f			activeRotVec=new Vec3f();
-	public Quat4M			activeRotQuat=new Quat4M();
+	public Vec3f			activeRotVec	=new Vec3f();
+	public Quat4M			activeRotQuat	=new Quat4M();
 	
 	public void update(){
 		
 		prevPos.set(pos);
-		prevRot.set(rot);
 		
 		MOVE.set(0, 0, 0);
 		if(Keyboard.isKeyDown(Keyboard.KEY_D)) MOVE.addX(1);
@@ -53,29 +54,31 @@ public class Camera{
 		
 		pos.add(MOVE.mul(1F));
 		
-		if(Game.win().isFocused()){
-			if(noMouseMode){
-				if(Keyboard.isKeyDown(Keyboard.KEY_Q)) rot.y-=0.1;
-				if(Keyboard.isKeyDown(Keyboard.KEY_E)) rot.y+=0.1;
-				if(Keyboard.isKeyDown(Keyboard.KEY_R)) rot.x-=0.1;
-				if(Keyboard.isKeyDown(Keyboard.KEY_F)) rot.x+=0.1;
-			}
-			else{
-				float yAmmount=(Mouse.getX()-Display.getWidth()/2)/100F;
-				rot.y+=yAmmount;
-				rot.x-=(Mouse.getY()-Display.getHeight()/2)/100F;
-				Game.win().centerMouse();
-			}
+	}
+	
+	@Override
+	public void onMouseMove(MouseMoveEvent e){
+		if(!Game.win().isFocused()||!Mouse.isGrabbed()) return;
+		if(noMouseMode){
+			if(Keyboard.isKeyDown(Keyboard.KEY_Q)) rot.y-=0.1;
+			if(Keyboard.isKeyDown(Keyboard.KEY_E)) rot.y+=0.1;
+			if(Keyboard.isKeyDown(Keyboard.KEY_R)) rot.x-=0.1;
+			if(Keyboard.isKeyDown(Keyboard.KEY_F)) rot.x+=0.1;
+		}
+		else{
+			rot.x-=e.yDelta/200F;
+			rot.y+=e.xDelta/200F;
+			Game.win().centerMouse();
 		}
 		
 		if(rot.x>Math.PI/2) rot.x=(float)(Math.PI/2);
 		else if(rot.x<-Math.PI/2) rot.x=(float)(-Math.PI/2);
-		
 	}
 	
 	public Matrix4f createView(Matrix4f dest){
 		dest.setIdentity();
-		MatrixUtil.rotateZXY(dest, PartialTick.calc(activeRotVec, prevRot, rot));
+		//		MatrixUtil.rotateZXY(dest, PartialTick.calc(activeRotVec, prevRot, rot));
+		MatrixUtil.rotateZXY(dest, activeRotVec.set(rot));
 		dest.translate(PartialTick.calc(EFF_POS, prevPos, pos).mul(-1F));
 		activeRotVec.mul(-1);
 		activeRotQuat.set(activeRotVec);

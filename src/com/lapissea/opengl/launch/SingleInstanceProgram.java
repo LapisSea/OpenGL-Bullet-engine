@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util;
+package com.lapissea.opengl.launch;
 
 import java.awt.Toolkit;
 import java.io.File;
@@ -6,8 +6,10 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
+import com.lapissea.opengl.program.util.OperatingSystem;
+
 @SuppressWarnings("resource")
-public class SingleInstanceProgram{
+class SingleInstanceProgram{
 	
 	static{
 		try{

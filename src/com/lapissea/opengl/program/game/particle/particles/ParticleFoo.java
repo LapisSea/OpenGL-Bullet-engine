@@ -1,5 +1,6 @@
 package com.lapissea.opengl.program.game.particle.particles;
 
+import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.particle.Particle;
 import com.lapissea.opengl.program.game.particle.ParticleHandler;
 import com.lapissea.opengl.program.util.RandUtil;
@@ -10,10 +11,12 @@ public class ParticleFoo extends Particle<ParticleFoo>{
 	private float maxAge=150+RandUtil.RI(100),orgScale=4F+RandUtil.RF(5);
 	
 	public ParticleFoo(ParticleHandler<ParticleFoo> handler, Vec3f pos){
-		super(handler, pos.sub(0, 5, 0));
-		speed.set(RandUtil.CRF(0.3), 1F+RandUtil.RF(0.5), RandUtil.CRF(0.3));
+		super(handler, Game.get().world.putHeightAt(pos));
+		speed.set(RandUtil.CRF(0.1), 0.1F+RandUtil.RF(0.1), RandUtil.CRF(0.1));
 		scale.set(orgScale, orgScale, orgScale);
-		gravity=-0.01f;
+		this.pos.sub(0, orgScale/2, 0);
+		this.prevPos.sub(0, orgScale/2, 0);
+		gravity=-0.001f;
 		
 	}
 	
@@ -25,7 +28,7 @@ public class ParticleFoo extends Particle<ParticleFoo>{
 			return;
 		}
 		float ageDiv=(float)Math.sqrt(1-age/maxAge);
-//		LogUtil.println(age,maxAge);
+		//		LogUtil.println(age,maxAge);
 		this.scale.set(orgScale*ageDiv, orgScale*ageDiv, orgScale*ageDiv);
 	}
 	

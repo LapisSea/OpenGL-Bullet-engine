@@ -28,7 +28,7 @@ import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public class Terrain implements ModelTransformed{
+public class Chunk implements ModelTransformed{
 	
 	protected static final Matrix4f	TRANSFORM	=new Matrix4f();
 	protected static final Vec3f	POS			=new Vec3f();
@@ -45,9 +45,10 @@ public class Terrain implements ModelTransformed{
 	
 	protected final Matrix4f mat=new Matrix4f();
 	
-	public final double seed=Math.random();
+	public final double	seed=Math.random();
+	private float[]		hMap;
 	
-	public Terrain(int gridX, int gridZ, IHeightMapProvider hMap){
+	public Chunk(int gridX, int gridZ, IHeightMapProvider hMap){
 		
 		x=gridX;
 		z=gridZ;
@@ -94,7 +95,7 @@ public class Terrain implements ModelTransformed{
 				indices.add(p3);
 			}
 		}
-		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(vertices.toFloatArray(), indices.toIntArray()), true);
+		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh((this.hMap=vertices.toFloatArray()), indices.toIntArray()), true);
 		MotionState ballMotionState=new DefaultMotionState(new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x*SIZE, 0, z*SIZE), 1)));
 		RigidBodyConstructionInfo ballConstructionInfo=new RigidBodyConstructionInfo(0, ballMotionState, trimeshshape, new Vector3f());
 		ballConstructionInfo.restitution=0F;
@@ -104,40 +105,19 @@ public class Terrain implements ModelTransformed{
 		Quat4M q=new Quat4M();
 		Vec3f rot=new Vec3f(),vRot=new Vec3f();
 		for(int i=0, j=GRASS_MIN+RandUtil.RI(GRASS_RAND);i<j;i++){
-			float x=RandUtil.RF(mul*RESOLUTION);
-			float z=RandUtil.RF(mul*RESOLUTION);
-			float y;
-			float scale=0.7F+RandUtil.RF(0.3);
-			int xi=(int)Math.floor(x/mul);
-			int zi=(int)Math.floor(z/mul);
-			
-			float y_00=vertices.getFloat((xi+zi*r1)*3+1);
-			float y_10=vertices.getFloat((xi+1+zi*r1)*3+1);
-			float y_01=vertices.getFloat((xi+(zi+1)*r1)*3+1);
-			float y_11=vertices.getFloat((xi+1+(zi+1)*r1)*3+1);
-			
-			float xPerc=(x%mul)/mul;
-			float zPerc=(z%mul)/mul;
-			
-			
-			if(1-xPerc+zPerc>1){
-				float y_0=y_00+(y_01-y_00)*zPerc;
-				y=y_0+(y_11-y_0)*xPerc;
-			}
-			else{
-				float y_1=y_10+(y_11-y_10)*zPerc;
-				y=y_00+(y_1-y_00)*xPerc;
-			}
-			
+			float xOnChunk=RandUtil.RF(SIZE);
+			float zOnChunk=RandUtil.RF(SIZE);
+			float y=getHeightAt(xOnChunk, zOnChunk);
 			
 			q.set(rot.setThis(0, RandUtil.RF(Math.PI*2), RandUtil.CRF(0.2)));
 			
+			float scale=0.7F+RandUtil.RF(0.3);
 			for(Vec3f v:grass[RandUtil.RI(grass.length)].vertecies){
 				q.rotate(vRot.set(v));
 				indices.add(vertices.size()/3);
-				vertices.add(vRot.x()*scale+x);
+				vertices.add(vRot.x()*scale+xOnChunk);
 				vertices.add(vRot.y()*scale+y);
-				vertices.add(vRot.z()*scale+z);
+				vertices.add(vRot.z()*scale+zOnChunk);
 				mats.add(1);
 			}
 		}
@@ -164,5 +144,32 @@ public class Terrain implements ModelTransformed{
 		POS.z=z*SIZE;
 		TRANSFORM.translate(POS);
 		return TRANSFORM;
+	}
+	
+	public float getHeightAt(float xOnChunk, float zOnChunk){
+		
+		float mul=SIZE/RESOLUTION;
+		int r1=RESOLUTION+1;
+		
+		int xi=(int)Math.floor(xOnChunk/mul);
+		int zi=(int)Math.floor(zOnChunk/mul);
+		
+		float y_00=hMap[(xi+zi*r1)*3+1];
+		float y_10=hMap[(xi+1+zi*r1)*3+1];
+		float y_01=hMap[(xi+(zi+1)*r1)*3+1];
+		float y_11=hMap[(xi+1+(zi+1)*r1)*3+1];
+		
+		float xPerc=(xOnChunk%mul)/mul;
+		float zPerc=(zOnChunk%mul)/mul;
+		
+		
+		if(1-xPerc+zPerc>1){
+			float y_0=y_00+(y_01-y_00)*zPerc;
+			return y_0+(y_11-y_0)*xPerc;
+		}
+		else{
+			float y_1=y_10+(y_11-y_10)*zPerc;
+			return y_00+(y_1-y_00)*xPerc;
+		}
 	}
 }
