@@ -42,7 +42,7 @@ public abstract class GameTimer{
 	
 	public abstract float getSpeed();
 	
-	public abstract GameTimer setSpeed(int speed);
+	public abstract GameTimer setSpeed(float speed);
 	
 	
 	public abstract GameTimer setInfiniteFps(boolean flag);

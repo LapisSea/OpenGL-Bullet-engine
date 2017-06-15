@@ -218,6 +218,7 @@ public class World{
 	
 	public void update(){
 		//		if(terrains.size()==64)removeChunk(terrains.get(0));
+		Game.get().timer.setSpeed(2);
 		int steps=1;
 		float step=1F/Game.get().timer.getUps()/steps;
 		for(int i=0;i<steps;i++){

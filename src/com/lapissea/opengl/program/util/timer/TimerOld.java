@@ -149,7 +149,7 @@ public class TimerOld extends GameTimer{
 	}
 	
 	@Override
-	public GameTimer setSpeed(int fps){
+	public GameTimer setSpeed(float fps){
 		return this;
 	}
 	

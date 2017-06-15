@@ -65,8 +65,8 @@ public class Timer_Ver2 extends GameTimer{
 	}
 	
 	@Override
-	public synchronized GameTimer setSpeed(int speed){
-		this.speed=speed;
+	public synchronized GameTimer setSpeed(float speed){
+		this.speed=Math.max(speed, 0);
 		calcNspu();
 		return this;
 	}
@@ -96,7 +96,6 @@ public class Timer_Ver2 extends GameTimer{
 	@Override
 	public synchronized GameTimer runRender(){
 		if(!isRunning()||render==null) return this;
-		
 		if(infiniteFps) render.run();
 		else{
 			long t=time();
@@ -120,7 +119,7 @@ public class Timer_Ver2 extends GameTimer{
 	public synchronized GameTimer runUpdate(){
 		if(!isRunning()||update==null) return this;
 		long t=time();
-		int count=(int)Math.floor((t-lastUpdate)/(nanosecondsPerUpdateWSpeed=nanosecondsPerUpdate*speed));
+		int count=(int)Math.floor((t-lastUpdate)/(nanosecondsPerUpdateWSpeed=nanosecondsPerUpdate/speed));
 		if(count>30){
 			LogUtil.println("Game is severely lagging or paused or system time changed! Skipping "+(count-1F)/updatesPerSecond+" seconds!");
 			count=1;
