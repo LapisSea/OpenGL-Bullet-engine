@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.core;
+package com.lapissea.opengl.program.util.timer;
 
 public abstract class GameTimer{
 	
