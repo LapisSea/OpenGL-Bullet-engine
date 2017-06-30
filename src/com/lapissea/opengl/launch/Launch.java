@@ -1,10 +1,15 @@
 package com.lapissea.opengl.launch;
 
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+
+import javax.imageio.ImageIO;
+
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.core.GameSettings;
+import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.util.OperatingSystem;
+import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.config.Config;
-import com.lapissea.opengl.program.util.config.configs.WindowConfig;
 import com.lapissea.opengl.window.api.IGLWindow;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
 import com.lapissea.opengl.window.impl.LWJGL2Ctx;
@@ -22,18 +27,10 @@ public class Launch{
 		SplashScreenHost.sendMsg("Injected natves!");
 		SplashScreenHost.sendPercent(0.1F);
 		
-		//		try{
-		//			new Test().lel();
-		//		}catch(Throwable e){
-		//			e.printStackTrace();
-		//		}
-		//		System.exit(0);
-		
 		try{
 			LogUtil.__.INJECT_FILE_LOG(OperatingSystem.APP_DATA+"/OpenGL engine/log.txt");
 			//LogUtil.__.INJECT_EXTERNAL_PRINT("dev_log");
 			LogUtil.__.INJECT_DEBUG_PRINT(true);
-			
 			
 			SplashScreenHost.sendMsg("Injected logger!");
 			SplashScreenHost.sendPercent(0.3F);
@@ -63,22 +60,31 @@ public class Launch{
 			Game.createGame(glCtx);
 			
 			IGLWindow window=glCtx.getCtxWindow();
-			WindowConfig winCfg=Config.getConfig(WindowConfig.class, "win_startup");
-			GameSettings s=Config.getConfig(GameSettings.class, "game_settings");
-			s.save();
 			SplashScreenHost.sendMsg("Initalised game base!");
 			SplashScreenHost.sendPercent(0.4F);
 			try{
 				SplashScreenHost.sendMsg("Creating window...");
 				
 				//window.setTitle("Genine and Lee");
-				window.setPos(-10000, -10000).setSize(1, 1);
-				window.setTitle("The abandoned");
-				window.setFullScreen(false);
-				window.setResizable(true);
-				window.setVSync(true);
-				window.setPos(winCfg.position);
-				window.setSize(winCfg.size);
+				window
+						.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
+						.setPos(-10000, -10000)
+						.setTitle("The abandoned")
+						.setFullScreen(false)
+						.setResizable(true)
+						.setVSync(true);
+				
+				//				window.setPos(winCfg.position);
+				//				window.setSize(winCfg.size);
+				ByteBuffer[] ico=new ByteBuffer[2];
+				try(InputStream img=UtilM.getResource("textures/icon/16.png")){
+					ico[0]=TextureLoader.imgToBuff(ImageIO.read(img));
+				}
+				try(InputStream img=UtilM.getResource("textures/icon/32.png")){
+					ico[1]=TextureLoader.imgToBuff(ImageIO.read(img));
+				}
+				window.setIcon(ico);
+				
 				glCtx.init();
 				SplashScreenHost.sendMsg("Window created!");
 				SplashScreenHost.sendPercent(0.7F);
@@ -90,13 +96,14 @@ public class Launch{
 			
 			Game.get().start();
 			if(window.getPos().x()!=-10000){
-				winCfg.size.set(window.getSize());
-				winCfg.position.set(window.getPos());
+				Config.set("win_startup:size.x", window.getSize().x());
+				Config.set("win_startup:size.y", window.getSize().y());
+				Config.set("win_startup:pos.x", window.getPos().x());
+				Config.set("win_startup:pos.y", window.getPos().y());
 			}
 			glCtx.destroy();
+			Config.save();
 			
-			winCfg.save();
-			s.save();
 		}catch(Exception e){
 			e.printStackTrace();
 			System.exit(-1);

@@ -1,32 +1,22 @@
 package com.lapissea.opengl.program.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.jar.JarFile;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.bulletphysics.collision.shapes.IndexedMesh;
@@ -122,23 +112,11 @@ public class UtilM extends UtilL{
 		try(InputStream is=getResource(name)){
 			
 			if(is==null) return null;
+			return new String(readAll(is));
 			
-			ByteArrayOutputStream buffer=new ByteArrayOutputStream();
-			try{
-				int nRead;
-				byte[] data=new byte[16384];
-				while((nRead=is.read(data, 0, data.length))!=-1){
-					buffer.write(data, 0, nRead);
-				}
-				buffer.flush();
-			}catch(IOException e){
-				e.printStackTrace();
-			}
-			return new String(buffer.toByteArray());
 		}catch(IOException e1){
 			return null;
 		}
-		
 	}
 	
 	public static InputStream getResource(String name){
@@ -170,16 +148,16 @@ public class UtilM extends UtilL{
 		
 		JarFile jar=Globals.getJarFile();
 		List<String> list=new ArrayList<>();
-		UtilL.stream(jar.entries())
+		stream(jar.entries())
 				.filter(e->e.getName().length()>name0.length()&&e.getName().startsWith(name0))
 				.forEach(e->list.add(e.getName().substring(name0.length())));
-		UtilL.closeSilenty(jar);
+		closeSilenty(jar);
 		
 		if(list.isEmpty()){
 			FOLDER_NULL.add(name0);
 			return null;
 		}
-		String[] result=UtilL.array(list);
+		String[] result=array(list);
 		FOLDER_CASH.put(name0, result);
 		
 		return result;
@@ -205,140 +183,6 @@ public class UtilM extends UtilL{
 	
 	public static boolean isWrapperType(Class<?> type){
 		return WRAPPER_TYPES.contains(type);
-	}
-	
-	private static void jsonAddTo(Object obj, Consumer<Object> target){
-		if(isWrapperType(obj)||obj instanceof String){
-			target.accept(JSONObject.wrap(obj));
-			return;
-		}
-		target.accept(obj.getClass().isArray()?jsonArr(obj):jsonObj(obj));
-	}
-	
-	public static String objToJson(Object obj){
-		if(obj.getClass().isArray()) return jsonArr(obj).toString();
-		return jsonObj(obj).toString(4);
-	}
-	
-	public static JSONArray jsonArr(Object array){
-		if(!array.getClass().isArray()) return null;
-		
-		JSONArray json=new JSONArray();
-		int length=Array.getLength(array);
-		for(int i=0;i<length;i++){
-			jsonAddTo(Array.get(array, i), obj->json.put(obj));
-		}
-		return json;
-	}
-	
-	public static JSONObject compressTypes(JSONObject obj){
-		Map<String,List<Consumer<String>>> data=new HashMap<>();
-		compressTypes0(obj, data);
-		if(data.isEmpty()) return obj;
-		
-		
-		JSONObject dictionary=new JSONObject();
-		obj.put("~c", dictionary);
-		
-		Iterator<Entry<String,List<Consumer<String>>>> dat=data.entrySet().iterator();
-		int i=0;
-		while(dat.hasNext()){
-			Entry<String,List<Consumer<String>>> e=dat.next();
-			if(e.getValue().size()==1) continue;
-			String key=String.valueOf((char)('a'+i));
-			dictionary.put(key, e.getKey());
-			e.getValue().forEach(hook->hook.accept("~"+key));
-			
-			i++;
-		}
-		return obj;
-	}
-	
-	private static void compressTypes0(JSONObject obj, Map<String,List<Consumer<String>>> data){
-		
-		if(obj.has("~t")){
-			String str=obj.getString("~t");
-			List<Consumer<String>> type=data.get(str);
-			if(type==null) data.put(str, type=new ArrayList<>());
-			type.add(s->obj.put("~t", s));
-		}
-		for(String key:obj.keySet()){
-			Object o=obj.get(key);
-			if(o instanceof JSONObject) compressTypes0((JSONObject)o, data);
-		}
-	}
-	
-	public static JSONObject jsonObj(Object obj){
-		Class<?> type=obj.getClass();
-		JSONObject json=new JSONObject();
-		json.put("~t", type.getName());
-		
-		if(obj instanceof Collection){
-			Collection<?> c=(Collection<?>)obj;
-			JSONArray arr=new JSONArray();
-			for(Object object:c){
-				jsonAddTo(object, o->arr.put(o));
-			}
-			json.put("~d", arr);
-		}
-		else if(obj instanceof Map){
-			Map<?,?> c=(Map<?,?>)obj;
-			JSONObject mp=new JSONObject();
-			c.forEach((k, v)->jsonAddTo(v, o->mp.put(k.toString(), o)));
-			json.put("~d", mp);
-		}
-		else for(Field field:getAllFields(type)){
-			int mod=field.getModifiers();
-			if(Modifier.isFinal(mod)||Modifier.isStatic(mod)||Modifier.isTransient(mod)) continue;
-			field.setAccessible(true);
-			try{
-				jsonAddTo(field.get(obj), value->json.put(field.getName(), value));
-			}catch(Exception e){
-				throw new RuntimeException(e);
-			}
-		}
-		return json;
-	}
-	
-	public static Object parseJson(Object json){
-		try{
-			Map<String,Class<?>> types=new HashMap<>();
-			if(json instanceof JSONObject){
-				JSONObject json0=(JSONObject)json;
-				if(json0.has("~c")){
-					json0=json0.getJSONObject("~c");
-					for(String s:json0.keySet()){
-						types.put("~"+s, Class.forName(json0.getString(s)));
-					}
-				}
-			}
-			return parseJson0(json, types);
-		}catch(Exception e){
-			throw new RuntimeException(e);
-		}
-	}
-	
-	private static Object parseJson0(Object object, Map<String,Class<?>> types) throws ClassNotFoundException,JSONException,InstantiationException,IllegalAccessException{
-		if(object instanceof JSONArray) return ((JSONArray)object).toList().toArray();
-		JSONObject json=(JSONObject)object;
-		if(json.has("~t")){
-			String s=json.getString("~t");
-			Class<?> type=types.get(s);
-			if(type==null)type=Class.forName(s);
-			
-			Object o=type.newInstance();
-			
-//			for(String s:json0.keySet()){
-//				types.put("~"+s, Class.forName(json0.getString(s)));
-//			}
-			
-		}
-		
-		if(isWrapperType(object)||object instanceof String) return object;
-		
-		
-		
-		return null;
 	}
 	
 }

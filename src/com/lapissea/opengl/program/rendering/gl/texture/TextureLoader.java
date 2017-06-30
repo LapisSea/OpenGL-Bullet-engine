@@ -360,7 +360,7 @@ public class TextureLoader{
 		return CUSTOM_PARAMS;
 	}
 	
-	private static ByteBuffer imgToBuff(BufferedImage img){
+	public static ByteBuffer imgToBuff(BufferedImage img){
 		BufferedImage image=img;
 		
 		int[] pixels=new int[image.getWidth()*image.getHeight()];

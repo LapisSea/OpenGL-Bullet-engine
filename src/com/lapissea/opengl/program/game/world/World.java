@@ -38,6 +38,7 @@ import com.lapissea.opengl.program.game.entity.entitys.EntityTree;
 import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.program.game.terrain.Chunk;
 import com.lapissea.opengl.program.game.terrain.IHeightMapProvider;
+import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
@@ -48,7 +49,7 @@ import com.lapissea.util.LogUtil;
 
 public class World{
 	
-	public static int		PHYSICS_CUBE_AMMOUNT=3,CHUNK_GRID_SIZE;
+	public static int		PHYSICS_CUBE_AMMOUNT=3,CHUNK_GRID_SIZE=20;
 	public DynamicsWorld	bulletWorld;
 	private List<Entity>	entitys				=new ArrayList<>();
 	private List<EntityUpd>	entitysUpd			=new ArrayList<>();
@@ -85,8 +86,7 @@ public class World{
 			
 			@Override
 			public int getDebugMode(){
-				boolean draw=false;
-				return draw?DRAW_WIREFRAME|DRAW_CONTACT_POINTS|MAX_DEBUG_DRAW_MODE|ENABLE_CCD:0;
+				return Renderer.RENDER_FRUSTRUM?DRAW_WIREFRAME|DRAW_CONTACT_POINTS|MAX_DEBUG_DRAW_MODE|ENABLE_CCD:0;
 			}
 			
 			@Override
@@ -218,14 +218,8 @@ public class World{
 	
 	public void update(){
 		//		if(terrains.size()==64)removeChunk(terrains.get(0));
-		Game.get().timer.setSpeed(2);
-		int steps=1;
-		float step=1F/Game.get().timer.getUps()/steps;
-		for(int i=0;i<steps;i++){
-			bulletWorld.stepSimulation(step, 1, step);
-		}
-		
-		//		bulletWorld.debugDrawWorld();
+		float step=1F/Game.get().timer.getUps();
+		bulletWorld.stepSimulation(step, 1, step);
 		
 		if(checkDead){
 			entitysUpd.removeIf(Entity::isDead);

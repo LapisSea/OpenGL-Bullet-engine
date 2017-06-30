@@ -12,6 +12,7 @@ import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.assets.IMaterial;
+import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.impl.assets.Material;
 import com.lapissea.opengl.window.impl.assets.Model;
 import com.lapissea.util.LogUtil;
@@ -339,11 +340,11 @@ public class ObjModelLoader{
 		return arr;
 	}
 	
-	public static Model[] loadAndBuildArr(String name){
+	public static IModel[] loadAndBuildArr(String name){
 		return loadAndBuildArr(Model.class, name);
 	}
 	
-	public static <T extends Model> T[] loadAndBuildArr(Class<T> type, String name){
+	public static <T extends IModel> T[] loadAndBuildArr(Class<T> type, String name){
 		String[] mds=UtilM.getResourceFolderContent("models/"+name, s->s.endsWith(".obj")&&Character.isDigit(s.charAt(0)));
 		T[] arr=UtilL.array(type, mds.length);
 		for(int i=0;i<arr.length;i++){
@@ -352,11 +353,11 @@ public class ObjModelLoader{
 		return arr;
 	}
 	
-	public static Model loadAndBuild(String name){
+	public static IModel loadAndBuild(String name){
 		return ModelLoader.buildModel(Model.class, load(name));
 	}
 	
-	public static <T extends Model> T loadAndBuild(Class<T> type, String name){
+	public static <T extends IModel> T loadAndBuild(Class<T> type, String name){
 		return ModelLoader.buildModel(type, load(name));
 	}
 	

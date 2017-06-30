@@ -17,7 +17,6 @@ import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.config.Config;
-import com.lapissea.opengl.program.util.config.configs.WindowConfig;
 import com.lapissea.opengl.program.util.timer.GameTimer;
 import com.lapissea.opengl.program.util.timer.Timer_Ver2;
 import com.lapissea.opengl.window.api.IGLWindow;
@@ -114,20 +113,22 @@ public class Game{
 		if(first){
 			first=false;
 			LogUtil.printWrapped("LOADED IN: "+(System.nanoTime()-GameStart.START_TIME)/1000_000_000D);
-			WindowConfig winCfg=Config.getConfig(WindowConfig.class, "win_startup");
-			//			win().setSize(winCfg.size);
-			//			win().setPos(winCfg.position);
+			win().setPos(Config.getInt("win_startup:pos.x", -1), Config.getInt("win_startup:pos.y", -1));
+			win().setResizable(true);
 			new Thread(()->{
 				UtilM.sleep(100);
 				SplashScreenHost.close();
 			}).start();
 		}
-		try{
-			renderer.render();
-		}catch(OpenGLException e){
-			e.printStackTrace();
+		if(win().isVisible()){
+			
+			try{
+				renderer.render();
+			}catch(OpenGLException e){
+				e.printStackTrace();
+			}
+			win().swapBuffers();
 		}
-		win().swapBuffers();
 	}
 	
 	public synchronized void loadGLData(){

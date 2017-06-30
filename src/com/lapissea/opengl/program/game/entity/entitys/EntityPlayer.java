@@ -10,13 +10,13 @@ import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
-import com.lapissea.opengl.window.impl.assets.Model;
+import com.lapissea.opengl.window.assets.IModel;
 
 public class EntityPlayer extends EntityUpd{
 	
-	private static Model MODEL;
+	private static IModel MODEL;
 	
-	private static Model getModel0(){
+	private static IModel getModel0(){
 		if(MODEL==null){
 			MODEL=ObjModelLoader.loadAndBuild("fox");
 		}

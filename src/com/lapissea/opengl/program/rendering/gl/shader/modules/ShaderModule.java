@@ -44,8 +44,8 @@ public abstract class ShaderModule{
 			this.name=name;
 		}
 		
-		public String load(boolean isFragment, String[] args){
-			return UtilM.getTxtResource("shaders/modules/"+name+(isFragment?".fsmd":".vsmd"));
+		public String load(String extension, String[] args){
+			return UtilM.getTxtResource("shaders/modules/"+name+extension);
 		}
 	}
 	

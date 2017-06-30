@@ -10,14 +10,13 @@ import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.light.DirLight;
 import com.lapissea.opengl.program.rendering.gl.shader.light.LineLight;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.Global;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints.UniformInt1;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
-public class ShaderModuleLight extends ShaderModule implements Global{
+public class ShaderModuleLight extends ShaderModule implements ShaderModule.Global{
 	
 	private static final class LimitedList<T>extends ArrayList<T>{
 		

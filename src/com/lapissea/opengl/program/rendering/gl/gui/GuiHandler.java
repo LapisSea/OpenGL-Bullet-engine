@@ -78,7 +78,7 @@ public class GuiHandler{
 	private List<List<GuiElement>> renderList=new ArrayList<>();
 	
 	private void render0(){
-		drawFbo.setRenderBufferType(false).setSample(8);
+		//		drawFbo.setRenderBufferType(false).setSample(8);
 		
 		drawFbo.setSize(Game.win().getSize());
 		lastZLayer.setSize(Game.win().getSize());
@@ -97,7 +97,7 @@ public class GuiHandler{
 		first=true;
 		renderList.forEach(l->{
 			(first?Game.get().renderer.worldFbo:drawFbo).copyColorTo(lastZLayer);
-			if(first)first=false;
+			if(first) first=false;
 			drawFbo.bind();
 			
 			UtilM.doAndClear(l, e->{
@@ -113,6 +113,7 @@ public class GuiHandler{
 		drawFbo.process();
 		Fbo.bindDefault();
 		drawFbo.drawImg();
+		
 		GLUtil.DEPTH_TEST.set(true);
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
 	}

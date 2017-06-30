@@ -15,7 +15,7 @@ public class Test{
 	public void lel(){
 		Vec3f vec=lel1;
 		vec.set(0,0,0);
-		LogUtil.println(vec);
+		LogUtil.println(vec==lel1);
 	}
 	
 }

@@ -8,11 +8,10 @@ import java.util.function.Consumer;
 public class MapOfLists<K,V>extends HashMap<K,List<V>>{
 	
 	private static final long serialVersionUID=3664792300296610332L;
-
+	
 	public boolean add(K key, V value){
 		List<V> l=get(key);
 		if(l==null) put(key, l=new ArrayList<>());
-		
 		return l.add(value);
 	}
 	

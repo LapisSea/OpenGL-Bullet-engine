@@ -108,10 +108,7 @@ public class GLUtil{
 	
 	public static enum BlendFunc{
 		
-		NORMAL(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA),
-		ADD(GL11.GL_SRC_ALPHA, GL11.GL_ONE),
-		ADD2(GL11.GL_ONE, GL11.GL_ONE),
-		INVERT(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
+		NORMAL(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA),ADD(GL11.GL_SRC_ALPHA, GL11.GL_ONE),ADD2(GL11.GL_ONE, GL11.GL_ONE),INVERT(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
 		
 		public final int sfactor,dfactor;
 		
@@ -162,6 +159,19 @@ public class GLUtil{
 	
 	public static void viewport(int width, int height){
 		GL11.glViewport(0, 0, width, height);
+	}
+	
+	public static void deleteDetachShader(int program, int shader){
+		detachShader(program, shader);
+		deleteShader(shader);
+	}
+	
+	public static void deleteShader(int shader){
+		if(shader>0) GL20.glDeleteShader(shader);
+	}
+	
+	public static void detachShader(int program, int shader){
+		if(program>0&&shader>0) GL20.glDetachShader(program, shader);
 	}
 	
 }

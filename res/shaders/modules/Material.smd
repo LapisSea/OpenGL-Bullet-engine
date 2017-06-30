@@ -1,9 +1,4 @@
 
-in float materialId;
-
-#ifndef ModelMaterial_STR
-#define ModelMaterial_STR
-
 struct ModelMaterial{
 	vec3 ambient;
 	vec3 diffuse;
@@ -14,10 +9,8 @@ struct ModelMaterial{
 	float lightTroughput;
 };
 
-#endif
-
 uniform ModelMaterial materials["<MATERIAL_MAX_COUNT>"];
 
-ModelMaterial getMaterial(){
-	return materials[int(round(materialId))];
+ModelMaterial getMaterial(int id){
+	return materials[id];
 }

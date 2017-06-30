@@ -55,8 +55,8 @@ import com.lapissea.opengl.window.api.events.util.WindowEvents;
 import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
-import com.lapissea.opengl.window.impl.assets.Model;
 
 public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
@@ -89,7 +89,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	
 	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL11.GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
-	private Model			moon		=ObjModelLoader.loadAndBuild("moon");
+	private IModel			moon		=ObjModelLoader.loadAndBuild("moon");
 	public FboRboTextured	worldFbo	=new FboRboTextured();
 	public Fbo				skyFbo		=new Fbo();
 	public GuiHandler		guiHandler	=new GuiHandler();
@@ -256,6 +256,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void renderWorld(){
 		
 		World world=Game.get().world;
+		if(RENDER_FRUSTRUM) world.bulletWorld.debugDrawWorld();
 		float pt=Game.getPartialTicks();
 		double sunPos=world.getSunPos(pt)*Math.PI*2;
 		float bright=(float)world.getSunBrightness(pt);

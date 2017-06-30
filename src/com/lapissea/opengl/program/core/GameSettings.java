@@ -21,7 +21,6 @@ public class GameSettings extends Config{
 	
 	
 	public GameSettings(String name){
-		super(name);
 		ShaderModuleLight.MAX_POINT_LIGHT=maxPointLight;
 		ShaderModuleLight.MAX_DIR_LIGHT=maxPointLight;
 		
@@ -38,7 +37,6 @@ public class GameSettings extends Config{
 	
 	
 	public GameSettings(String name, int maxPointLight, int maxDirLight, int skyResolutionDevider, int physicsCubeAmmount, int perChunkGrassMin, int perChunkGrassRand, int chunkResolution, int chunkHeight, int chunkGridSize){
-		super(name);
 		this.maxPointLight=maxPointLight;
 		this.maxDirLight=maxDirLight;
 		

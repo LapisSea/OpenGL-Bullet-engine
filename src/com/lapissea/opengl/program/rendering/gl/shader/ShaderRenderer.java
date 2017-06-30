@@ -12,10 +12,10 @@ import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
-import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.data.MapOfLists;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.util.UtilL;
 
 public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends Shader implements Renderable{
 	
@@ -26,6 +26,14 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 	
 	public ShaderRenderer(){
 		super();
+	}
+	
+	public ShaderRenderer(ShaderLoader loader){
+		super(loader);
+	}
+	
+	public ShaderRenderer(String name, ShaderLoader loader){
+		super(name, loader);
 	}
 	
 	public ShaderRenderer(String name){
@@ -52,7 +60,7 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 			if(toRender.isEmpty()) return;
 			prepareGlobal();
 			
-			UtilM.doAndClear(toRender, (model, entitysWithSameModel)->{
+			UtilL.doAndClear(toRender, (model, entitysWithSameModel)->{
 				if(entitysWithSameModel.isEmpty()) return;
 				if(!model.isLoaded()) return;
 				prepareModel(model);
@@ -83,7 +91,7 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		do{
 			prepareInstance(type);
 			model.drawCall();
-			if(!i.hasNext())break;
+			if(!i.hasNext()) break;
 			type=i.next();
 		}while(true);
 		
@@ -170,7 +178,7 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		
 		float farPlane=1000,nearPlane=0.1F;
 		float aspectRatio=(float)Display.getWidth()/(float)Display.getHeight();
-		float y_scale=(float)((1f/Math.tan(Math.toRadians(60/2f)))*aspectRatio);
+		float y_scale=(float)(1f/Math.tan(Math.toRadians(60/2f))*aspectRatio);
 		float x_scale=y_scale/aspectRatio;
 		float frustum_length=farPlane-nearPlane;
 		
@@ -179,7 +187,7 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		NULL_PROJECTION.m11=y_scale;
 		NULL_PROJECTION.m22=-((farPlane+nearPlane)/frustum_length);
 		NULL_PROJECTION.m23=-1;
-		NULL_PROJECTION.m32=-((2*nearPlane*farPlane)/frustum_length);
+		NULL_PROJECTION.m32=-(2*nearPlane*farPlane/frustum_length);
 		NULL_PROJECTION.m33=0;
 		
 		return NULL_PROJECTION;
@@ -197,6 +205,14 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		
 		public Basic3D(){
 			super();
+		}
+		
+		public Basic3D(ShaderLoader loader){
+			super(loader);
+		}
+		
+		public Basic3D(String name, ShaderLoader loader){
+			super(name, loader);
 		}
 		
 		public Basic3D(String name){

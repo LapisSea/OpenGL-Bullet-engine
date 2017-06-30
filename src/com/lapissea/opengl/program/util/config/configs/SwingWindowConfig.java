@@ -11,7 +11,6 @@ public class SwingWindowConfig extends Config{
 	public Dimension	size;
 	
 	public SwingWindowConfig(String name){
-		super(name);
 		position=new Point();
 		size=new Dimension(500, 250);
 	}

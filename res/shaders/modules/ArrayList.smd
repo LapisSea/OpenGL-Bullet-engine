@@ -1,0 +1,12 @@
+
+struct ArrayList<TYPE>{
+	
+	<TYPE> data[<MAX_SIZE>];
+	
+	int size;
+	
+	<TYPE> get(int id){
+		return data[id];
+	}
+	
+};

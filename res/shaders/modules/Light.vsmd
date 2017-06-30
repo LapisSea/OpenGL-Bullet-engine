@@ -1,10 +1,7 @@
 
-
 out vec3 normal;
 out vec3 toCamera;
 out vec3 wPos;
-
-
 
 void lightingSetUp(mat4 transformMat, vec4 worldPos, vec3 rawNormal, vec3 cameraPos){
 	if(rawNormal.x!=0||rawNormal.y!=0||rawNormal.z!=0)normal=(transformMat*vec4(rawNormal,0)).xyz;
@@ -13,4 +10,3 @@ void lightingSetUp(mat4 transformMat, vec4 worldPos, vec3 rawNormal, vec3 camera
 	toCamera=cameraPos - worldPos.xyz;
 	
 }
-

@@ -20,9 +20,10 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 		}
 		
 		@Override
-		public String load(boolean isFragment, String[] args){
+		public String load(String extension, String[] args){
 			if(args==null) args=new String[]{"texture0"};
-			String src0=super.load(isFragment, args);
+			String src0=super.load(extension, args);
+			if(src0==null) throw new NullPointerException(name+extension);
 			String[] parts=src0.split("<SPLIT>");
 			String template=parts[1],templateCube=parts[2];
 			
