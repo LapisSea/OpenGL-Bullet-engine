@@ -20,19 +20,25 @@ public class ImportShaderLoader extends ShaderLoader{
 	@Override
 	public PairM<String,Collection<ShaderModule>> getVertex(){
 		Map<String,ShaderModule> modules=new HashMap<>();
-		return new PairM<>(resolve(UtilM.getTxtResource("shaders/"+shader.name+".vs"), modules), modules.values());
+		String src=resolve(UtilM.getTxtResource("shaders/"+shader.name+".vs"), modules);
+		if(src==null) return null;
+		return new PairM<>(src, modules.values());
 	}
 	
 	@Override
 	public PairM<String,Collection<ShaderModule>> getGeometry(){
 		Map<String,ShaderModule> modules=new HashMap<>();
-		return new PairM<>(resolve(UtilM.getTxtResource("shaders/"+shader.name+".gs"), modules), modules.values());
+		String src=resolve(UtilM.getTxtResource("shaders/"+shader.name+".gs"), modules);
+		if(src==null) return null;
+		return new PairM<>(src, modules.values());
 	}
 	
 	@Override
 	public PairM<String,Collection<ShaderModule>> getFragment(){
 		Map<String,ShaderModule> modules=new HashMap<>();
-		return new PairM<>(resolve(UtilM.getTxtResource("shaders/"+shader.name+".fs"), modules), modules.values());
+		String src=resolve(UtilM.getTxtResource("shaders/"+shader.name+".fs"), modules);
+		if(src==null) return null;
+		return new PairM<>(src, modules.values());
 	}
 	
 	protected String resolve(String src, Map<String,ShaderModule> modules){
@@ -62,6 +68,7 @@ public class ImportShaderLoader extends ShaderLoader{
 					args[j]=args[j].trim();
 				}
 			}
+			
 			int pos=name.lastIndexOf('.');
 			String extension;
 			if(pos==-1){
@@ -83,7 +90,7 @@ public class ImportShaderLoader extends ShaderLoader{
 			if(loader==null) importSrc=UtilM.getTxtResource("shaders/modules/"+name);
 			else importSrc=loader.load(extension, args);
 			
-			if(importSrc==null) return null;
+			if(importSrc==null) importSrc="//MISSING SOURCE\n\n";
 			
 			src=insertReplace(src, macher, "//////_:"+name+":_\\\\\\\\\\\\\n\n"+resolve(importSrc, modules));
 			

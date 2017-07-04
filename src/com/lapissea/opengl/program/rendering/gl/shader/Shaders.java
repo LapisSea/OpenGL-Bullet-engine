@@ -61,7 +61,7 @@ public class Shaders{
 	public static ShaderRenderer<GuiElement>		GUI_NORMAL;
 	
 	public static void load(){
-		ENTITY=new ShaderRenderer.Basic3D("entity");
+		ENTITY=new ShaderRenderer.Basic3D<ModelTransformed>("entity");
 		
 		TERRAIN=new TerrainShader();
 		

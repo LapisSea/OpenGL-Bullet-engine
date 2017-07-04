@@ -12,9 +12,9 @@ uniform mat4 transformMat;
 uniform mat4 projectionMat;
 uniform mat4 viewMat;
 
-#include "Material"
-#include "Light"
-#include "Fog"
+#include "Material.smd"
+#include "Light.vsmd"
+#include "Fog.vsmd"
 
 void main(void){
 	setupModelMaterial();

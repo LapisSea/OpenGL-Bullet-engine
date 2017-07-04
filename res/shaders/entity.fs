@@ -6,8 +6,8 @@ out vec4 pixelColor;
 
 #include "Texture.smd: mainTexture"
 #include "Material.smd"
-#include "Light.smd"
-#include "Fog.smd"
+#include "Light.fsmd"
+#include "Fog.fsmd"
 
 void main(void){
 	initFog(wPos.xz);

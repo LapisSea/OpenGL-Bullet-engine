@@ -164,7 +164,8 @@ public abstract class Shader{
 	protected static final Pattern ERROR_TYPE=Pattern.compile("\\w+ \\w+");
 	
 	protected void loadShader(PairM<String,Collection<ShaderModule>> data, int type, String ext, IntConsumer set){
-		if(data==null||data.obj1==null){
+		LogUtil.println(name+ext, data!=null);
+		if(data==null){
 			set.accept(NOT_FOUND);
 			return;
 		}
@@ -192,7 +193,8 @@ public abstract class Shader{
 				shaderID=FAILED;
 				
 				LogUtil.printlnEr("Could not compile", name+ext);
-				String[] errors=GL20.glGetShaderInfoLog(shaderID, 2048).split("\n");
+				String errTxt=GL20.glGetShaderInfoLog(shaderID, 2048);
+				String[] errors=errTxt.split("\n");
 				
 				MapOfLists<String,String> errs=new MapOfLists<>();
 				MapOfLists<String,String> wans=new MapOfLists<>();
