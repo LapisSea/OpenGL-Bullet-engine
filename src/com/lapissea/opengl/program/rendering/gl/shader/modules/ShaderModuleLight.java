@@ -59,8 +59,8 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 	public static int	MAX_LINE_LIGHT	=2;
 	public static int	MAX_DIR_LIGHT	=2;
 	
-	private static final List<PointLight>	POINTS	=new LimitedList<PointLight>(MAX_POINT_LIGHT);
-	private static final List<LineLight>	LINES	=new LimitedList<LineLight>(MAX_LINE_LIGHT);
+	private static final List<PointLight>	POINTS	=new LimitedList<>(MAX_POINT_LIGHT);
+	private static final List<LineLight>	LINES	=new LimitedList<>(MAX_LINE_LIGHT);
 	private static final List<DirLight>		DIRS	=new LimitedList<>(MAX_DIR_LIGHT);
 	
 	public ShaderModuleLight(Shader parent){
@@ -70,24 +70,24 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 	@Override
 	public void setUpUniforms(){
 		//FS
-		pointLightColor=getUniformArray(UniformFloat4.class, i->"pointLights["+i+"].color");
-		pointLightAttenuation=getUniformArray(UniformFloat3.class, i->"pointLights["+i+"].attenuation");
-		pointLightPos=getUniformArray(UniformFloat3.class, i->"pointLights["+i+"].pos");
+		pointLightColor=getUniformArray(i->"pointLights["+i+"].color");
+		pointLightAttenuation=getUniformArray(i->"pointLights["+i+"].attenuation");
+		pointLightPos=getUniformArray(i->"pointLights["+i+"].pos");
 		
-		numberOfPointLights=getUniform(UniformInt1.class, "numberOfPointLights");
+		numberOfPointLights=getUniform("numberOfPointLights");
 		
-		lineLightColor=getUniformArray(UniformFloat4.class, i->"lineLights["+i+"].color");
-		lineLightAttenuation=getUniformArray(UniformFloat3.class, i->"lineLights["+i+"].attenuation");
-		lineLightPos1=getUniformArray(UniformFloat3.class, i->"lineLights["+i+"].pos1");
-		lineLightPos2=getUniformArray(UniformFloat3.class, i->"lineLights["+i+"].pos2");
+		lineLightColor=getUniformArray(i->"lineLights["+i+"].color");
+		lineLightAttenuation=getUniformArray(i->"lineLights["+i+"].attenuation");
+		lineLightPos1=getUniformArray(i->"lineLights["+i+"].pos1");
+		lineLightPos2=getUniformArray(i->"lineLights["+i+"].pos2");
 		
-		numberOfLineLights=getUniform(UniformInt1.class, "numberOfLineLights");
+		numberOfLineLights=getUniform("numberOfLineLights");
 		
-		dirLightColor=getUniformArray(UniformFloat4.class, i->"dirLights["+i+"].color");
-		dirLightDirection=getUniformArray(UniformFloat3.class, i->"dirLights["+i+"].direction");
+		dirLightColor=getUniformArray(i->"dirLights["+i+"].color");
+		dirLightDirection=getUniformArray(i->"dirLights["+i+"].direction");
 		
-		numberOfDirLights=getUniform(UniformInt1.class, "numberOfDirLights");
-		minBrightness=getUniform(UniformFloat1.class, "minBrightness");
+		numberOfDirLights=getUniform("numberOfDirLights");
+		minBrightness=getUniform("minBrightness");
 		
 	}
 	

@@ -28,14 +28,14 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 	
 	@Override
 	public void setUpUniforms(){
-		ambient=getUniformArray(UniformFloat3.class, i->"materials["+i+"].ambient");
-		diffuse=getUniformArray(UniformFloat3.class, i->"materials["+i+"].diffuse");
-		specular=getUniformArray(UniformFloat3.class, i->"materials["+i+"].specular");
-		jelly=getUniformArray(UniformFloat1.class, i->"materials["+i+"].jelly");
-		shineDamper=getUniformArray(UniformFloat1.class, i->"materials["+i+"].shineDamper");
-		reflectivity=getUniformArray(UniformFloat1.class, i->"materials["+i+"].reflectivity");
-		lightTroughput=getUniformArray(UniformFloat1.class, i->"materials["+i+"].lightTroughput");
-		tim=getUniform(UniformFloat1.class, "tim");
+		ambient=getUniformArray(i->"materials["+i+"].ambient");
+		diffuse=getUniformArray(i->"materials["+i+"].diffuse");
+		specular=getUniformArray(i->"materials["+i+"].specular");
+		jelly=getUniformArray(i->"materials["+i+"].jelly");
+		shineDamper=getUniformArray(i->"materials["+i+"].shineDamper");
+		reflectivity=getUniformArray(i->"materials["+i+"].reflectivity");
+		lightTroughput=getUniformArray(i->"materials["+i+"].lightTroughput");
+		tim=getUniform("tim");
 	}
 	
 	@Override
@@ -45,7 +45,7 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelUniforms{
 	
 	@Override
 	public void uploadUniformsModel(IModel model){
-		if(tim!=null)tim.upload((float)(((Game.get().world.time()+(double)Game.getPartialTicks())/20D)%(Math.PI*2)));
+		if(tim!=null)tim.upload((float)((Game.get().world.time()+(double)Game.getPartialTicks())/20D%(Math.PI*2)));
 		for(int i=0, j=Math.min(model.getMaterialCount(), ambient.length-1);i<j;i++){
 			IMaterial mat=model.getMaterial(i);
 			uploadMaterial(mat.getId(), mat);

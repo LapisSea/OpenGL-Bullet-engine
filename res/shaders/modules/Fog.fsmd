@@ -1,5 +1,5 @@
 
-#include "Noise2D"
+#include "Noise2D.smd"
 
 in float fogVisibility;
 

@@ -15,7 +15,7 @@ public class ShaderModuleScreenSize extends ShaderModule implements Global{
 	
 	@Override
 	public void setUpUniforms(){
-		screenSize=getUniform(UniformFloat2.class, "screenSize");
+		screenSize=getUniform("screenSize");
 	}
 	
 	@Override

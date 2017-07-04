@@ -8,8 +8,6 @@ vec4 <NAME>(vec2 uv){
 	if(!MDL_TEXTURE_USED[<NUM>])return vec4(<COL>);
 	return texture(MDL_TEXTURE<NUM>, uv);
 }
-asd
-a asd asd
 ////////////////////////////////////////////////
 <SPLIT>
 uniform samplerCube MDL_TEXTURE<NUM>;

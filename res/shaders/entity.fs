@@ -4,10 +4,10 @@ in vec2 uv;
 
 out vec4 pixelColor;
 
-#include "Texture: mainTexture"
-#include "Material"
-#include "Light"
-#include "Fog"
+#include "Texture.smd: mainTexture"
+#include "Material.smd"
+#include "Light.smd"
+#include "Fog.smd"
 
 void main(void){
 	initFog(wPos.xz);

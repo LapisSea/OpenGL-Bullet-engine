@@ -5,7 +5,6 @@ import com.lapissea.opengl.program.rendering.gl.gui.GuiElementMaterial;
 import com.lapissea.opengl.program.rendering.gl.gui.GuiHandler;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat2;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat4;
@@ -20,9 +19,9 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 		
 		
 		public RenderType(String name){
-			blurRad=getUniform(UniformFloat1.class, name+".blurRad");
-			color=getUniform(UniformFloat4.class, name+".color");
-			mouseRad=getUniform(UniformFloat1.class, name+".mouseRad");
+			blurRad=getUniform(name+".blurRad");
+			color=getUniform(name+".color");
+			mouseRad=getUniform(name+".mouseRad");
 		}
 		
 		
@@ -49,17 +48,17 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 	public GuiRectShader(){
 		super("gui/rect");
 	}
-
+	
 	
 	@Override
 	protected void setUpUniforms(){
-		transformMat=getUniform(UniformMat4.class, "transformMat");
-		size=getUniform(UniformFloat2.class, "size");
+		transformMat=getUniform("transformMat");
+		size=getUniform("size");
 		
 		background=new RenderType("background");
 		border=new RenderType("border");
-		borderWidth=getUniform(UniformFloat1.class, "borderWidth");
-		blurDiv=getUniform(UniformFloat1.class, "blurDiv");
+		borderWidth=getUniform("borderWidth");
+		blurDiv=getUniform("blurDiv");
 	}
 	
 	@Override

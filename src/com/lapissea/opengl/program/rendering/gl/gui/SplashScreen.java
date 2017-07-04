@@ -84,7 +84,7 @@ public class SplashScreen{
 		@Override
 		protected void setUpUniforms(){
 			super.setUpUniforms();
-			tim=getUniform(UniformFloat1.class, "tim");
+			tim=getUniform("tim");
 		}
 		
 		@Override

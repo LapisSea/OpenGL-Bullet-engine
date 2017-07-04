@@ -13,7 +13,7 @@ public class UniformMat4 extends AbstractUniform{
 	
 	protected static final FloatBuffer BUFF=BufferUtils.createFloatBuffer(16);
 	
-	protected Matrix4f prev=new Matrix4f();
+	protected Matrix4f prev=Matrix4f.setZero(new Matrix4f());
 	
 	public UniformMat4(Shader shader, int id, String name){
 		super(shader, id, name);

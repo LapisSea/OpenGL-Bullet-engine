@@ -16,7 +16,7 @@ public class ShaderModuleMousePosition extends ShaderModule implements Global{
 	
 	@Override
 	public void setUpUniforms(){
-		mousePos=getUniform(UniformFloat2.class, "mousePos");
+		mousePos=getUniform("mousePos");
 	}
 	
 	@Override

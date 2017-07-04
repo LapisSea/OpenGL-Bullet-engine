@@ -24,7 +24,7 @@ public abstract class ShaderModule{
 		final ShaderModuleSrcLoader					loader;
 		
 		ModuleEntry(Class<? extends ShaderModule> module, ShaderModuleSrcLoader loader, String[] args) throws Exception{
-			this.constr=module.getDeclaredConstructor(Shader.class);
+			constr=module.getDeclaredConstructor(Shader.class);
 			this.loader=loader;
 			for(int i=0;i<args.length;i+=2){
 				this.args.put(args[i], args[i+1]);
@@ -132,16 +132,16 @@ public abstract class ShaderModule{
 	
 	public void bindAttributes(){}
 	
-	public <T extends AbstractUniform> T[] getUniformArray(Class<T> uniformType, String name){
-		return parent.getUniformArray(uniformType, name);
+	public <T extends AbstractUniform> T[] getUniformArray(String name){
+		return parent.getUniformArray(name);
 	}
 	
-	public <T extends AbstractUniform> T[] getUniformArray(Class<T> uniformType, Function<Integer,String> name){
-		return parent.getUniformArray(uniformType, name);
+	public <T extends AbstractUniform> T[] getUniformArray(Function<Integer,String> name){
+		return parent.getUniformArray(name);
 	}
 	
-	protected <T extends AbstractUniform> T getUniform(Class<T> uniformType, String name){
-		return parent.getUniform(uniformType, name);
+	protected <T extends AbstractUniform> T getUniform(String name){
+		return parent.getUniform(name);
 	}
 	
 	public void bindAttribute(ModelAttribute attr){

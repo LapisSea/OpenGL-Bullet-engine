@@ -58,7 +58,7 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 	
 	@Override
 	public void setUpUniforms(){
-		texturesUsed=getUniformArray(UniformBoolean.class, "MDL_TEXTURE_USED");
+		texturesUsed=getUniformArray("MDL_TEXTURE_USED");
 	}
 	
 	@Override
@@ -67,7 +67,7 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 			notInit=false;
 			if(texturesUsed!=null){
 				for(int i=0;i<texturesUsed.length;i++){
-					UniformInt1 u=getUniform(UniformInt1.class, "MDL_TEXTURE"+i);
+					UniformInt1 u=getUniform("MDL_TEXTURE"+i);
 					if(u!=null) u.upload(i);
 				}
 			}
@@ -75,7 +75,6 @@ public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
 		
 		if(texturesUsed!=null){
 			List<ITexture> txts=model.getTextures();
-			//			LogUtil.println(txts);
 			for(int i=0;i<texturesUsed.length;i++){
 				ITexture texture=i<txts.size()?txts.get(i):null;
 				boolean valid=texture!=null&&texture.isLoaded();

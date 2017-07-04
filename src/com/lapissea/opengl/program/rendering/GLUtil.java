@@ -174,4 +174,8 @@ public class GLUtil{
 		if(program>0&&shader>0) GL20.glDetachShader(program, shader);
 	}
 	
+	public static void attachShader(int program, int shader){
+		if(program>0&&shader>0) GL20.glAttachShader(program, shader);
+	}
+	
 }

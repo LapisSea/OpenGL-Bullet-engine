@@ -8,7 +8,7 @@ import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFl
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
 
 public class ShaderModuleFog extends ShaderModule implements Global{
-
+	
 	protected UniformFloat3	skyColor;
 	protected UniformFloat1	fogDensity;
 	protected UniformFloat1	fogGradient;
@@ -16,15 +16,15 @@ public class ShaderModuleFog extends ShaderModule implements Global{
 	public ShaderModuleFog(Shader parent){
 		super(parent);
 	}
-
+	
 	@Override
 	public void setUpUniforms(){
 		//VS
-		fogDensity=getUniform(UniformFloat1.class, "fogDensity");
-		fogGradient=getUniform(UniformFloat1.class, "fogGradient");
+		fogDensity=getUniform("fogDensity");
+		fogGradient=getUniform("fogGradient");
 		
 		//FS
-		skyColor=getUniform(UniformFloat3.class, "skyColor");
+		skyColor=getUniform("skyColor");
 	}
 	
 	@Override

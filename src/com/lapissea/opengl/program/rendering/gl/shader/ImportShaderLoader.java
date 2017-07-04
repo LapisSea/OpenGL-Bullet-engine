@@ -11,6 +11,7 @@ import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ShaderModuleSrcLoader;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.util.LogUtil;
 
 public class ImportShaderLoader extends ShaderLoader{
 	
@@ -62,7 +63,11 @@ public class ImportShaderLoader extends ShaderLoader{
 				}
 			}
 			int pos=name.lastIndexOf('.');
-			String extension=pos==-1?".smd":name.substring(pos);
+			String extension;
+			if(pos==-1){
+				LogUtil.printlnEr("WARNING: Shader module extension name not included! ("+name+"@"+shader.name+") Assuming \".smd\"!");
+				extension=".smd";
+			}else extension=name.substring(pos);
 			
 			if(modules.containsKey(name)){
 				src=insertReplace(src, macher, "//SKIPPED DUPLICATE \""+name+'"');
@@ -80,7 +85,7 @@ public class ImportShaderLoader extends ShaderLoader{
 			
 			if(importSrc==null) return null;
 			
-			src=insertReplace(src, macher, "////_:"+name+":_\\\\\\\\\\\n"+resolve(importSrc, modules));
+			src=insertReplace(src, macher, "//////_:"+name+":_\\\\\\\\\\\\\n\n"+resolve(importSrc, modules));
 			
 		}
 		
