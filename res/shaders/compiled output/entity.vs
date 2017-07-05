@@ -4,6 +4,7 @@
 in vec3 pos;
 in vec2 uvIn;
 in vec3 normalIn;
+in float materialIdIn;
 
 out vec2 uv;
 
@@ -12,8 +13,7 @@ uniform mat4 transformMat;
 uniform mat4 projectionMat;
 uniform mat4 viewMat;
 
-//////_:Material.smd:_\\\\\\
-
+/* MODULE_:Material.smd:_MODULE*/
 struct ModelMaterial{
 	vec3 ambient;
 	vec3 diffuse;
@@ -30,8 +30,7 @@ ModelMaterial getMaterial(int id){
 	return materials[id];
 }
 
-//////_:Light.vsmd:_\\\\\\
-
+/* MODULE_:Light.vsmd:_MODULE*/
 out vec3 normal;
 out vec3 toCamera;
 out vec3 wPos;
@@ -44,8 +43,7 @@ void lightingSetUp(mat4 transformMat, vec4 worldPos, vec3 rawNormal, vec3 camera
 	
 }
 
-//////_:Fog.vsmd:_\\\\\\
-
+/* MODULE_:Fog.vsmd:_MODULE*/
 out float fogVisibility;
 
 void applyFog(vec3 worldViewPos, float fogDensity, float fogGradient){
@@ -58,7 +56,7 @@ void applyFog(vec3 worldViewPos, float fogDensity, float fogGradient){
 
 void main(void){
 	setupModelMaterial();
-	ModelMaterial m=getMaterial();
+	ModelMaterial m=getMaterial(int(round(materialIdIn)));
 	vec3 pos0=pos;
 	if(m.jelly>0){
 		vec3 v=(transformMat*vec4(pos0,1)).xyz;

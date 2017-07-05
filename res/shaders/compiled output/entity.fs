@@ -1,32 +1,23 @@
 #version 400 core
 
 in vec2 uv;
+in float materialIdIn;
 
 out vec4 pixelColor;
 
-//////_:Texture.smd:_\\\\\\
-
-uniform bool MDL_TEXTURE_USED[<COUNT>];
+/* MODULE_:Texture.smd:_MODULE*/
+uniform bool MDL_TEXTURE_USED[1];
 ////////////////////////////////////////////////
-<SPLIT>
-uniform sampler2D MDL_TEXTURE<NUM>;
 
-vec4 <NAME>(vec2 uv){
-	if(!MDL_TEXTURE_USED[<NUM>])return vec4(<COL>);
-	return texture(MDL_TEXTURE<NUM>, uv);
-}
-////////////////////////////////////////////////
-<SPLIT>
-uniform samplerCube MDL_TEXTURE<NUM>;
+uniform sampler2D MDL_TEXTURE0;
 
-vec4 <NAME>(vec3 uv){
-	if(!MDL_TEXTURE_USED[<NUM>])return vec4(<COL>);
-	return texture(MDL_TEXTURE<NUM>, uv);
+vec4 mainTexture(vec2 uv){
+	if(!MDL_TEXTURE_USED[0])return vec4(1);
+	return texture(MDL_TEXTURE0, uv);
 }
 ////////////////////////////////////////////////
 
-//////_:Material.smd:_\\\\\\
-
+/* MODULE_:Material.smd:_MODULE*/
 struct ModelMaterial{
 	vec3 ambient;
 	vec3 diffuse;
@@ -43,9 +34,8 @@ ModelMaterial getMaterial(int id){
 	return materials[id];
 }
 
-//////_:Light.fsmd:_\\\\\\
-
-//SKIPPED DUPLICATE "Material.smd"
+/* MODULE_:Light.fsmd:_MODULE*/
+/*SKIPPED DUPLICATE "Material.smd" */
 
 
 struct PointLight{
@@ -227,8 +217,7 @@ void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight ligh
 }
 
 
-//////_:ArrayList.smd:_\\\\\\
-
+/* MODULE_:ArrayList.smd:_MODULE*/
 struct ArrayList<TYPE>{
 	
 	<TYPE> data[<MAX_SIZE>];
@@ -266,10 +255,8 @@ vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material, 
 	return max(vec4(minBrightness),light_diffuseTotal)*baseColor+light_specularTotal;
 }
 
-//////_:Fog.fsmd:_\\\\\\
-
-//////_:Noise2D.smd:_\\\\\\
-
+/* MODULE_:Fog.fsmd:_MODULE*/
+/* MODULE_:Noise2D.smd:_MODULE*/
 //
 // Description : Array and textureless GLSL 2D simplex noise function.
 //      Author : Ian McEwan, Ashima Arts.
@@ -366,7 +353,7 @@ void main(void){
 	initFog(wPos.xz);
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
-	pixelColor=applyLighting(pixelColor, getMaterial());
+	pixelColor=applyLighting(pixelColor, getMaterial(int(round(materialIdIn))));
 	pixelColor=applyFog(pixelColor);
 	
 }

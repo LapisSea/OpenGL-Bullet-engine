@@ -153,12 +153,23 @@ public class GLUtil{
 		}
 	}
 	
+	private static int	viewportWidth;
+	private static int	viewportHeight;
+	
 	public static void viewport(IVec2i size){
 		viewport(size.x(), size.y());
 	}
 	
 	public static void viewport(int width, int height){
-		GL11.glViewport(0, 0, width, height);
+		GL11.glViewport(0, 0, viewportWidth=width, viewportHeight=height);
+	}
+	
+	public static int getViewportWidth(){
+		return viewportWidth;
+	}
+	
+	public static int getViewportHeight(){
+		return viewportHeight;
 	}
 	
 	public static void deleteDetachShader(int program, int shader){

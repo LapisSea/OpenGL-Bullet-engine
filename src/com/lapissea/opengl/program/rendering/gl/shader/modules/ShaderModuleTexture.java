@@ -5,13 +5,13 @@ import java.util.List;
 import org.lwjgl.opengl.GL13;
 
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelUniforms;
+import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelMdl;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformBoolean;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints.UniformInt1;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ITexture;
 
-public class ShaderModuleTexture extends ShaderModule implements ModelUniforms{
+public class ShaderModuleTexture extends ShaderModule implements ModelMdl{
 	
 	public static class Loader extends ShaderModuleSrcLoader{
 		

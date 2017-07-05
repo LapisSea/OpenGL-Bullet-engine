@@ -4,6 +4,7 @@
 in vec3 pos;
 in vec2 uvIn;
 in vec3 normalIn;
+in float materialIdIn;
 
 out vec2 uv;
 
@@ -18,7 +19,7 @@ uniform mat4 viewMat;
 
 void main(void){
 	setupModelMaterial();
-	ModelMaterial m=getMaterial();
+	ModelMaterial m=getMaterial(int(round(materialIdIn)));
 	vec3 pos0=pos;
 	if(m.jelly>0){
 		vec3 v=(transformMat*vec4(pos0,1)).xyz;

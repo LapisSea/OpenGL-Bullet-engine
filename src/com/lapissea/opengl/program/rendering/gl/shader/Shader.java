@@ -92,10 +92,10 @@ public abstract class Shader{
 	protected UniformFloat1	reflectivity;
 	protected UniformFloat1	lightTroughput;
 	
-	protected List<ShaderModule>				modules				=new ArrayList<>();
-	protected List<ShaderModule.Global>			modulesGlobal		=new ArrayList<>();
-	protected List<ShaderModule.Instance>		modulesInstance		=new ArrayList<>();
-	protected List<ShaderModule.ModelUniforms>	modulesModelUniforms=new ArrayList<>();
+	protected List<ShaderModule>			modules				=new ArrayList<>();
+	protected List<ShaderModule.Global>		modulesGlobal		=new ArrayList<>();
+	protected List<ShaderModule.Instance>	modulesInstance		=new ArrayList<>();
+	protected List<ShaderModule.ModelMdl>	modulesModelUniforms=new ArrayList<>();
 	
 	public Shader(){
 		this(new ImportShaderLoader());
@@ -138,7 +138,7 @@ public abstract class Shader{
 			modules.forEach(module->{
 				if(module instanceof ShaderModule.Global) modulesGlobal.add((ShaderModule.Global)module);
 				if(module instanceof ShaderModule.Instance) modulesInstance.add((ShaderModule.Instance)module);
-				if(module instanceof ShaderModule.ModelUniforms) modulesModelUniforms.add((ShaderModule.ModelUniforms)module);
+				if(module instanceof ShaderModule.ModelMdl) modulesModelUniforms.add((ShaderModule.ModelMdl)module);
 			});
 			
 			program=GL20.glCreateProgram();
@@ -148,7 +148,12 @@ public abstract class Shader{
 			GLUtil.attachShader(program, fragment);
 			
 			bindAttributes();
-			modules.forEach(ShaderModule::bindAttributes);
+			for(ShaderModule shaderModule:modules){
+				LogUtil.println(shaderModule);
+			}
+			modules.forEach(md->{
+				md.bindAttributes();
+			});
 			
 			GL20.glLinkProgram(program);
 			GL20.glValidateProgram(program);
@@ -164,13 +169,14 @@ public abstract class Shader{
 	protected static final Pattern ERROR_TYPE=Pattern.compile("\\w+ \\w+");
 	
 	protected void loadShader(PairM<String,Collection<ShaderModule>> data, int type, String ext, IntConsumer set){
-		LogUtil.println(name+ext, data!=null);
 		if(data==null){
 			set.accept(NOT_FOUND);
 			return;
 		}
 		
-		if(data.obj2!=null) data.obj2.stream().filter(m->!modules.contains(m)).forEach(modules::add);
+		if(data.obj2!=null) data.obj2.stream().filter(m->!modules.stream().noneMatch(m1->m1.getClass().equals(m.getClass()))).forEach(modules::add);
+		
+		data.obj1=data.obj1.replaceAll("\r\n", "\n");
 		
 		if(Globals.DEV_ENV) try{
 			File f=new File("res/shaders/compiled output/"+name+ext);
@@ -187,13 +193,12 @@ public abstract class Shader{
 			
 			GL20.glShaderSource(shaderID, data.obj1);
 			GL20.glCompileShader(shaderID);
-			
-			if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS)==GL11.GL_FALSE){
+			String errTxt;
+			if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS)==GL11.GL_FALSE&&!(errTxt=GL20.glGetShaderInfoLog(shaderID, 2048)).isEmpty()){
 				GL20.glDeleteShader(shaderID);
 				shaderID=FAILED;
 				
 				LogUtil.printlnEr("Could not compile", name+ext);
-				String errTxt=GL20.glGetShaderInfoLog(shaderID, 2048);
 				String[] errors=errTxt.split("\n");
 				
 				MapOfLists<String,String> errs=new MapOfLists<>();
@@ -201,6 +206,7 @@ public abstract class Shader{
 				
 				for(int i=0;i<errors.length;i++){
 					String error=errors[i];
+					if(error.isEmpty()) continue;
 					String lineNum=error.substring(error.indexOf('(')+1, error.indexOf(')'));
 					
 					Matcher errType=ERROR_TYPE.matcher(error);
@@ -219,8 +225,7 @@ public abstract class Shader{
 					if(msgs.size()==1){
 						LogUtil.printlnEr(msgs.get(0));
 						LogUtil.printlnEr("    src -> "+lines[Integer.parseInt(line)-1]);
-					}
-					else{
+					}else{
 						LogUtil.printlnEr("\n    src -> "+lines[Integer.parseInt(line)-1]);
 						msgs.forEach(msg->LogUtil.printlnEr("        "+msg));
 					}

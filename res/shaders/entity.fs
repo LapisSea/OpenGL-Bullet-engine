@@ -1,6 +1,7 @@
 #version 400 core
 
 in vec2 uv;
+in float materialIdIn;
 
 out vec4 pixelColor;
 
@@ -13,7 +14,7 @@ void main(void){
 	initFog(wPos.xz);
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
-	pixelColor=applyLighting(pixelColor, getMaterial());
+	pixelColor=applyLighting(pixelColor, getMaterial(int(round(materialIdIn))));
 	pixelColor=applyFog(pixelColor);
 	
 }

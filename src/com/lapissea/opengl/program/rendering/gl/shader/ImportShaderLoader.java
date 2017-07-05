@@ -7,6 +7,8 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.lwjgl.opengl.OpenGLException;
+
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ShaderModuleSrcLoader;
 import com.lapissea.opengl.program.util.PairM;
@@ -70,29 +72,30 @@ public class ImportShaderLoader extends ShaderLoader{
 			}
 			
 			int pos=name.lastIndexOf('.');
-			String extension;
 			if(pos==-1){
 				LogUtil.printlnEr("WARNING: Shader module extension name not included! ("+name+"@"+shader.name+") Assuming \".smd\"!");
-				extension=".smd";
-			}else extension=name.substring(pos);
-			
+				pos=name.length();
+				name+=".smd";
+			}
+			String extension=name.substring(pos);
+			name=name.substring(0, pos);
 			if(modules.containsKey(name)){
-				src=insertReplace(src, macher, "//SKIPPED DUPLICATE \""+name+'"');
+				src=insertReplace(src, macher, "/*SKIPPED DUPLICATE \""+name+extension+"\" */");
 				continue;
 			}
-			
+			LogUtil.println(name);
 			ShaderModuleSrcLoader loader=ShaderModule.getLoader(name);
 			
 			modules.put(name, ShaderModule.getNew(name, shader));
 			
 			String importSrc;
 			
-			if(loader==null) importSrc=UtilM.getTxtResource("shaders/modules/"+name);
+			if(loader==null) importSrc=UtilM.getTxtResource("shaders/modules/"+name+extension);
 			else importSrc=loader.load(extension, args);
 			
-			if(importSrc==null) importSrc="//MISSING SOURCE\n\n";
+			if(importSrc==null) throw new OpenGLException("Missing moddule source: "+name+extension+"@"+shader.name);
 			
-			src=insertReplace(src, macher, "//////_:"+name+":_\\\\\\\\\\\\\n\n"+resolve(importSrc, modules));
+			src=insertReplace(src, macher, "/* MODULE_:"+name+extension+":_MODULE*/\n"+resolve(importSrc, modules));
 			
 		}
 		

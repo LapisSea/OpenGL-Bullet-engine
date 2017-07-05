@@ -8,7 +8,7 @@ uniform vec3 sunPos;
 uniform float eyeHeight;
 uniform float skyClarity;
 
-#include "atmosphere"
+#include "atmosphere.fsmd"
 
 void main(void){
 	float div=max(1,1+eyeHeight*eyeHeight/100);

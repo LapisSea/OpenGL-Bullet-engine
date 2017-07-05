@@ -54,22 +54,28 @@ public abstract class ShaderModule{
 		registerModule("Fog", ShaderModuleFog.class, null);
 		registerModule("Material", ShaderModuleMaterial.class, null, "MATERIAL_MAX_COUNT", String.valueOf(ShaderModuleMaterial.MATERIAL_MAX_COUNT));
 		registerModule("Texture", ShaderModuleTexture.class, new ShaderModuleTexture.Loader());
-		registerModule("ScreenSize", ShaderModuleScreenSize.class, null);
-		registerModule("MousePosition", ShaderModuleMousePosition.class, null);
+		registerModule("ScreenSize", ShaderModuleScreenSize.class, new ShaderModuleGlobalUniform.Loader("vec2", "screenSize"));
+		registerModule("MousePosition", ShaderModuleMousePosition.class, new ShaderModuleGlobalUniform.Loader("vec2", "mousePosition"));
 	}
 	
 	/**
-	 * @param name = name that matches the string inside of shader module.<br>
-	 * Example:<br>
-	 * //shader<br>
-	 * #include "FooBar"<br>
-	 * module name = FooBar
+	 * @param name
+	 *            = name that matches the string inside of shader module.<br>
+	 *            Example:<br>
+	 *            //shader<br>
+	 *            #include "FooBar"<br>
+	 *            module name = FooBar
 	 * 
-	 * @param module = module class whos instance handles the shader module uniforms and such.<br>
-	 * Example:<br>
-	 * A module contains "uniform vec3 fooUni;" the module instance should load uniform "fooUni" with type {@link UniformFloat3} and upload desired value to it.
+	 * @param module
+	 *            = module class whos instance handles the shader module
+	 *            uniforms and such.<br>
+	 *            Example:<br>
+	 *            A module contains "uniform vec3 fooUni;" the module instance
+	 *            should load uniform "fooUni" with type {@link UniformFloat3}
+	 *            and upload desired value to it.
 	 * 
-	 * @param args = "value1 name", "value1", "value2 name", "value2"....
+	 * @param args
+	 *            = "value1 name", "value1", "value2 name", "value2"....
 	 */
 	public static void registerModule(String name, Class<? extends ShaderModule> module, ShaderModuleSrcLoader loader, String...args){
 		if(args==null) args=new String[0];
@@ -123,7 +129,7 @@ public abstract class ShaderModule{
 		void uploadUniformsInstance(ModelTransformed instance);
 	}
 	
-	public interface ModelUniforms{
+	public interface ModelMdl{
 		
 		void uploadUniformsModel(IModel model);
 	}

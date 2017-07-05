@@ -1,5 +1,6 @@
 package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
+import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.gl.gui.GuiElement;
 import com.lapissea.opengl.program.rendering.gl.gui.GuiElementMaterial;
 import com.lapissea.opengl.program.rendering.gl.gui.GuiHandler;
@@ -30,7 +31,6 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 			color.upload(col);
 			mouseRad.upload(mouse);
 		}
-		
 		
 		public void upload(GuiElementMaterial background){
 			upload(background.blurRad, background.color, background.mouseRad);
@@ -65,7 +65,8 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 	public void prepareGlobal(){
 		bind();
 		modulesGlobal.forEach(ShaderModule.Global::uploadUniformsGlobal);
-		if(blurDiv!=null)blurDiv.upload(GuiHandler.BLUR_DIV);
+		GLUtil.printAllUniforms(program);
+		if(blurDiv!=null) blurDiv.upload(GuiHandler.BLUR_DIV);
 	}
 	
 	@Override

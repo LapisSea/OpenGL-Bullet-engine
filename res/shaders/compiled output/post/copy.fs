@@ -4,8 +4,7 @@ in vec2 uv;
 
 out vec4 pixelColor;
 
-//////_:Texture:_\\\\\\
-
+/* MODULE_:Texture.smd:_MODULE*/
 uniform bool MDL_TEXTURE_USED[1];
 ////////////////////////////////////////////////
 

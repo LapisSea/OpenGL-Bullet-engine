@@ -13,8 +13,8 @@ in vec2 uv;
 
 out vec4 pixelColor;
 
-#include "ScreenSize"
-#include "MousePosition"
+#include "ScreenSize.smd"
+#include "MousePosition.smd"
 #include "Texture: screen;; elementTexture-0"
 
 uniform RenderType background;

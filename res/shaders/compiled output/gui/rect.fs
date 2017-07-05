@@ -13,16 +13,13 @@ in vec2 uv;
 
 out vec4 pixelColor;
 
-//////_:ScreenSize:_\\\\\\
+/* MODULE_:ScreenSize.smd:_MODULE*/
+uniform vec2 screenSize;
 
-//MISSING SOURCE
+/* MODULE_:MousePosition.smd:_MODULE*/
+uniform vec2 mousePosition;
 
-//////_:MousePosition:_\\\\\\
-
-//MISSING SOURCE
-
-//////_:Texture:_\\\\\\
-
+/* MODULE_:Texture.smd:_MODULE*/
 uniform bool MDL_TEXTURE_USED[2];
 ////////////////////////////////////////////////
 
