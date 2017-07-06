@@ -6,3 +6,8 @@ I am developing this engine because I want to learn how a game works and what is
 ________________
 ### Who is making this?
 Me. Everything in this project is made by me or is an open source api.
+________________
+### Extra
+Big props to:
+* [ThinMatrix@YouTube](https://www.youtube.com/user/ThinMatrix) for bringing the OpenGL shading language closer to me and for explaining in detail concepts of things like lighting.
+* [Sebastian Lague@YouTube](https://www.youtube.com/channel/UCmtyQOKKmrMVaKuRXz02jbQ) for explaining basics of blender and many of its useful features.
