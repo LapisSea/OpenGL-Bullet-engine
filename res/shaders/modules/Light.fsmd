@@ -182,20 +182,23 @@ void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight ligh
 
 #include "ArrayList.smd: PointLight, <MAX_POINT_LIGHT>;; LineLight, <MAX_LINE_LIGHT>;; DirectionalLight, <MAX_DIR_LIGHT>"
 
-vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material, vec3 normal, vec3 toCamera, vec3 wPos, ArrayListPointLight pointLights, ArrayListLineLight lineLights, ArrayListDirectionalLight dirLights){
+in vec3 normal;
+in vec3 toCamera;
+in vec3 wPos;
+
+vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material, ListPointLight pointLights, ListLineLight lineLights, ListDirectionalLight dirLights){
 	
 	vec3 unitToCamera=normalize(toCamera);
 	vec3 unitNormal=normalize(normal);
 	if(!gl_FrontFacing)unitNormal*=-1;
 	
-	int i;
-	for(i=0;i<pointLights.size;i++){
+	for(int i=0;i<pointLights.size;i++){
 		calcPointLightColor(unitToCamera, unitNormal, pointLights.get(i), material, wPos);
 	}
-	for(i=0;i<lineLights.size;i++){
+	for(int i=0;i<lineLights.size;i++){
 		calcLineLightColor(unitToCamera,unitNormal,lineLights.get(i),material, wPos);
 	}
-	for(i=0;i<dirLights.size;i++){
+	for(int i=0;i<dirLights.size;i++){
 		calcDirLightColor(unitToCamera,unitNormal,dirLights.get(i), material);
 	}
 	

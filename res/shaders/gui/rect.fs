@@ -15,7 +15,7 @@ out vec4 pixelColor;
 
 #include "ScreenSize.smd"
 #include "MousePosition.smd"
-#include "Texture: screen;; elementTexture-0"
+#include "Texture.smd: screen;; elementTexture-0"
 
 uniform RenderType background;
 uniform RenderType border;

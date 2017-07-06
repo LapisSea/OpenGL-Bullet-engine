@@ -1,5 +1,8 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelMdl;
@@ -62,4 +65,10 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelMdl{
 		lightTroughput[i].upload(material.getLightTroughput());
 	}
 	
+	@Override
+	public Map<String,String> getCompileValues(){
+		Map<String,String> map=new HashMap<>();
+		map.put("MATERIAL_MAX_COUNT", ""+MATERIAL_MAX_COUNT);
+		return map;
+	}
 }

@@ -267,10 +267,6 @@ public abstract class Shader{
 		viewMat=getUniform("viewMat");
 	}
 	
-	protected int getUniformId(String name){
-		return GL20.glGetUniformLocation(program, name);
-	}
-	
 	public <T extends AbstractUniform> T[] getUniformArray(String name){
 		return getUniformArray(i->name+"["+i+"]");
 	}
@@ -290,13 +286,29 @@ public abstract class Shader{
 	@SuppressWarnings("unchecked")
 	public <T extends AbstractUniform> T getUniform(String name){
 		GLUtil.checkError();
-		int id=getUniformId(name);
+		int id=GL20.glGetUniformLocation(program, name);
 		GLUtil.checkError();
 		if(id==-1) return null;
 		
+		String nameCheck=GL20.glGetActiveUniform(program, id, 512);
+		if(!nameCheck.equals(name)){
+			if(GL20.glGetActiveUniform(program, id-1, 512).equals(name)) id--;
+			else if(GL20.glGetActiveUniform(program, id+1, 512).equals(name)) id++;
+		}
+		
 		int type=GL20.glGetActiveUniformType(program, id);
 		UniformFactory fac=UNIFORMS.get(type);
-		if(fac==null) throw new RuntimeException("Unknown uniform type "+type);
+		if(fac==null){
+//			Map<Integer,String> unis=new HashMap<>();
+//			GLUtil.getAllUniforms(program, unis);
+//
+//			unis.forEach((i, k)->{
+//
+//				LogUtil.println(i, GL20.glGetUniformLocation(program, k), k);
+//
+//			});
+			throw new RuntimeException("Unknown uniform type "+type+" with name "+name+" and id "+id+" at shader "+this.name);
+		}
 		
 		return (T)fac.get(this, id, name);
 	}

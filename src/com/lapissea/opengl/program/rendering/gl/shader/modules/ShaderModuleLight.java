@@ -1,7 +1,9 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import com.lapissea.opengl.program.core.Game;
@@ -142,6 +144,15 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 			light.dir.normalise(UNIT_VEC);
 			dirLightDirection[i].upload(UNIT_VEC);
 		}
+	}
+	
+	@Override
+	public Map<String,String> getCompileValues(){
+		Map<String,String> map=new HashMap<>();
+		map.put("MAX_POINT_LIGHT", ""+MAX_POINT_LIGHT);
+		map.put("MAX_LINE_LIGHT", ""+MAX_LINE_LIGHT);
+		map.put("MAX_DIR_LIGHT", ""+MAX_DIR_LIGHT);
+		return map;
 	}
 	
 }

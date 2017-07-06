@@ -1,5 +1,6 @@
 package com.lapissea.opengl.program.rendering;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.lwjgl.opengl.GL11;
@@ -136,6 +137,18 @@ public class GLUtil{
 			id++;
 		}
 		LogUtil.println("uniform count", id);
+	}
+	
+	public static void getAllUniforms(int program, Map<Integer,String> dest){
+		GL20.glUseProgram(program);
+		
+		int id=0;
+		String name,last="";
+		while(!(name=GL20.glGetActiveUniform(program, id, 512)).isEmpty()){
+			if(last.equals(name)) break;
+			dest.put(id, last=name);
+			id++;
+		}
 	}
 	
 	public static void checkError(){

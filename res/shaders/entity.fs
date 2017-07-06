@@ -10,11 +10,19 @@ out vec4 pixelColor;
 #include "Light.fsmd"
 #include "Fog.fsmd"
 
+
+uniform vec3 skyColor;
+uniform float minBrightness;
+
+uniform ListPointLight       pointLights;
+uniform ListLineLight        lineLights;
+uniform ListDirectionalLight dirLights;
+
+
 void main(void){
 	initFog(wPos.xz);
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
-	pixelColor=applyLighting(pixelColor, getMaterial(int(round(materialIdIn))));
-	pixelColor=applyFog(pixelColor);
-	
+	pixelColor=applyLighting(pixelColor, minBrightness, getMaterial(int(round(materialIdIn))), pointLights, lineLights, dirLights);
+	pixelColor=applyFog(pixelColor, skyColor);
 }

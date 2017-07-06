@@ -5,7 +5,7 @@ in float fogVisibility;
 
 float fogCalculated;
 
-void initFog(vec2 wPos, vec3 skyColor){
+void initFog(vec2 wPos){
 	float n=(1+snoise(wPos/200))/2;
 	n*=n;
 	fogCalculated=fogVisibility-n/5;
@@ -15,6 +15,6 @@ void initFog(vec2 wPos, vec3 skyColor){
 	}
 }
 
-vec4 applyFog(vec4 initalColor){
+vec4 applyFog(vec4 initalColor, vec3 skyColor){
 	return vec4(mix(skyColor,initalColor.rgb, fogCalculated),initalColor.a);
 }

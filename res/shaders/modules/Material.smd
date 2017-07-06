@@ -9,7 +9,7 @@ struct ModelMaterial{
 	float lightTroughput;
 };
 
-uniform ModelMaterial materials["<MATERIAL_MAX_COUNT>"];
+uniform ModelMaterial materials[<MATERIAL_MAX_COUNT>];
 
 ModelMaterial getMaterial(int id){
 	return materials[id];

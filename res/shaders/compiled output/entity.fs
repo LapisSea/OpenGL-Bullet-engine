@@ -5,7 +5,7 @@ in float materialIdIn;
 
 out vec4 pixelColor;
 
-/* MODULE_:Texture.smd:_MODULE*/
+/*MODULE_START: Texture.smd*/
 uniform bool MDL_TEXTURE_USED[1];
 ////////////////////////////////////////////////
 
@@ -16,8 +16,10 @@ vec4 mainTexture(vec2 uv){
 	return texture(MDL_TEXTURE0, uv);
 }
 ////////////////////////////////////////////////
+/*MODULE_END: Texture.smd*/
 
-/* MODULE_:Material.smd:_MODULE*/
+
+/*MODULE_START: Material.smd*/
 struct ModelMaterial{
 	vec3 ambient;
 	vec3 diffuse;
@@ -28,13 +30,15 @@ struct ModelMaterial{
 	float lightTroughput;
 };
 
-uniform ModelMaterial materials["<MATERIAL_MAX_COUNT>"];
+uniform ModelMaterial materials[20];
 
 ModelMaterial getMaterial(int id){
 	return materials[id];
 }
+/*MODULE_END: Material.smd*/
 
-/* MODULE_:Light.fsmd:_MODULE*/
+
+/*MODULE_START: Light.fsmd*/
 /*SKIPPED DUPLICATE "Material.smd" */
 
 
@@ -217,34 +221,51 @@ void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight ligh
 }
 
 
-/* MODULE_:ArrayList.smd:_MODULE*/
-struct ArrayList<TYPE>{
-	
-	<TYPE> data[<MAX_SIZE>];
-	
+/*MODULE_START: ArrayList.smd*/
+struct ListPointLight{
+	PointLight data[2];
 	int size;
-	
-	<TYPE> get(int id){
+	PointLight get(int id){
 		return data[id];
 	}
-	
 };
 
+struct ListLineLight{
+	LineLight data[2];
+	int size;
+	LineLight get(int id){
+		return data[id];
+	}
+};
 
-vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material, vec3 normal, vec3 toCamera, vec3 wPos, ArrayListPointLight pointLights, ArrayListLineLight lineLights, ArrayListDirectionalLight dirLights){
+struct ListDirectionalLight{
+	DirectionalLight data[2];
+	int size;
+	DirectionalLight get(int id){
+		return data[id];
+	}
+};
+/*MODULE_END: ArrayList.smd*/
+
+
+
+in vec3 normal;
+in vec3 toCamera;
+in vec3 wPos;
+
+vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material, ListPointLight pointLights, ListLineLight lineLights, ListDirectionalLight dirLights){
 	
 	vec3 unitToCamera=normalize(toCamera);
 	vec3 unitNormal=normalize(normal);
 	if(!gl_FrontFacing)unitNormal*=-1;
 	
-	int i;
-	for(i=0;i<pointLights.size;i++){
+	for(int i=0;i<pointLights.size;i++){
 		calcPointLightColor(unitToCamera, unitNormal, pointLights.get(i), material, wPos);
 	}
-	for(i=0;i<lineLights.size;i++){
+	for(int i=0;i<lineLights.size;i++){
 		calcLineLightColor(unitToCamera,unitNormal,lineLights.get(i),material, wPos);
 	}
-	for(i=0;i<dirLights.size;i++){
+	for(int i=0;i<dirLights.size;i++){
 		calcDirLightColor(unitToCamera,unitNormal,dirLights.get(i), material);
 	}
 	
@@ -254,9 +275,11 @@ vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material, 
 	
 	return max(vec4(minBrightness),light_diffuseTotal)*baseColor+light_specularTotal;
 }
+/*MODULE_END: Light.fsmd*/
 
-/* MODULE_:Fog.fsmd:_MODULE*/
-/* MODULE_:Noise2D.smd:_MODULE*/
+
+/*MODULE_START: Fog.fsmd*/
+/*MODULE_START: Noise2D.smd*/
 //
 // Description : Array and textureless GLSL 2D simplex noise function.
 //      Author : Ian McEwan, Ashima Arts.
@@ -328,13 +351,15 @@ float snoise(vec2 v)
   g.yz = a0.yz * x12.xz + h.yz * x12.yw;
   return 130.0 * dot(m, g);
 }
+/*MODULE_END: Noise2D.smd*/
+
 
 
 in float fogVisibility;
 
 float fogCalculated;
 
-void initFog(vec2 wPos, vec3 skyColor){
+void initFog(vec2 wPos){
 	float n=(1+snoise(wPos/200))/2;
 	n*=n;
 	fogCalculated=fogVisibility-n/5;
@@ -344,16 +369,26 @@ void initFog(vec2 wPos, vec3 skyColor){
 	}
 }
 
-vec4 applyFog(vec4 initalColor){
+vec4 applyFog(vec4 initalColor, vec3 skyColor){
 	return vec4(mix(skyColor,initalColor.rgb, fogCalculated),initalColor.a);
 }
+/*MODULE_END: Fog.fsmd*/
+
+
+
+
+uniform vec3 skyColor;
+uniform float minBrightness;
+
+uniform ListPointLight       pointLights;
+uniform ListLineLight        lineLights;
+uniform ListDirectionalLight dirLights;
 
 
 void main(void){
 	initFog(wPos.xz);
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
-	pixelColor=applyLighting(pixelColor, getMaterial(int(round(materialIdIn))));
-	pixelColor=applyFog(pixelColor);
-	
+	pixelColor=applyLighting(pixelColor, minBrightness, getMaterial(int(round(materialIdIn))), pointLights, lineLights, dirLights);
+	pixelColor=applyFog(pixelColor, skyColor);
 }

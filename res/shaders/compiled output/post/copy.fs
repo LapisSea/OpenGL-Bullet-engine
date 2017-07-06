@@ -4,7 +4,7 @@ in vec2 uv;
 
 out vec4 pixelColor;
 
-/* MODULE_:Texture.smd:_MODULE*/
+/*MODULE_START: Texture.smd*/
 uniform bool MDL_TEXTURE_USED[1];
 ////////////////////////////////////////////////
 
@@ -15,6 +15,8 @@ vec4 screen(vec2 uv){
 	return texture(MDL_TEXTURE0, uv);
 }
 ////////////////////////////////////////////////
+/*MODULE_END: Texture.smd*/
+
 
 
 void main(void){

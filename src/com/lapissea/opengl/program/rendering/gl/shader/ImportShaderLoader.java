@@ -48,12 +48,12 @@ public class ImportShaderLoader extends ShaderLoader{
 		src=src.trim();
 		if(src.isEmpty()) return null;
 		
-		Map<String,String> m=shader.getCompileValues();
-		if(m!=null){
-			for(Entry<String,String> e:m.entrySet()){
-				src=src.replaceAll(e.getKey(), e.getValue());
-			}
-		}
+		Map<String,String> values=new HashMap<>();
+		
+		values(values, shader.getCompileValues());
+		modules.values().forEach(m->values(values, m.getCompileValues()));
+		
+		src=values(values, src);
 		
 		Matcher macher;
 		while((macher=IMPORT_MARK.matcher(src)).find()){
@@ -83,11 +83,11 @@ public class ImportShaderLoader extends ShaderLoader{
 				src=insertReplace(src, macher, "/*SKIPPED DUPLICATE \""+name+extension+"\" */");
 				continue;
 			}
-			LogUtil.println(name);
+			
+			ShaderModule m=ShaderModule.getNew(name, shader);
+			if(m!=null) modules.put(name, m);
+			
 			ShaderModuleSrcLoader loader=ShaderModule.getLoader(name);
-			
-			modules.put(name, ShaderModule.getNew(name, shader));
-			
 			String importSrc;
 			
 			if(loader==null) importSrc=UtilM.getTxtResource("shaders/modules/"+name+extension);
@@ -95,11 +95,23 @@ public class ImportShaderLoader extends ShaderLoader{
 			
 			if(importSrc==null) throw new OpenGLException("Missing moddule source: "+name+extension+"@"+shader.name);
 			
-			src=insertReplace(src, macher, "/* MODULE_:"+name+extension+":_MODULE*/\n"+resolve(importSrc, modules));
+			src=insertReplace(src, macher, "/*MODULE_START: "+name+extension+"*/\n"+resolve(importSrc, modules)+"\n/*MODULE_END: "+name+extension+"*/\n");
 			
 		}
 		
 		return src;
+	}
+	
+	protected String values(Map<String,String> values, String src){
+		for(Entry<String,String> e:values.entrySet()){
+			src=src.replaceAll("<"+e.getKey()+">", e.getValue());
+		}
+		return src;
+	}
+	
+	protected void values(Map<String,String> data, Map<String,String> add){
+		if(add==null) return;
+		data.putAll(add);
 	}
 	
 	protected String cropImportMark(String imp0rt){

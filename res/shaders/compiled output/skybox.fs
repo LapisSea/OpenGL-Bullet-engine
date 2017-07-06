@@ -8,7 +8,7 @@ uniform vec3 sunPos;
 uniform float eyeHeight;
 uniform float skyClarity;
 
-/* MODULE_:atmosphere.fsmd:_MODULE*/
+/*MODULE_START: atmosphere.fsmd*/
 //==============================================================================
 // ALL CREDIT FOR THIS GOES TO https://github.com/wwwtyro/glsl-atmosphere ======
 //==============================================================================
@@ -112,6 +112,8 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
     // Calculate and return the final color.
     return iSun * (pRlh * kRlh * totalRlh + pMie * kMie * totalMie);
 }
+/*MODULE_END: atmosphere.fsmd*/
+
 
 
 void main(void){

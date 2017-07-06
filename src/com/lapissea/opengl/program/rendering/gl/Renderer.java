@@ -39,7 +39,6 @@ import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.shaders.SkyboxShader;
 import com.lapissea.opengl.program.util.NanoTimer;
 import com.lapissea.opengl.program.util.RandUtil;
-import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.events.FocusEvent;
@@ -57,6 +56,7 @@ import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.util.UtilL;
 
 public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
@@ -234,7 +234,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		renderBechmark.start();
 		
 		
-		//PREPARE 
+		//PREPARE
 		RENDER_FRUSTRUM=false;
 		fpsCounter.newFrame();
 		
@@ -244,7 +244,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		Fbo.bindDefault();
 		worldFbo.copyColorToScreen();
 		
-		guiHandler.render();
+//		guiHandler.render();
 		renderBechmark.end();
 		
 		pointLights.clear();
@@ -357,7 +357,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		renderBuildBechmark.end();
 		
 		//RENDER
-		UtilM.doAndClear(toRender, ShaderRenderer::render);
+		UtilL.doAndClear(toRender, ShaderRenderer::render);
 		//		Shaders.ENTITY.renderSingle(new EntityStatic(world, fontDynamicModel, new Vec3f(0, 2, 0)));
 		particleHandler.render();
 		GL11.glLineWidth(GL11.GL_LINE_WIDTH_RANGE);

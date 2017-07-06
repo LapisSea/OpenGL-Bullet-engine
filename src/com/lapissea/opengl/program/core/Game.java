@@ -15,7 +15,6 @@ import com.lapissea.opengl.program.rendering.gl.gui.SplashScreen;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.util.PairM;
-import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.config.Config;
 import com.lapissea.opengl.program.util.timer.GameTimer;
 import com.lapissea.opengl.program.util.timer.Timer_Ver2;
@@ -23,6 +22,7 @@ import com.lapissea.opengl.window.api.IGLWindow;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
 import com.lapissea.splashscreen.SplashScreenHost;
 import com.lapissea.util.LogUtil;
+import com.lapissea.util.UtilL;
 
 public class Game{
 	
@@ -85,7 +85,7 @@ public class Game{
 		while(timer.isRunning()){
 			timer.runUpdate();
 			timer.runRender();
-			UtilM.sleep(1);
+			UtilL.sleep(1);
 		}
 		
 	}
@@ -116,7 +116,7 @@ public class Game{
 			win().setPos(Config.getInt("win_startup:pos.x", -1), Config.getInt("win_startup:pos.y", -1));
 			win().setResizable(true);
 			new Thread(()->{
-				UtilM.sleep(100);
+				UtilL.sleep(100);
 				SplashScreenHost.close();
 			}).start();
 		}
@@ -133,7 +133,7 @@ public class Game{
 	
 	public synchronized void loadGLData(){
 		if(openglLoadQueue.isEmpty()) return;
-		UtilM.doAndClear(openglLoadQueue, p->{
+		UtilL.doAndClear(openglLoadQueue, p->{
 			try{
 				GLUtil.checkError();
 				p.obj1.run();

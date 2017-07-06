@@ -20,15 +20,11 @@ public abstract class ShaderModule{
 	private static class ModuleEntry{
 		
 		final Constructor<? extends ShaderModule>	constr;
-		final Map<String,String>					args=new HashMap<>();
 		final ShaderModuleSrcLoader					loader;
 		
-		ModuleEntry(Class<? extends ShaderModule> module, ShaderModuleSrcLoader loader, String[] args) throws Exception{
+		ModuleEntry(Class<? extends ShaderModule> module, ShaderModuleSrcLoader loader) throws Exception{
 			constr=module.getDeclaredConstructor(Shader.class);
 			this.loader=loader;
-			for(int i=0;i<args.length;i+=2){
-				this.args.put(args[i], args[i+1]);
-			}
 		}
 		
 		ShaderModule newMod(Shader shader) throws Exception{
@@ -50,12 +46,18 @@ public abstract class ShaderModule{
 	}
 	
 	public static void register(){
-		registerModule("Light", ShaderModuleLight.class, null, "MAX_POINT_LIGHT", String.valueOf(ShaderModuleLight.MAX_POINT_LIGHT), "MAX_DIR_LIGHT", String.valueOf(ShaderModuleLight.MAX_DIR_LIGHT), "MAX_LINE_LIGHT", String.valueOf(ShaderModuleLight.MAX_LINE_LIGHT));
-		registerModule("Fog", ShaderModuleFog.class, null);
-		registerModule("Material", ShaderModuleMaterial.class, null, "MATERIAL_MAX_COUNT", String.valueOf(ShaderModuleMaterial.MATERIAL_MAX_COUNT));
+		registerModule("Light", ShaderModuleLight.class);
+		registerModule("Fog", ShaderModuleFog.class);
+		registerModule("Material", ShaderModuleMaterial.class);
 		registerModule("Texture", ShaderModuleTexture.class, new ShaderModuleTexture.Loader());
 		registerModule("ScreenSize", ShaderModuleScreenSize.class, new ShaderModuleGlobalUniform.Loader("vec2", "screenSize"));
-		registerModule("MousePosition", ShaderModuleMousePosition.class, new ShaderModuleGlobalUniform.Loader("vec2", "mousePosition"));
+		registerModule("MousePosition", ShaderModuleMousePosition.class, new ShaderModuleGlobalUniform.Loader("vec2", "mousePos"));
+		registerModule("Time", ShaderModuleTime.class, new ShaderModuleTime.Loader());
+		registerModule("ArrayList", ShaderModuleArrayList.class, new ShaderModuleArrayList.Loader());
+	}
+	
+	public static void registerModule(String name, Class<? extends ShaderModule> module){
+		registerModule(name, module, null);
 	}
 	
 	/**
@@ -77,20 +79,12 @@ public abstract class ShaderModule{
 	 * @param args
 	 *            = "value1 name", "value1", "value2 name", "value2"....
 	 */
-	public static void registerModule(String name, Class<? extends ShaderModule> module, ShaderModuleSrcLoader loader, String...args){
-		if(args==null) args=new String[0];
-		else if(args.length%2!=0) throw new IllegalArgumentException("Invalid number of arguments!");
+	public static void registerModule(String name, Class<? extends ShaderModule> module, ShaderModuleSrcLoader loader){
 		try{
-			MODULES.put(name, new ModuleEntry(module, loader, args));
+			MODULES.put(name, new ModuleEntry(module, loader));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-	}
-	
-	public static Map<String,String> getArgs(String name){
-		ModuleEntry module=MODULES.get(name);
-		if(module!=null) return new HashMap<>(module.args);
-		return new HashMap<>();
 	}
 	
 	public static ShaderModule getNew(String name, Shader sh){
@@ -160,6 +154,10 @@ public abstract class ShaderModule{
 	
 	protected void bindAttribute(int attr, String name){
 		parent.bindAttribute(attr, name);
+	}
+	
+	public Map<String,String> getCompileValues(){
+		return null;
 	}
 	
 }

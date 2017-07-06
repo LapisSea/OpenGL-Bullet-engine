@@ -1,0 +1,44 @@
+package com.lapissea.opengl.program.rendering.gl.shader.modules;
+
+import com.lapissea.opengl.program.rendering.gl.shader.Shader;
+
+public class ShaderModuleArrayList extends ShaderModule{
+	
+	public static class Loader extends ShaderModuleSrcLoader{
+		
+		public Loader(){
+			super("Texture");
+		}
+		
+		@Override
+		public String load(String extension, String[] args){
+			StringBuilder src=new StringBuilder();
+			
+			for(String arg:args){
+				String[] arr=arg.split(",");
+				String type=arr[0].trim();
+				String size=arr[1].trim();
+				
+				src
+				.append("\nstruct List").append(type).append("{")
+				.append("\n\t").append(type).append(" data[").append(size).append("];")
+				.append("\n\tint size;")
+				.append("\n\t").append(type).append(" get(int id){\n\t\treturn data[id];")
+				.append("\n\t}")
+				.append("\n};")
+				.append("\n");
+			}
+			
+			return src.toString();
+		}
+		
+	}
+	
+	public ShaderModuleArrayList(Shader parent){
+		super(parent);
+	}
+	
+	@Override
+	public void setUpUniforms(){}
+	
+}

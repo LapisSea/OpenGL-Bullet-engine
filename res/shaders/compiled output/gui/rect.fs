@@ -13,13 +13,17 @@ in vec2 uv;
 
 out vec4 pixelColor;
 
-/* MODULE_:ScreenSize.smd:_MODULE*/
+/*MODULE_START: ScreenSize.smd*/
 uniform vec2 screenSize;
+/*MODULE_END: ScreenSize.smd*/
 
-/* MODULE_:MousePosition.smd:_MODULE*/
-uniform vec2 mousePosition;
 
-/* MODULE_:Texture.smd:_MODULE*/
+/*MODULE_START: MousePosition.smd*/
+uniform vec2 mousePos;
+/*MODULE_END: MousePosition.smd*/
+
+
+/*MODULE_START: Texture.smd*/
 uniform bool MDL_TEXTURE_USED[2];
 ////////////////////////////////////////////////
 
@@ -38,6 +42,8 @@ vec4 elementTexture(vec2 uv){
 	return texture(MDL_TEXTURE1, uv);
 }
 ////////////////////////////////////////////////
+/*MODULE_END: Texture.smd*/
+
 
 
 uniform RenderType background;
