@@ -26,7 +26,7 @@ public class GuiLabel extends GuiElement{
 		this.text=text;
 		this.fontSize=fontSize;
 		if(!changing){
-			this.model=Game.get().renderer.fontComfortaa.buildAsModel(fontSize, text, false);
+			model=Game.get().renderer.fontComfortaa.buildAsModel(fontSize, text, false);
 			FrustrumCube c=(FrustrumCube)model.getFrustrumShape();
 			preferedWidth=new SizeCalcStatic(c.getSizeX()*2);
 			preferedHeight=new SizeCalcStatic(c.getSizeY()*2);
@@ -44,6 +44,7 @@ public class GuiLabel extends GuiElement{
 	public void setText(String text){
 		if(!(model instanceof DynamicModel)||text.equals(this.text)) return;
 		DynamicModel m=(DynamicModel)model;
+		m.clear();
 		Game.get().renderer.fontComfortaa.build(0, 0, fontSize, text, (x, y)->m.add(m.getVertexType(), x, y), (u, v)->m.add(ModelAttribute.UV_ATTR, u, v));
 		FrustrumCube c=(FrustrumCube)m.getFrustrumShape();
 		((SizeCalcStatic)preferedWidth).value=c.getSizeX()*2;

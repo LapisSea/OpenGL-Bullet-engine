@@ -115,7 +115,7 @@ public class DynamicModel extends Model{
 		if(type.size!=toAdd) throw new IllegalAccessError("Bad attibute size!"+type.size+"/"+toAdd);
 		int id=vtIds.get(type.id);
 		FloatBuffer b=data[id];
-		if(b.capacity()<=b.position()+toAdd) b=data[id]=BufferUtil.expand(b, b.position()+toAdd);
+		if(b.limit()<=b.position()+toAdd) b=data[id]=BufferUtil.expand(b, b.position()+toAdd);
 		dirty=true;
 		return b;
 	}
@@ -160,8 +160,8 @@ public class DynamicModel extends Model{
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbos[i]);
 			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, f, GL15.GL_STREAM_DRAW);
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-			f.clear();
 		}
+		clear();
 		dirty=false;
 	}
 	
@@ -169,5 +169,11 @@ public class DynamicModel extends Model{
 	public DynamicModel culface(boolean enabled){
 		super.culface(enabled);
 		return this;
+	}
+	
+	public void clear(){
+		for(int i=0;i<getAttributeCount();i++){
+			data[i].clear();
+		}
 	}
 }

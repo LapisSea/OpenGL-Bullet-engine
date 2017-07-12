@@ -3,6 +3,7 @@ package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 import java.util.Collection;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.lapissea.opengl.program.core.Game;
@@ -106,6 +107,19 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 		viewMat=(UniformMat4)getUniform("viewMat");
 		sunPos=(UniformFloat3)getUniform("sunPos");
 		eyeHeight=(UniformFloat1)getUniform("eyeHeight");
+	}
+	
+	Matrix4f viewCopy=new Matrix4f();
+	
+	@Override
+	public void uploadProjectionAndViewMat(Matrix4f project, Matrix4f view){
+		if(viewMat==null) return;
+		viewCopy.load(view);
+		viewCopy.m30=0;
+		viewCopy.m31=0;
+		viewCopy.m32=0;
+		viewMat.upload(viewCopy);
+		projectionMat.upload(project);
 	}
 	
 	private static final int	iSteps	=16;

@@ -64,7 +64,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		ShaderModule.register();
 	}
 	
-	public static boolean	RENDER_FRUSTRUM			=true;
+	public static boolean	RENDER_FRUSTRUM			=false;
 	public static int		SKY_RESOLUTION_DEVIDER	=1;
 	
 	private final Matrix4f	projection	=new Matrix4f(),view=new Matrix4f();
@@ -86,7 +86,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public ParticleHandler<ParticleFoo> particleHandler;
 	
 	private NanoTimer renderBuildBechmark=new NanoTimer(),renderBechmark=new NanoTimer();
-	
 	
 	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL11.GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
 	private IModel			moon		=ObjModelLoader.loadAndBuild("moon");
@@ -110,18 +109,18 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 				-0.5F,-0.5F,0,
 				+0.5F,+0.5F,0,
 				-0.5F,+0.5F,0,
-		}, "uvs", new float[]{
-				0,0,
-				1,0,
-				1,1,
-				
-				0,0,
-				1,1,
-				0,1,
+		}, "uvs",
+				new float[]{
+						0,0,
+						1,0,
+						1,1,
+						
+						0,0,
+						1,1,
+						0,1,
 		}, "textures", "particle/SoftBloom"));
 		
 	}
-	
 	
 	public Camera getCamera(){
 		return camera;
@@ -219,7 +218,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 	}
 	
-	
 	@Override
 	public void onFocus(FocusEvent e){
 		if(!e.focused) Mouse.setGrabbed(false);
@@ -232,7 +230,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	public void render(){
 		renderBechmark.start();
-		
 		
 		//PREPARE
 		RENDER_FRUSTRUM=false;
@@ -263,7 +260,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		ColorM moonCol=new ColorM(0, 0, 0);
 		
-		
 		List<Entity> entitys=Game.get().world.getAll();
 		
 		worldFog.density=0.006F;
@@ -291,9 +287,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		ColorM sunCol=new ColorM(v);
 		sunCol.a(bright+0.1F);
 		
-		
 		worldFog.color.set(moonCol.mix(sunCol, bright, 1-bright));
-		
 		
 		dirLights.add(new DirLight(sunDir, sunCol));
 		sunPos-=Math.PI;
@@ -306,7 +300,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		setView();
 		
 		potentialRenders=actualRenders=0;
-		
 		
 		worldFbo.setRenderBufferType(false).setSample(4);
 		
@@ -334,8 +327,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 			Shaders.SKYBOX.render();
 			skyFbo.copyTo(worldFbo, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_LINEAR);
 			GLUtil.MULTISAMPLE.set(true);
-		}
-		else{
+		}else{
 			skyFbo.delete();
 			Shaders.SKYBOX.render();
 		}
@@ -346,7 +338,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		GLUtil.DEPTH_TEST.set(true);
 		GL11.glDepthMask(true);
-		
 		
 		//BUILD
 		addShader(Shaders.TERRAIN);
@@ -398,7 +389,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void notifyEntityActualRender(){
 		actualRenders++;
 	}
-	
 	
 	public String getDebugInfo(){
 		return "FPS:\t\t\t\t"+fpsCounter.getFps()+

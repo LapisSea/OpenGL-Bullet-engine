@@ -25,4 +25,5 @@ void main(void){
 	if(pixelColor.a==0)discard;
 	pixelColor=applyLighting(pixelColor, minBrightness, getMaterial(int(round(materialIdIn))), pointLights, lineLights, dirLights);
 	pixelColor=applyFog(pixelColor, skyColor);
+	pixelColor+=1;
 }

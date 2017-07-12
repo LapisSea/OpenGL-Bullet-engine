@@ -1,6 +1,9 @@
 package com.lapissea.opengl.program.game.world;
 
-import static com.bulletphysics.linearmath.DebugDrawModes.*;
+import static com.bulletphysics.linearmath.DebugDrawModes.DRAW_CONTACT_POINTS;
+import static com.bulletphysics.linearmath.DebugDrawModes.DRAW_WIREFRAME;
+import static com.bulletphysics.linearmath.DebugDrawModes.ENABLE_CCD;
+import static com.bulletphysics.linearmath.DebugDrawModes.MAX_DEBUG_DRAW_MODE;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -76,7 +79,7 @@ public class World{
 			
 			@Override
 			public void setDebugMode(int debugMode){
-			
+				
 			}
 			
 			@Override
@@ -133,7 +136,7 @@ public class World{
 			return new Color(img.getRGB((int)Math.abs(x)%img.getWidth(), (int)Math.abs(y)%img.getHeight())).getRed()*Chunk.WORLD_H/26F;
 			//			double h=SimplexNoise.noise(x, y);
 			//			h-=0.5;
-			//			
+			//
 			//			h+=(SimplexNoise.noise(x*10, y*10)-0.5)/10;
 			//			return (float)(h*Terrain.WORLD_H);
 		};
@@ -217,7 +220,6 @@ public class World{
 	
 	
 	public void update(){
-		//		if(terrains.size()==64)removeChunk(terrains.get(0));
 		float step=1F/Game.get().timer.getUps();
 		bulletWorld.stepSimulation(step, 1, step);
 		
@@ -229,7 +231,7 @@ public class World{
 		
 		Game.get().renderer.lines.clearIfEmpty();
 		
-		entitysUpd.stream().forEach(Updateable::update);
+		entitysUpd.forEach(Updateable::update);
 		if(Mouse.isButtonDown(1)){
 			for(EntityUpd c:entitysUpd){
 				if(!(c instanceof EntityCrazyCube)) return;
@@ -305,20 +307,20 @@ public class World{
 		double gradientSize=0.1,result;
 		
 		if(pos<0.5){
-			if(pos<gradientSize) result=0.5+(pos/gradientSize)/2;
+			if(pos<gradientSize) result=0.5+pos/gradientSize/2;
 			else{
 				pos=0.5-pos;
-				if(pos<gradientSize) result=0.5+(pos/gradientSize)/2;
+				if(pos<gradientSize) result=0.5+pos/gradientSize/2;
 				else result=1;
 			}
 		}
 		else{
 			pos-=0.5;
 			
-			if(pos<gradientSize) result=0.5-(pos/gradientSize)/2;
+			if(pos<gradientSize) result=0.5-pos/gradientSize/2;
 			else{
 				pos=0.5-pos;
-				if(pos<gradientSize) result=0.5-(pos/gradientSize)/2;
+				if(pos<gradientSize) result=0.5-pos/gradientSize/2;
 				else result=0;
 			}
 		}

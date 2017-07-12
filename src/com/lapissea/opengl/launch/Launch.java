@@ -20,12 +20,11 @@ public class Launch{
 	
 	
 	public static void start(String[] args) throws Exception{
-		SplashScreenHost.open("Splash.jar", "LWJGL 2 game");
+		SplashScreenHost.open("Splash.jar", "LWJGL 2 game", OperatingSystem.APP_DATA+"/OpenGL engine/LTD.bin");
 		Thread.sleep(1);
 		SplashScreenHost.sendMsg("Starting...");
 		NativeSetUp.haxNatives();
 		SplashScreenHost.sendMsg("Injected natves!");
-		SplashScreenHost.sendPercent(0.1F);
 		
 		try{
 			LogUtil.__.INJECT_FILE_LOG(OperatingSystem.APP_DATA+"/OpenGL engine/log.txt");
@@ -33,7 +32,6 @@ public class Launch{
 			LogUtil.__.INJECT_DEBUG_PRINT(true);
 			
 			SplashScreenHost.sendMsg("Injected logger!");
-			SplashScreenHost.sendPercent(0.3F);
 			
 			//			TransformerAsmPoll.register();
 			//			try{
@@ -61,18 +59,17 @@ public class Launch{
 			
 			IGLWindow window=glCtx.getCtxWindow();
 			SplashScreenHost.sendMsg("Initalised game base!");
-			SplashScreenHost.sendPercent(0.4F);
 			try{
-				SplashScreenHost.sendMsg("Creating window...");
+				SplashScreenHost.sendMsg("Configuring window...");
 				
 				//window.setTitle("Genine and Lee");
 				window
-						.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
-						.setPos(-10000, -10000)
-						.setTitle("The abandoned")
-						.setFullScreen(false)
-						.setResizable(true)
-						.setVSync(true);
+				.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
+				.setPos(-10000, -10000)
+				.setTitle("The abandoned")
+				.setFullScreen(false)
+				.setResizable(true)
+				.setVSync(true);
 				
 				//				window.setPos(winCfg.position);
 				//				window.setSize(winCfg.size);
@@ -85,9 +82,9 @@ public class Launch{
 				}
 				window.setIcon(ico);
 				
+				SplashScreenHost.sendMsg("Creating window...");
 				glCtx.init();
 				SplashScreenHost.sendMsg("Window created!");
-				SplashScreenHost.sendPercent(0.7F);
 				
 			}catch(Exception e){
 				e.printStackTrace();

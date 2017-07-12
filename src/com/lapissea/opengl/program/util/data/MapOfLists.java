@@ -18,7 +18,7 @@ public class MapOfLists<K,V>extends HashMap<K,List<V>>{
 	public void forEach(K key, Consumer<V> action){
 		List<V> l=get(key);
 		if(l==null) return;
-		l.stream().forEach(action);
+		l.forEach(action);
 	}
 	
 }

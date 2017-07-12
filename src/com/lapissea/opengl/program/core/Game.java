@@ -54,8 +54,6 @@ public class Game{
 	public void start(){
 		win().setEventHooks(registry);
 		
-		SplashScreenHost.sendMsg("Loading assets...!");
-		SplashScreenHost.sendPercent(0.8F);
 		ShaderModule.register();
 		
 		timer=new Timer_Ver2(20, 60);
@@ -72,11 +70,12 @@ public class Game{
 			registry.init();
 			registry.postInit();
 			
+			SplashScreenHost.sendMsg("Loading world...");
 			world=new World();
-			SplashScreenHost.sendPercent(0.9F);
+			SplashScreenHost.sendMsg("Loading shaders...");
 			Shaders.load();
+			SplashScreenHost.sendMsg("Finishing up!");
 			screen.end();
-			SplashScreenHost.sendPercent(0.9999F);
 			LogUtil.printWrapped("=======GAME_RUN=======");
 			timer.setUpdate(this::update);
 			timer.setRender(this::render);
@@ -102,7 +101,6 @@ public class Game{
 	}
 	
 	private void render(){
-		//		Display.sync(60);
 		timer.setInfiniteFps(false);
 		if(win().isClosed()){
 			timer.end();
@@ -115,10 +113,7 @@ public class Game{
 			LogUtil.printWrapped("LOADED IN: "+(System.nanoTime()-GameStart.START_TIME)/1000_000_000D);
 			win().setPos(Config.getInt("win_startup:pos.x", -1), Config.getInt("win_startup:pos.y", -1));
 			win().setResizable(true);
-			new Thread(()->{
-				UtilL.sleep(100);
-				SplashScreenHost.close();
-			}).start();
+			SplashScreenHost.close();
 		}
 		if(win().isVisible()){
 			
