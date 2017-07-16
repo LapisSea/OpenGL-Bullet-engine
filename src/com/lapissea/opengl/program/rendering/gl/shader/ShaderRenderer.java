@@ -12,6 +12,7 @@ import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
+import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
 import com.lapissea.opengl.program.util.data.MapOfLists;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
@@ -23,6 +24,10 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 	
 	private final MapOfLists<IModel,RenderType>	toRender=new MapOfLists<>();
 	private boolean								added	=false;
+	
+	protected UniformMat4	transformMat;
+	protected UniformMat4	projectionMat;
+	protected UniformMat4	viewMat;
 	
 	public ShaderRenderer(){
 		super();
@@ -42,6 +47,25 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 	
 	protected void onRendered(){
 		added=false;
+	}
+	
+	public void uploadTransformMat(Matrix4f mat){
+		if(transformMat!=null){
+			transformMat.upload(mat);
+//			transformMat.getLastKnown(new Matrix4f());
+		}
+	}
+	
+	public void uploadProjectionAndViewMat(Matrix4f project, Matrix4f view){
+		if(viewMat!=null) viewMat.upload(view);
+		if(projectionMat!=null) projectionMat.upload(project);
+	}
+	
+	@Override
+	protected void setUpUniforms(){
+		transformMat=getUniform("transformMat");
+		projectionMat=getUniform("projectionMat");
+		viewMat=getUniform("viewMat");
 	}
 	
 	//----BATCHED----//

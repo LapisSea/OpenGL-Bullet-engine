@@ -13,7 +13,6 @@ import org.lwjgl.util.vector.Matrix4f;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.Camera;
 import com.lapissea.opengl.program.game.entity.Entity;
-import com.lapissea.opengl.program.game.entity.entitys.EntityStatic;
 import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.program.game.particle.ParticleHandler;
 import com.lapissea.opengl.program.game.particle.particles.ParticleFoo;
@@ -36,9 +35,7 @@ import com.lapissea.opengl.program.rendering.gl.shader.light.LightSource;
 import com.lapissea.opengl.program.rendering.gl.shader.light.LineLight;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
-import com.lapissea.opengl.program.rendering.gl.shader.shaders.SkyboxShader;
 import com.lapissea.opengl.program.util.NanoTimer;
-import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.events.FocusEvent;
@@ -67,9 +64,8 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public static boolean	RENDER_FRUSTRUM			=false;
 	public static int		SKY_RESOLUTION_DEVIDER	=1;
 	
-	private final Matrix4f	projection	=new Matrix4f(),view=new Matrix4f();
+	private final Matrix4f	projection	=new Matrix4f(),view=new Matrix4f(),identity=new Matrix4f();
 	private Camera			camera		=new Camera();
-	public Fog				worldFog	=new Fog();
 	public final Frustum	frustrum	=new Frustum();
 	
 	private final List<ShaderRenderer<?>>	toRender	=new ArrayList<>();
@@ -92,6 +88,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public FboRboTextured	worldFbo	=new FboRboTextured();
 	public Fbo				skyFbo		=new Fbo();
 	public GuiHandler		guiHandler	=new GuiHandler();
+	
 	
 	private boolean renderWorldFlag=true;
 	
@@ -150,24 +147,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		if(Game.isPaused()) return;
 		camera.update();
 		particleHandler.update();
-		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
-		//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
+//		particleHandler.spawn(new Vec3f(RandUtil.CRF(150), 0, RandUtil.CRF(150)));
 	}
 	
 	@Override
@@ -180,7 +160,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 			if(Shaders.ENTITY!=null){
 				Shaders.ENTITY.load();
 				Shaders.TERRAIN.load();
-				//				Shaders.SKYBOX.load();
+				Shaders.SKYBOX.load();
 				Shaders.GUI_RECT.load();
 				//Shaders.POST_COPY.load();
 			}
@@ -229,7 +209,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	public void render(){
-		renderBechmark.start();
 		
 		//PREPARE
 		RENDER_FRUSTRUM=false;
@@ -241,8 +220,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		Fbo.bindDefault();
 		worldFbo.copyColorToScreen();
 		
-//		guiHandler.render();
-		renderBechmark.end();
+		guiHandler.render();
 		
 		pointLights.clear();
 		dirLights.clear();
@@ -262,38 +240,20 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		List<Entity> entitys=Game.get().world.getAll();
 		
-		worldFog.density=0.006F;
-		worldFog.gradient=3;
-		
 		moonCol.a(1.1F-bright*bright);
-		float cos=(float)Math.cos(sunPos);
-		Vec3f sunDir=new Vec3f(cos/3, (float)Math.sin(sunPos), cos);
+		Vec3f sunDir=new Vec3f((float)(sunPos+Math.PI), 0, 0).eulerToVector();
+		
 		float h=10;
 		float worldSiz=Math.max(0, 6371e3F/Math.max(1, 1+h*h/100));
-		Vec3f v=SkyboxShader.atmosphere(
-				sunDir.clone().y(Math.max(sunDir.y(), 0.04F)),
-				new Vec3f(0, worldSiz, 0),
-				sunDir.clone().y(Math.max(sunDir.y(), 0.04F)),
-				30,
-				worldSiz,
-				worldSiz+100e3F,
-				new Vec3f(5.5e-6F, 13.0e-6F, 22.4e-6F),
-				21e-6F,
-				7e3F,
-				1.2e3F,
-				0.998F);
-		if(Float.isNaN(v.x)) v.set(0, 0, 0);
-		if(v.lengthSquared()>0) v.normalise();
-		ColorM sunCol=new ColorM(v);
+		ColorM sunCol=new ColorM(1, 0.3, 0.2);
 		sunCol.a(bright+0.1F);
 		
-		worldFog.color.set(moonCol.mix(sunCol, bright, 1-bright));
+		Game.get().world.fog.color.set(moonCol.mix(sunCol, bright, 1-bright));
 		
 		dirLights.add(new DirLight(sunDir, sunCol));
 		sunPos-=Math.PI;
 		
-		cos=(float)Math.cos(sunPos);
-		Vec3f moonRot=new Vec3f(cos/3, (float)Math.sin(sunPos), cos);
+		Vec3f moonRot=new Vec3f((float)(sunPos+Math.PI), 0, 0).eulerToVector();
 		dirLights.add(new DirLight(moonRot, moonCol));
 		
 		getCamera().createProjection(projection);
@@ -309,9 +269,14 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
 		GLUtil.CULL_FACE.set(CullFace.BACK);
 		GLUtil.CULL_FACE.set(true);
-		//		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
 		GLUtil.BLEND.set(true);
 		
+		GLUtil.MULTISAMPLE.set(false);
+		skyFbo.setSize(worldFbo.getWidth()/SKY_RESOLUTION_DEVIDER, worldFbo.getHeight()/SKY_RESOLUTION_DEVIDER);
+		skyFbo.bind();
+		Shaders.SKYBOX.render();
+		skyFbo.copyTo(worldFbo, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_LINEAR);
+		GLUtil.MULTISAMPLE.set(true);
 		worldFbo.bind();
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
@@ -320,17 +285,8 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		GL11.glDepthMask(false);
 		GLUtil.DEPTH_TEST.set(false);
 		
-		if(!worldFbo.getRenderBufferType()&&SKY_RESOLUTION_DEVIDER>1){
-			GLUtil.MULTISAMPLE.set(false);
-			skyFbo.setSize(worldFbo.getWidth()/SKY_RESOLUTION_DEVIDER, worldFbo.getHeight()/SKY_RESOLUTION_DEVIDER);
-			skyFbo.bind();
-			Shaders.SKYBOX.render();
-			skyFbo.copyTo(worldFbo, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_LINEAR);
-			GLUtil.MULTISAMPLE.set(true);
-		}else{
-			skyFbo.delete();
-			Shaders.SKYBOX.render();
-		}
+		//
+		
 		moon.getMaterial(0).getAmbient().set(0.4F, 0.4F, 0.5F, 1);
 		Matrix4f mat=new Matrix4f();
 		mat.translate(moonRot.mul(25).add(PartialTick.calc(new Vec3f(), camera.prevPos, camera.pos)));
@@ -348,17 +304,18 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		renderBuildBechmark.end();
 		
 		//RENDER
+		renderBechmark.start();
+		renderBechmark.end();
 		UtilL.doAndClear(toRender, ShaderRenderer::render);
-		//		Shaders.ENTITY.renderSingle(new EntityStatic(world, fontDynamicModel, new Vec3f(0, 2, 0)));
-		particleHandler.render();
-		GL11.glLineWidth(GL11.GL_LINE_WIDTH_RANGE);
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
-		GL11.glEnable(GL11.GL_LINE_WIDTH);
-		
-		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-		Shaders.LINE.renderSingle(new EntityStatic(world, lines, new Vec3f()));
+		GLUtil.DEPTH_TEST.set(false);
+		Shaders.LINE.renderSingle(identity, lines);
+		GLUtil.DEPTH_TEST.set(true);
+		lines.clear();
 		Shaders.LINE.render();
 		worldFbo.process();
+		
+		particleHandler.render();
 		
 	}
 	
@@ -371,6 +328,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	public void drawLine(Vec3f from, Vec3f to, IColorM color){
+		
 		lines.add(ModelAttribute.VERTEX_ATTR_3D, from.x, from.y, from.z);
 		lines.add(ModelAttribute.VERTEX_ATTR_3D, to.x, to.y, to.z);
 		

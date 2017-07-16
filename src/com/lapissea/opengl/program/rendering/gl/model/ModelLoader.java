@@ -21,7 +21,6 @@ import com.lapissea.opengl.program.rendering.frustrum.FrustrumBool;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
-import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
 import com.lapissea.opengl.window.api.util.BufferUtil;
@@ -29,11 +28,10 @@ import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ITexture;
 import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.opengl.window.assets.Vbo;
 import com.lapissea.opengl.window.impl.assets.Model;
 import com.lapissea.util.LogUtil;
-
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
+import com.lapissea.util.UtilL;
 
 public class ModelLoader{
 	
@@ -43,24 +41,55 @@ public class ModelLoader{
 	public static final IModel EMPTY_MODEL=new Model("EMPTY_MODEL"){
 		
 		@Override
-		public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute vertexType, ModelAttribute[] attributeIds, IFrustrumShape shape){
+		public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, Vbo[] vbos, ModelAttribute vertexType, ModelAttribute[] attributeIds, IFrustrumShape shape){
 			throw new UnsupportedOperationException();
 		}
 		
 		@Override
 		public IModel drawCall(){
-			return this;
+			throw new UnsupportedOperationException();
 		}
 		
 		@Override
 		public IModel enableAttributes(){
-			return this;
+			throw new UnsupportedOperationException();
 		}
 		
 		@Override
 		public IModel disableAttributes(){
-			return this;
+			throw new UnsupportedOperationException();
 		}
+		
+		@Override
+		public boolean isLoaded(){
+			return false;
+		}
+		
+		@Override
+		public IModel bindVao(){
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public void addMaterial(IMaterial material){
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public void addTexture(ITexture texture){
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public IMaterial createMaterial(){
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public IMaterial createMaterial(String name){
+			throw new UnsupportedOperationException();
+		}
+		
 	};
 	
 	private static final Vec3f V0=new Vec3f(),V1=new Vec3f(),V2=new Vec3f(),V01=new Vec3f(),V12=new Vec3f(),NORMAL=new Vec3f();
@@ -74,7 +103,7 @@ public class ModelLoader{
 	}
 	
 	public static <T extends IModel> T[] buildModels(Class<T> type, ModelData...modelsData){
-		T[] models=UtilM.array(type, modelsData.length);
+		T[] models=UtilL.array(type, modelsData.length);
 		for(int i=0;i<modelsData.length;i++){
 			models[i]=buildModel(type, modelsData[0]);
 		}
@@ -93,16 +122,28 @@ public class ModelLoader{
 	 * Use "0" on any array for minimal empty array<br>
 	 * Values:<br>
 	 * vertices = float[]
-	 * <br>uvs = float[]
-	 * <br>normals = float[]
-	 * <br>materialIds = float[] (only round numbers)
-	 * <br>indices = int[]
-	 * <br>genNormals = boolean (defaults to yes if no normals are present)
-	 * <br>killSmooth = boolean (defaults to yes)
-	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
-	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
-	 * <br>primitiveColor = float[] (rgba)
-	 * <br>vertexType = ModelAttribute
+	 * <br>
+	 * uvs = float[]
+	 * <br>
+	 * normals = float[]
+	 * <br>
+	 * materialIds = float[] (only round numbers)
+	 * <br>
+	 * indices = int[]
+	 * <br>
+	 * genNormals = boolean (defaults to yes if no normals are present)
+	 * <br>
+	 * killSmooth = boolean (defaults to yes)
+	 * <br>
+	 * textures = array or {@link Iterable} or single element of
+	 * {@link ITexture} or String (texture name)
+	 * <br>
+	 * materials = array or {@link Iterable} or single element of
+	 * {@link IMaterial}
+	 * <br>
+	 * primitiveColor = float[] (rgba)
+	 * <br>
+	 * vertexType = ModelAttribute
 	 */
 	public synchronized static IModel buildModel(String name, int format, Object...data){
 		return buildModel(Model.class, name, format, data);
@@ -112,16 +153,28 @@ public class ModelLoader{
 	 * Use "0" on any array for minimal empty array<br>
 	 * Values:<br>
 	 * vertices = float[]
-	 * <br>uvs = float[]
-	 * <br>normals = float[]
-	 * <br>materialIds = float[] (only round numbers)
-	 * <br>indices = int[]
-	 * <br>genNormals = boolean (defaults to yes if no normals are present)
-	 * <br>killSmooth = boolean (defaults to yes)
-	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
-	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
-	 * <br>primitiveColor = float[] (rgba)
-	 * <br>vertexType = ModelAttribute
+	 * <br>
+	 * uvs = float[]
+	 * <br>
+	 * normals = float[]
+	 * <br>
+	 * materialIds = float[] (only round numbers)
+	 * <br>
+	 * indices = int[]
+	 * <br>
+	 * genNormals = boolean (defaults to yes if no normals are present)
+	 * <br>
+	 * killSmooth = boolean (defaults to yes)
+	 * <br>
+	 * textures = array or {@link Iterable} or single element of
+	 * {@link ITexture} or String (texture name)
+	 * <br>
+	 * materials = array or {@link Iterable} or single element of
+	 * {@link IMaterial}
+	 * <br>
+	 * primitiveColor = float[] (rgba)
+	 * <br>
+	 * vertexType = ModelAttribute
 	 */
 	public synchronized static <T extends IModel> T buildModel(Class<T> type, String name, int format, Object...data){
 		if(data==null||data.length==0) return null;
@@ -141,16 +194,28 @@ public class ModelLoader{
 	 * Use "0" on any array for minimal empty array<br>
 	 * Values:<br>
 	 * vertices = float[]
-	 * <br>uvs = float[]
-	 * <br>normals = float[]
-	 * <br>materialIds = float[] (only round numbers)
-	 * <br>indices = int[]
-	 * <br>genNormals = boolean (defaults to yes if no normals are present)
-	 * <br>killSmooth = boolean (defaults to yes)
-	 * <br>textures = array or {@link Iterable} or single element of {@link ITexture} or String (texture name)
-	 * <br>materials = array or {@link Iterable} or single element of {@link IMaterial}
-	 * <br>primitiveColor = float[] (rgba)
-	 * <br>vertexType = ModelAttribute
+	 * <br>
+	 * uvs = float[]
+	 * <br>
+	 * normals = float[]
+	 * <br>
+	 * materialIds = float[] (only round numbers)
+	 * <br>
+	 * indices = int[]
+	 * <br>
+	 * genNormals = boolean (defaults to yes if no normals are present)
+	 * <br>
+	 * killSmooth = boolean (defaults to yes)
+	 * <br>
+	 * textures = array or {@link Iterable} or single element of
+	 * {@link ITexture} or String (texture name)
+	 * <br>
+	 * materials = array or {@link Iterable} or single element of
+	 * {@link IMaterial}
+	 * <br>
+	 * primitiveColor = float[] (rgba)
+	 * <br>
+	 * vertexType = ModelAttribute
 	 */
 	public static <T extends IModel> T buildModel(Class<T> type, String name, int format, Map<String,Object> data){
 		
@@ -165,7 +230,6 @@ public class ModelLoader{
 		
 		Object vertObj=Objects.requireNonNull(data.get("vertices"));
 		float[] vert=vertObj instanceof Number&&((Number)vertObj).intValue()==0?new float[(format==GL11.GL_QUADS?4:3)*vertexType.size]:(float[])vertObj;
-		
 		
 		Object killSmoothObj=data.get("killSmooth");
 		boolean killSmooth=hasIds&&(killSmoothObj==null||(boolean)killSmoothObj);
@@ -275,8 +339,7 @@ public class ModelLoader{
 						primitiveColor[counter++]=primitiveColor0[indices[i+3]*4+3];
 					}
 				}
-			}
-			else{
+			}else{
 				int counter=0;
 				for(int i=0;i<indices.length;i+=3){
 					vert[counter++]=vert0[indices[i+0]*3+0];
@@ -361,9 +424,9 @@ public class ModelLoader{
 		T model=create(type, name, format, hasIds?indices:null, vertexType, vert, new float[][]{uvs,normals,materialIds,primitiveColor}, UV_ATTR, NORMAL_ATTR, MATERIAL_ID_ATTR, COLOR_ATTR);
 		
 		//INJECT TEXTURE
-		UtilM.iterate(data.get("textures"), obj->model.addTexture(obj instanceof ITexture?(ITexture)obj:TextureLoader.loadTexture((String)obj)));
+		UtilL.iterate(data.get("textures"), obj->model.addTexture(obj instanceof ITexture?(ITexture)obj:TextureLoader.loadTexture((String)obj)));
 		
-		UtilM.iterate(data.get("materials"), IMaterial.class, model::addMaterial);
+		UtilL.iterate(data.get("materials"), IMaterial.class, model::addMaterial);
 		if(model.getMaterialCount()==0) model.createMaterial();
 		
 		return model;
@@ -399,7 +462,7 @@ public class ModelLoader{
 		
 		Game.glCtx(()->{
 			int vao=createVao();
-			IntList vbos=new IntArrayList();
+			List<Vbo> vbos=new ArrayList<>();
 			List<ModelAttribute> attributes=new ArrayList<>();
 			
 			boolean hasIds=indices!=null;
@@ -412,7 +475,7 @@ public class ModelLoader{
 			
 			unbindVao();
 			
-			model.load(vao, hasIds?indices.length:vertex.length, hasIds, format, vbos.toIntArray(), vertexType, attributes.toArray(new ModelAttribute[attributes.size()]), shape);
+			model.load(vao, hasIds?indices.length:vertex.length, hasIds, format, UtilL.array(vbos), vertexType, attributes.toArray(new ModelAttribute[attributes.size()]), shape);
 			if(print&&!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 		});
 		return model;
@@ -420,51 +483,45 @@ public class ModelLoader{
 	
 	//	private static void putAttribute(IntList vbos, IntList attributes, int attrListId, int[] data, int partSize){
 	//		if(data==null||data.length==0) return;
-	//		
+	//
 	//		int vbo=createVbo();
-	//		
+	//
 	//		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-	//		
+	//
 	//		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, BufferUtil.store(data), GL15.GL_STATIC_DRAW);
 	//		GL20.glVertexAttribPointer(attrListId, partSize, GL11.GL_INT, false, 0, 0);
-	//		
+	//
 	//		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-	//		
+	//
 	//		vbos.add(vbo);
 	//		attributes.add(attrListId);
 	//	}
 	
-	private static void putAttribute(IntList vbos, List<ModelAttribute> attributes, ModelAttribute attr, float[] data){
+	private static void putAttribute(List<Vbo> vbos, List<ModelAttribute> attributes, ModelAttribute attr, float[] data){
 		if(data==null||data.length==0) return;
-		int vbo=GL15.glGenBuffers();
+		Vbo vbo=Vbo.create(GL15.GL_ARRAY_BUFFER);
 		
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-		
-		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, BufferUtil.store(data), GL15.GL_DYNAMIC_DRAW);
+		vbo.bind();
+		vbo.storeData(data);
 		GL20.glVertexAttribPointer(attr.id, attr.size, GL11.GL_FLOAT, false, 0, 0);
-		
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		vbo.unbind();
 		
 		vbos.add(vbo);
 		attributes.add(attr);
 	}
 	
-	//	public static BasicModel buildModel(String name, float[] vert, float[] uvs, float[] normals, int[] indices){
-	//		checkData(vert, uvs);
-	//		
-	//		BasicModel model=new BasicModel(name);
-	//		float rad=calcRad(vert);
-	//		
-	//		Game.runInRenderContext(()->{
-	//			int vao=createVao();
-	//			bindIndices(indices);
-	//			int[] vbos=putData(vert, uvs, normals, new float[4]);
-	//			unbindVao();
-	//			model.load(vao, indices.length, false, vbos, rad, false);
-	//		});
-	//		
-	//		return model;
-	//	}
+	private static void putAttribute(List<Vbo> vbos, List<ModelAttribute> attributes, ModelAttribute attr, int[] data){
+		if(data==null||data.length==0) return;
+		Vbo vbo=Vbo.create(GL15.GL_ARRAY_BUFFER);
+		
+		vbo.bind();
+		vbo.storeData(data);
+		GL20.glVertexAttribPointer(attr.id, attr.size, GL11.GL_INT, false, 0, 0);
+		vbo.unbind();
+		
+		vbos.add(vbo);
+		attributes.add(attr);
+	}
 	
 	public static IFrustrumShape calcShape(FloatBuffer vert, int dimensions){
 		if(vert.limit()==0) return new FrustrumBool(false);
@@ -576,7 +633,7 @@ public class ModelLoader{
 	}
 	
 	public static void deleteAll(){
-		UtilM.doAndClear(MODELS, IModel::delete);
+		UtilL.doAndClear(MODELS, IModel::delete);
 	}
 	
 }

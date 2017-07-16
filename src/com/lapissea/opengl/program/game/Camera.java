@@ -18,7 +18,7 @@ public class Camera implements IMouseMoveEventListener{
 	
 	private static final Vec3f EFF_POS=new Vec3f(),MOVE=new Vec3f();
 	
-	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();		//,prevRot=new Vec3f();
+	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();						//,prevRot=new Vec3f();
 	public float	zoom=1,farPlane=1000,nearPlane=0.1F,fov=80,lastRenderFow;
 	
 	private final Matrix4f	projection		=new Matrix4f();
@@ -64,8 +64,7 @@ public class Camera implements IMouseMoveEventListener{
 			if(Keyboard.isKeyDown(Keyboard.KEY_E)) rot.y+=0.1;
 			if(Keyboard.isKeyDown(Keyboard.KEY_R)) rot.x-=0.1;
 			if(Keyboard.isKeyDown(Keyboard.KEY_F)) rot.x+=0.1;
-		}
-		else{
+		}else{
 			rot.x-=e.yDelta/200F;
 			rot.y+=e.xDelta/200F;
 			Game.win().centerMouse();
@@ -87,7 +86,7 @@ public class Camera implements IMouseMoveEventListener{
 	
 	public void createProjection(Matrix4f dest){
 		//		float fov=this.fov/zoom;
-		//		
+		//
 		//		if(lastRenderFow==fov){
 		//			injectProjection(dest);
 		//			return;
@@ -99,8 +98,10 @@ public class Camera implements IMouseMoveEventListener{
 	
 	public void calcProjection(){
 		
+		farPlane=(float)Game.get().world.fog.getMaxDistance();
+		
 		float aspectRatio=(float)Display.getWidth()/(float)Display.getHeight();
-		float y_scale=(float)((1f/Math.tan(Math.toRadians(this.fov/zoom/2f)))*aspectRatio);
+		float y_scale=(float)(1f/Math.tan(Math.toRadians(fov/zoom/2f))*aspectRatio);
 		float x_scale=y_scale/aspectRatio;
 		float frustumLength=farPlane-nearPlane;
 		
@@ -109,7 +110,7 @@ public class Camera implements IMouseMoveEventListener{
 		projection.m11=y_scale;
 		projection.m22=-((farPlane+nearPlane)/frustumLength);
 		projection.m23=-1;
-		projection.m32=-((2*nearPlane*farPlane)/frustumLength);
+		projection.m32=-(2*nearPlane*farPlane/frustumLength);
 		projection.m33=0;
 	}
 	

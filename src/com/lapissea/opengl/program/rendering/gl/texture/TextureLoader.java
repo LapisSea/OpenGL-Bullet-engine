@@ -26,6 +26,7 @@ import com.lapissea.opengl.window.assets.ITexture;
 import com.lapissea.opengl.window.assets.ITextureCube;
 import com.lapissea.opengl.window.impl.assets.BasicTexture;
 import com.lapissea.util.LogUtil;
+import com.lapissea.util.UtilL;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -154,7 +155,7 @@ public class TextureLoader{
 	
 	@SuppressWarnings("unchecked")
 	private static <T extends ITexture> T loadTexture0(String path, Class<T> type, int...params){
-		if(UtilM.instanceOf(type, ITextureCube.class)){
+		if(UtilL.instanceOf(type, ITextureCube.class)){
 			String[] names={
 					"/right",
 					"/left",
@@ -226,7 +227,7 @@ public class TextureLoader{
 		Object code=texture.notifyLoading();
 		
 		Game.glCtx(()->{
-			if(code!=texture.loadingKey()) return;//another loading process was called, this will have no effect hence it is pointless 
+			if(code!=texture.loadingKey()) return;//another loading process was called, this will have no effect hence it is pointless
 			
 			int id=GL11.glGenTextures();
 			
@@ -266,7 +267,7 @@ public class TextureLoader{
 		Object code=texture.notifyLoading();
 		
 		Game.glCtx(()->{
-			if(code!=texture.loadingKey()) return;//another loading process was called, this will have no effect hence it is pointless 
+			if(code!=texture.loadingKey()) return;//another loading process was called, this will have no effect hence it is pointless
 			
 			int id=GL11.glGenTextures();
 			
@@ -315,7 +316,7 @@ public class TextureLoader{
 	}
 	
 	public synchronized static void deleteAll(){
-		UtilM.doAndClear(CHASE, ITexture::delete);
+		UtilL.doAndClear(CHASE, ITexture::delete);
 	}
 	
 	public synchronized static void cleanChaseUp(){
@@ -327,7 +328,7 @@ public class TextureLoader{
 		ITexture ex=getExisting(path);
 		if(ex==null) return null;
 		
-		if(UtilM.instanceOf(ex, type)) return (T)ex;
+		if(UtilL.instanceOf(ex, type)) return (T)ex;
 		
 		throw new ClassCastException("Found existing texture with path "+path+" with type "+ex.getClass().getSimpleName()+" that is ont compatabile with "+type.getSimpleName());
 	}
@@ -336,7 +337,7 @@ public class TextureLoader{
 		ITexture result=CHASE.stream().filter(tx->tx.getPath().equals(path)).findFirst().orElse(null);
 		if(result==null) return null;
 		if(!result.isLoaded()&&!result.isLoading()){
-			CHASE.remove(path);
+			CHASE.remove(result);
 			return null;
 		}
 		return result;
@@ -371,10 +372,10 @@ public class TextureLoader{
 		for(int y=0;y<image.getHeight();y++){
 			for(int x=0;x<image.getWidth();x++){
 				int pixel=pixels[y*image.getWidth()+x];
-				buffer.put((byte)((pixel>>16)&0xFF)); // Red component
-				buffer.put((byte)((pixel>>8)&0xFF)); // Green component
+				buffer.put((byte)(pixel>>16&0xFF)); // Red component
+				buffer.put((byte)(pixel>>8&0xFF)); // Green component
 				buffer.put((byte)(pixel&0xFF)); // Blue component
-				buffer.put((byte)((pixel>>24)&0xFF)); // Alpha component. Only for RGBA
+				buffer.put((byte)(pixel>>24&0xFF)); // Alpha component. Only for RGBA
 			}
 		}
 		

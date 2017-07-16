@@ -15,10 +15,8 @@ public class GameSettings extends Config{
 	public int	perChunkGrassMin	=50;
 	public int	perChunkGrassRand	=50;
 	public int	chunkResolution		=5;
-	public int	chunkHeight			=5;
 	public int	chunkGridSize		=18;
 	public int	worldMultisampling	=4;
-	
 	
 	public GameSettings(String name){
 		ShaderModuleLight.MAX_POINT_LIGHT=maxPointLight;
@@ -32,9 +30,7 @@ public class GameSettings extends Config{
 		Chunk.GRASS_MIN=perChunkGrassMin;
 		Chunk.GRASS_RAND=perChunkGrassRand;
 		Chunk.RESOLUTION=chunkResolution;
-		Chunk.WORLD_H=chunkHeight;
 	}
-	
 	
 	public GameSettings(String name, int maxPointLight, int maxDirLight, int skyResolutionDevider, int physicsCubeAmmount, int perChunkGrassMin, int perChunkGrassRand, int chunkResolution, int chunkHeight, int chunkGridSize){
 		this.maxPointLight=maxPointLight;
@@ -48,7 +44,6 @@ public class GameSettings extends Config{
 		this.perChunkGrassRand=perChunkGrassRand;
 		
 		this.chunkResolution=chunkResolution;
-		this.chunkHeight=chunkHeight;
 		
 		this.chunkGridSize=chunkGridSize;
 		
@@ -63,8 +58,6 @@ public class GameSettings extends Config{
 		Chunk.GRASS_MIN=perChunkGrassMin;
 		Chunk.GRASS_RAND=perChunkGrassRand;
 		Chunk.RESOLUTION=chunkResolution;
-		Chunk.WORLD_H=chunkHeight;
 	}
-	
 	
 }

@@ -7,60 +7,28 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
+import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.opengl.window.impl.assets.BasicTextureCube;
 
 public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	
-//	private static class UniformMat40 extends UniformMat4{
-//
-//		public UniformMat40(UniformMat4 child){
-//			super(shader, id, name);
-//		}
-//
-//		@Override
-//		public void upload(Matrix4f mat){
-//			shader.bindingProttect();
-//
-//			if(MatrixUtil.equals(mat, prev)) return;
-//			prev.load(mat);
-//
-//			BUFF.put(prev.m00);
-//			BUFF.put(prev.m01);
-//			BUFF.put(prev.m02);
-//			BUFF.put(prev.m03);
-//			BUFF.put(prev.m10);
-//			BUFF.put(prev.m11);
-//			BUFF.put(prev.m12);
-//			BUFF.put(prev.m13);
-//			BUFF.put(prev.m20);
-//			BUFF.put(prev.m21);
-//			BUFF.put(prev.m22);
-//			BUFF.put(prev.m23);
-//			BUFF.put(0);//prev.m30);
-//			BUFF.put(0);//prev.m31);
-//			BUFF.put(0);//prev.m32);
-//			BUFF.put(prev.m33);
-//			BUFF.flip();
-//			GL20.glUniformMatrix4(id(), false, BUFF);
-//			checkError(this::retryUpload);
-//		}
-//
-//	}
-	
-	private IModel cube=ModelLoader.buildModel("Skybox", GL11.GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false/*, "textures", TextureLoader.loadTexture("skybox/test", BasicTextureCube.class)*/);
+	private IModel cube=ModelLoader.buildModel("Skybox", GL11.GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false, "textures", TextureLoader.loadTexture("skybox/ame_nebula", BasicTextureCube.class));
 	
 	UniformFloat3	sunPos;
 	UniformFloat1	eyeHeight;
+	UniformFloat1	viewFarPlane;
+	Vec3f dir=new Vec3f();
 	
 	@Override
 	@Deprecated
@@ -87,11 +55,16 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	@Override
 	public void prepareGlobal(){
 		super.prepareGlobal();
-		double sunPos0=Game.get().world.getSunPos(Game.getPartialTicks())*Math.PI*2;
-		float cos=(float)Math.cos(sunPos0);
-		Vec3f dir=new Vec3f(cos/3, (float)Math.sin(sunPos0), cos);
-		dir.normalise();
+		World world=Game.get().world;
+		float sunPos0=(float)(world.getSunPos(Game.getPartialTicks())*Math.PI*2+Math.PI);
+		dir.set(sunPos0, 0, 0);
+		
+		dir.eulerToVector();
+		
+		//dir.set(getRenderer().getCamera().rot).eulerToVector();
+		
 		sunPos.upload(dir);
+		if(viewFarPlane!=null) viewFarPlane.upload((float)world.fog.getMaxDistance());
 		
 		if(eyeHeight!=null) eyeHeight.upload(PartialTick.calc(getRenderer().getCamera().prevPos.y, getRenderer().getCamera().pos.y));
 	}
@@ -103,10 +76,11 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	
 	@Override
 	protected void setUpUniforms(){
-		projectionMat=(UniformMat4)getUniform("projectionMat");
-		viewMat=(UniformMat4)getUniform("viewMat");
-		sunPos=(UniformFloat3)getUniform("sunPos");
-		eyeHeight=(UniformFloat1)getUniform("eyeHeight");
+		projectionMat=getUniform("projectionMat");
+		viewMat=getUniform("viewMat");
+		sunPos=getUniform("sunPos");
+		eyeHeight=getUniform("eyeHeight");
+		viewFarPlane=getUniform("viewFarPlane");
 	}
 	
 	Matrix4f viewCopy=new Matrix4f();

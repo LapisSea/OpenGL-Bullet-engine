@@ -20,8 +20,8 @@ import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
-import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.assets.IModel;
+import com.lapissea.opengl.window.impl.assets.Material;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
@@ -35,13 +35,12 @@ public class Chunk implements ModelTransformed{
 	
 	public static ModelData[] grass=ObjModelLoader.loadArr("Grass");
 	
-	public static final float	SIZE		=32;
-	public static int			RESOLUTION	=6,WORLD_H=5,GRASS_MIN=50,GRASS_RAND=50;
+	public static final float	SIZE		=50;
+	public static int			RESOLUTION	=9,GRASS_MIN=20,GRASS_RAND=30;
 	
 	public final int	x,z;
 	public IModel		model	=ModelLoader.EMPTY_MODEL;
 	public RigidBody	chunkBody;
-	
 	
 	protected final Matrix4f mat=new Matrix4f();
 	
@@ -53,11 +52,10 @@ public class Chunk implements ModelTransformed{
 		x=gridX;
 		z=gridZ;
 		mat.translate(new Vec3f(x*SIZE, -2, z*SIZE));
-		model=generateModel(gridX, gridZ, hMap);
-		model.getMaterial(0).setShineDamper(50).setReflectivity(0.2F).setDiffuse(0.2F, 1, 0.25F, 1).setSpecular(1, 1, 1, 1);
+		generateModel(gridX, gridZ, hMap);
 	}
 	
-	private IModel generateModel(int gridX, int gridZ, IHeightMapProvider hMap){
+	private void generateModel(int gridX, int gridZ, IHeightMapProvider hMap){
 		int r1=RESOLUTION+1;
 		
 		FloatList vertices=new FloatArrayList(),mats=new FloatArrayList();
@@ -68,11 +66,9 @@ public class Chunk implements ModelTransformed{
 		for(int z=0;z<r1;z++){
 			for(int x=0;x<r1;x++){
 				vertices.add(x*mul);
-				vertices.add(hMap.getHeightAt((x/(double)RESOLUTION+gridX), (z/(double)RESOLUTION+gridZ)));
+				vertices.add(hMap.getHeightAt(x/(double)RESOLUTION+gridX, z/(double)RESOLUTION+gridZ));
 				vertices.add(z*mul);
 				mats.add(0);
-				//				uvs.add(x/(float)RESOLUTION);
-				//				uvs.add(z/(float)RESOLUTION);
 			}
 		}
 		
@@ -95,7 +91,7 @@ public class Chunk implements ModelTransformed{
 				indices.add(p3);
 			}
 		}
-		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh((this.hMap=vertices.toFloatArray()), indices.toIntArray()), true);
+		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(this.hMap=vertices.toFloatArray(), indices.toIntArray()), true);
 		MotionState ballMotionState=new DefaultMotionState(new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x*SIZE, 0, z*SIZE), 1)));
 		RigidBodyConstructionInfo ballConstructionInfo=new RigidBodyConstructionInfo(0, ballMotionState, trimeshshape, new Vector3f());
 		ballConstructionInfo.restitution=0F;
@@ -121,7 +117,18 @@ public class Chunk implements ModelTransformed{
 				mats.add(1);
 			}
 		}
-		return ModelLoader.buildModel("Gen_Floor-"+gridX+"_"+gridZ, GL11.GL_TRIANGLES, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toFloatArray(), "genNormals", true).culface(false);
+		model=ModelLoader.buildModel("Gen_Chunk-"+gridX+"_"+gridZ, GL11.GL_TRIANGLES, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toFloatArray(), "genNormals", true, "materials", new Material(0, "ground")).culface(false);
+		
+		model.createMaterial("grass")
+		.setDiffuse(0.2F, 1, 0.25F, 1)
+		.setLightTroughput(0.5F)
+		.setJelly(0.3F);
+		
+		model.getMaterial("ground")
+		.setShineDamper(50)
+		.setReflectivity(1)
+		.setDiffuse(0.2F, 1, 0.25F, 1)
+		.setSpecular(1, 1, 1, 1);
 	}
 	
 	@Override
@@ -131,12 +138,6 @@ public class Chunk implements ModelTransformed{
 	
 	@Override
 	public Matrix4f getTransform(){
-		if(model.getMaterialCount()==1){
-			IMaterial mat=model.createMaterial("grass");
-			mat.setDiffuse(0.2F, 1, 0.25F, 1).setLightTroughput(0.5F).setJelly(0.3F);
-			
-			model.getMaterial(0).setShineDamper(50).setReflectivity(1F);
-		}
 		
 		TRANSFORM.setIdentity();
 		POS.x=x*SIZE;
@@ -154,22 +155,23 @@ public class Chunk implements ModelTransformed{
 		int xi=(int)Math.floor(xOnChunk/mul);
 		int zi=(int)Math.floor(zOnChunk/mul);
 		
+		float xPerc=xOnChunk%mul/mul;
+		float zPerc=zOnChunk%mul/mul;
+		
 		float y_00=hMap[(xi+zi*r1)*3+1];
-		float y_10=hMap[(xi+1+zi*r1)*3+1];
-		float y_01=hMap[(xi+(zi+1)*r1)*3+1];
 		float y_11=hMap[(xi+1+(zi+1)*r1)*3+1];
 		
-		float xPerc=(xOnChunk%mul)/mul;
-		float zPerc=(zOnChunk%mul)/mul;
-		
-		
 		if(1-xPerc+zPerc>1){
+			float y_01=hMap[(xi+(zi+1)*r1)*3+1];
+			
 			float y_0=y_00+(y_01-y_00)*zPerc;
 			return y_0+(y_11-y_0)*xPerc;
 		}
-		else{
-			float y_1=y_10+(y_11-y_10)*zPerc;
-			return y_00+(y_1-y_00)*xPerc;
-		}
+		
+		float y_10=hMap[(xi+1+zi*r1)*3+1];
+		
+		float y_1=y_10+(y_11-y_10)*zPerc;
+		return y_00+(y_1-y_00)*xPerc;
+		
 	}
 }

@@ -2,6 +2,7 @@ package com.lapissea.opengl.program.rendering.gl.shader;
 
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.gui.GuiElement;
+import com.lapissea.opengl.program.rendering.gl.shader.shaders.EntityShader;
 import com.lapissea.opengl.program.rendering.gl.shader.shaders.GuiRectShader;
 import com.lapissea.opengl.program.rendering.gl.shader.shaders.SkyboxShader;
 import com.lapissea.opengl.program.rendering.gl.shader.shaders.TerrainShader;
@@ -61,7 +62,7 @@ public class Shaders{
 	public static ShaderRenderer<GuiElement>		GUI_NORMAL;
 	
 	public static void load(){
-		ENTITY=new ShaderRenderer.Basic3D<ModelTransformed>("entity");
+		ENTITY=new EntityShader();
 		
 		TERRAIN=new TerrainShader();
 		

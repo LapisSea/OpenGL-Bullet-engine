@@ -26,32 +26,32 @@ public class EntityCrazyCube extends EntityUpd{
 	//			-0.5f,-0.5f,-0.5f,
 	//			0.5f,-0.5f,-0.5f,
 	//			0.5f,0.5f,-0.5f,
-	//			
+	//
 	//			-0.5f,0.5f,0.5f,
 	//			-0.5f,-0.5f,0.5f,
 	//			0.5f,-0.5f,0.5f,
 	//			0.5f,0.5f,0.5f,
-	//			
+	//
 	//			0.5f,0.5f,-0.5f,
 	//			0.5f,-0.5f,-0.5f,
 	//			0.5f,-0.5f,0.5f,
 	//			0.5f,0.5f,0.5f,
-	//			
+	//
 	//			-0.5f,0.5f,-0.5f,
 	//			-0.5f,-0.5f,-0.5f,
 	//			-0.5f,-0.5f,0.5f,
 	//			-0.5f,0.5f,0.5f,
-	//			
+	//
 	//			-0.5f,0.5f,0.5f,
 	//			-0.5f,0.5f,-0.5f,
 	//			0.5f,0.5f,-0.5f,
 	//			0.5f,0.5f,0.5f,
-	//			
+	//
 	//			-0.5f,-0.5f,0.5f,
 	//			-0.5f,-0.5f,-0.5f,
 	//			0.5f,-0.5f,-0.5f,
 	//			0.5f,-0.5f,0.5f
-	//	
+	//
 	//	};
 	
 	static int[] indices={
@@ -72,7 +72,7 @@ public class EntityCrazyCube extends EntityUpd{
 			
 			20,21,23,
 			23,21,22
-	
+			
 	};
 	
 	private static IModel getModel0(){
@@ -93,6 +93,11 @@ public class EntityCrazyCube extends EntityUpd{
 		
 		scale.set(2, 2, 2);
 		
+//		model.getMaterial(2).getDiffuse().set(177/256F, 0, 177/256F, 1);
+//		model.getMaterial(1).getDiffuse().set(0x00C7E7);
+		model.getMaterial(1).getAmbient().set(0x00C7E7).a(1);
+//		model.getMaterial(0).getDiffuse().set(0x0000FF);
+		
 		float massKg=0.5F*scale.x*scale.y*scale.z;
 		
 		
@@ -107,10 +112,6 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	@Override
 	public void update(){
-		model.getMaterial(2).getDiffuse().set(177/256F, 0, 177/256F, 1);
-		model.getMaterial(1).getDiffuse().set(0x00C7E7);
-		model.getMaterial(1).getAmbient().set(0x00C7E7).a(1);
-		model.getMaterial(0).getDiffuse().set(0x0000FF);
 		//physicsBody.setDamping(0.5F, 0.5F);
 		
 		updatePrevs();
@@ -125,8 +126,7 @@ public class EntityCrazyCube extends EntityUpd{
 	public void preRender(){
 		if(lightColor!=null){
 			MODEL.getMaterial(0).setLightTroughput(1F);
-//			if(light==null) 
-				light=new LineLight(new Vec3f(), new Vec3f(), lightColor, new Vec3f(1F, 0.01F, 0.01F/(scale.max()*scale.max())));
+			if(light==null) light=new LineLight(new Vec3f(), new Vec3f(), lightColor, new Vec3f(1F, 0.01F, 0.01F/(scale.max()*scale.max())));
 			PartialTick.calc(light.pos1, prevPos, pos);
 			PartialTick.calc(light.pos2, prevPos, pos);
 			double angle=((world.time()+Game.getPartialTicks())/10D+light.pos2.length()/2)%(Math.PI*2);

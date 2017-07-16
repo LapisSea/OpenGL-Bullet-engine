@@ -1,5 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
+import java.util.function.Function;
+
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 
 public class ShaderModuleArrayList extends ShaderModule{
@@ -40,5 +42,17 @@ public class ShaderModuleArrayList extends ShaderModule{
 	
 	@Override
 	public void setUpUniforms(){}
+	
+	public static String arrayListSize(String name){
+		return name+".size";
+	}
+	
+	public static Function<Integer,String> arrayList(String name, String inData){
+		return arrayList(name, i->inData);
+	}
+	
+	public static Function<Integer,String> arrayList(String name, Function<Integer,String> inData){
+		return i->name+".data["+i+"]."+inData.apply(i);
+	}
 	
 }

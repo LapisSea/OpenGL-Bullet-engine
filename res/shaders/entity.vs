@@ -7,6 +7,7 @@ in vec3 normalIn;
 in float materialIdIn;
 
 out vec2 uv;
+out float materialId;
 
 
 uniform mat4 transformMat;
@@ -36,7 +37,7 @@ void main(void){
 	
 	gl_Position=projectionMat*posRelativeToCam;
 	uv=uvIn;
-	
+	materialId=materialIdIn;
 	
 	
 	lightingSetUp(transformMat, worldPos, normalIn, (inverse(viewMat)*vec4(0,0,0,1)).xyz);

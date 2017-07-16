@@ -20,7 +20,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.OpenGLException;
-import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.core.Globals;
@@ -29,10 +28,13 @@ import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformBoolean;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformMat4;
+import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformSampler2D;
+import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformSamplerCube;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat2;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat4;
+import com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints.UniformInt1;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.data.MapOfLists;
 import com.lapissea.opengl.window.assets.ModelAttribute;
@@ -77,20 +79,16 @@ public abstract class Shader{
 		registerUniform(GL20.GL_FLOAT_VEC3, UniformFloat3.class);
 		registerUniform(GL20.GL_FLOAT_VEC4, UniformFloat4.class);
 		registerUniform(GL20.GL_BOOL, UniformBoolean.class);
-		
+		registerUniform(GL11.GL_INT, UniformInt1.class);
+		registerUniform(GL20.GL_SAMPLER_2D, UniformSampler2D.class);
+		registerUniform(GL20.GL_SAMPLER_CUBE, UniformSamplerCube.class);
 	}
 	
 	public int			program,vertex=NOT_LOADED,geometry=NOT_LOADED,fragment=NOT_LOADED;
 	private boolean		bound,loaded;
 	public final String	name;
 	public ShaderLoader	loader;
-	
-	protected UniformMat4	transformMat;
-	protected UniformMat4	projectionMat;
-	protected UniformMat4	viewMat;
-	protected UniformFloat1	shineDamper;
-	protected UniformFloat1	reflectivity;
-	protected UniformFloat1	lightTroughput;
+	private String[]	uniformNames;
 	
 	protected List<ShaderModule>			modules				=new ArrayList<>();
 	protected List<ShaderModule.Global>		modulesGlobal		=new ArrayList<>();
@@ -148,15 +146,19 @@ public abstract class Shader{
 			GLUtil.attachShader(program, fragment);
 			
 			bindAttributes();
-			for(ShaderModule shaderModule:modules){
-				LogUtil.println(shaderModule);
-			}
-			modules.forEach(md->{
-				md.bindAttributes();
-			});
+			
+			modules.forEach(ShaderModule::bindAttributes);
 			
 			GL20.glLinkProgram(program);
 			GL20.glValidateProgram(program);
+			HashMap<Integer,String> uniforms=new HashMap<>();
+			GLUtil.getAllUniforms(program, uniforms);
+			
+			uniformNames=new String[uniforms.size()];
+			uniforms.forEach((id, name)->{
+				uniformNames[id]=name;
+			});
+			
 			setUpUniforms();
 			modules.forEach(ShaderModule::setUpUniforms);
 			
@@ -174,12 +176,12 @@ public abstract class Shader{
 			return;
 		}
 		
-		if(data.obj2!=null) data.obj2.stream().filter(m->!modules.stream().noneMatch(m1->m1.getClass().equals(m.getClass()))).forEach(modules::add);
+		if(data.obj2!=null) data.obj2.stream().filter(m->modules.stream().noneMatch(m1->m1.getClass().equals(m.getClass()))).forEach(modules::add);
 		
 		data.obj1=data.obj1.replaceAll("\r\n", "\n");
 		
 		if(Globals.DEV_ENV) try{
-			File f=new File("res/shaders/compiled output/"+name+ext);
+			File f=new File("dev/shader compiled output/"+name+ext);
 			f.getParentFile().mkdirs();
 			Files.write(f.toPath(), data.obj1.getBytes());
 		}catch(IOException e){
@@ -251,21 +253,7 @@ public abstract class Shader{
 		return loaded;
 	}
 	
-	public void uploadTransformMat(Matrix4f mat){
-		if(transformMat!=null) transformMat.upload(mat);
-	}
-	
-	public void uploadProjectionAndViewMat(Matrix4f project, Matrix4f view){
-		if(viewMat==null) return;
-		viewMat.upload(view);
-		projectionMat.upload(project);
-	}
-	
-	protected void setUpUniforms(){
-		transformMat=getUniform("transformMat");
-		projectionMat=getUniform("projectionMat");
-		viewMat=getUniform("viewMat");
-	}
+	protected void setUpUniforms(){}
 	
 	public <T extends AbstractUniform> T[] getUniformArray(String name){
 		return getUniformArray(i->name+"["+i+"]");
@@ -275,40 +263,37 @@ public abstract class Shader{
 		
 		List<T> unis=new ArrayList<>();
 		T unif;
-		
-		while((unif=getUniform(name.apply(unis.size())))!=null){
+		String nm;
+		while((unif=getUniform(nm=name.apply(unis.size())))!=null){
+			if(!nm.equals(unif.name())) break;
 			unis.add(unif);
 		}
-		
-		return UtilL.array(unis);
+		try{
+			return UtilL.array(unis);
+		}catch(Exception e){
+			GLUtil.printAllUniforms(program);
+			throw e;
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	public <T extends AbstractUniform> T getUniform(String name){
-		GLUtil.checkError();
-		int id=GL20.glGetUniformLocation(program, name);
-		GLUtil.checkError();
-		if(id==-1) return null;
+		if(UtilL.emptyOrNull(name)) throw new IllegalArgumentException("Uniform name can not be null or empty!");
 		
-		String nameCheck=GL20.glGetActiveUniform(program, id, 512);
-		if(!nameCheck.equals(name)){
-			if(GL20.glGetActiveUniform(program, id-1, 512).equals(name)) id--;
-			else if(GL20.glGetActiveUniform(program, id+1, 512).equals(name)) id++;
+		int id=-1;
+		
+		for(int i=0;i<uniformNames.length;i++){
+			if(uniformNames[i].equals(name)){
+				id=i;
+				break;
+			}
 		}
+		
+		if(id==-1) return null;
 		
 		int type=GL20.glGetActiveUniformType(program, id);
 		UniformFactory fac=UNIFORMS.get(type);
-		if(fac==null){
-//			Map<Integer,String> unis=new HashMap<>();
-//			GLUtil.getAllUniforms(program, unis);
-//
-//			unis.forEach((i, k)->{
-//
-//				LogUtil.println(i, GL20.glGetUniformLocation(program, k), k);
-//
-//			});
-			throw new RuntimeException("Unknown uniform type "+type+" with name "+name+" and id "+id+" at shader "+this.name);
-		}
+		if(fac==null) throw new RuntimeException("Unknown uniform type "+type+" with name "+name+" and id "+id+" at shader "+this.name);
 		
 		return (T)fac.get(this, id, name);
 	}

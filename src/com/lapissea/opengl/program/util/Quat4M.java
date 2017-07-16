@@ -6,11 +6,12 @@ import javax.vecmath.Quat4f;
 import javax.vecmath.Tuple4d;
 import javax.vecmath.Tuple4f;
 
+import com.lapissea.opengl.program.interfaces.Interpolateble;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.IRotation;
 import com.lapissea.opengl.window.api.util.IVec3f;
 
-public class Quat4M extends Quat4f implements IRotation{
+public class Quat4M extends Quat4f implements IRotation,Interpolateble<Quat4M>{
 	
 	private static final long serialVersionUID=1217013901730370836L;
 	
@@ -101,21 +102,21 @@ public class Quat4M extends Quat4f implements IRotation{
 	}
 	
 	public org.lwjgl.util.vector.Matrix4f quatToMatrix4f(org.lwjgl.util.vector.Matrix4f dest){
-		dest.m00=1.0f-2.0f*(this.y*this.y+this.z*this.z);
-		dest.m01=2.0f*(this.x*this.y+this.z*this.w);
-		dest.m02=2.0f*(this.x*this.z-this.y*this.w);
+		dest.m00=1.0f-2.0f*(y*y+z*z);
+		dest.m01=2.0f*(x*y+z*w);
+		dest.m02=2.0f*(x*z-y*w);
 		dest.m03=0.0f;
 		
 		// Second row
-		dest.m10=2.0f*(this.x*this.y-this.z*this.w);
-		dest.m11=1.0f-2.0f*(this.x*this.x+this.z*this.z);
-		dest.m12=2.0f*(this.z*this.y+this.x*this.w);
+		dest.m10=2.0f*(x*y-z*w);
+		dest.m11=1.0f-2.0f*(x*x+z*z);
+		dest.m12=2.0f*(z*y+x*w);
 		dest.m13=0.0f;
 		
 		// Third row
-		dest.m20=2.0f*(this.x*this.z+this.y*this.w);
-		dest.m21=2.0f*(this.y*this.z-this.x*this.w);
-		dest.m22=1.0f-2.0f*(this.x*this.x+this.y*this.y);
+		dest.m20=2.0f*(x*z+y*w);
+		dest.m21=2.0f*(y*z-x*w);
+		dest.m22=1.0f-2.0f*(x*x+y*y);
 		dest.m23=0.0f;
 		
 		// Fourth row
@@ -127,10 +128,6 @@ public class Quat4M extends Quat4f implements IRotation{
 		return dest;
 	}
 	
-	public Quat4M interpolate(Quat4M a, Quat4M b, float blend){
-		return interpolate(this, a, b, blend);
-	}
-	
 	public static Quat4M interpolate(Quat4M dest, Quat4M a, Quat4M b, float blend){
 		float dot=a.w*b.w+a.x*b.x+a.y*b.y+a.z*b.z;
 		float blendI=1f-blend;
@@ -139,8 +136,7 @@ public class Quat4M extends Quat4f implements IRotation{
 			dest.x=blendI*a.x+blend*-b.x;
 			dest.y=blendI*a.y+blend*-b.y;
 			dest.z=blendI*a.z+blend*-b.z;
-		}
-		else{
+		}else{
 			dest.w=blendI*a.w+blend*b.w;
 			dest.x=blendI*a.x+blend*b.x;
 			dest.y=blendI*a.y+blend*b.y;
@@ -225,6 +221,7 @@ public class Quat4M extends Quat4f implements IRotation{
 	public Quat4M fromMatrix(org.lwjgl.util.vector.Matrix4f matrix){
 		return fromMatrix(this, matrix);
 	}
+	
 	public static Quat4M fromMatrix(Quat4M dest, org.lwjgl.util.vector.Matrix4f matrix){
 		float w,x,y,z;
 		float diagonal=matrix.m00+matrix.m11+matrix.m22;
@@ -234,22 +231,19 @@ public class Quat4M extends Quat4f implements IRotation{
 			x=(matrix.m21-matrix.m12)/w4;
 			y=(matrix.m02-matrix.m20)/w4;
 			z=(matrix.m10-matrix.m01)/w4;
-		}
-		else if((matrix.m00>matrix.m11)&&(matrix.m00>matrix.m22)){
+		}else if(matrix.m00>matrix.m11&&matrix.m00>matrix.m22){
 			float x4=(float)(Math.sqrt(1f+matrix.m00-matrix.m11-matrix.m22)*2f);
 			w=(matrix.m21-matrix.m12)/x4;
 			x=x4/4f;
 			y=(matrix.m01+matrix.m10)/x4;
 			z=(matrix.m02+matrix.m20)/x4;
-		}
-		else if(matrix.m11>matrix.m22){
+		}else if(matrix.m11>matrix.m22){
 			float y4=(float)(Math.sqrt(1f+matrix.m11-matrix.m00-matrix.m22)*2f);
 			w=(matrix.m02-matrix.m20)/y4;
 			x=(matrix.m01+matrix.m10)/y4;
 			y=y4/4f;
 			z=(matrix.m12+matrix.m21)/y4;
-		}
-		else{
+		}else{
 			float z4=(float)(Math.sqrt(1f+matrix.m22-matrix.m00-matrix.m11)*2f);
 			w=(matrix.m10-matrix.m01)/z4;
 			x=(matrix.m02+matrix.m20)/z4;
@@ -259,4 +253,15 @@ public class Quat4M extends Quat4f implements IRotation{
 		dest.set(x, y, z, w);
 		return dest;
 	}
+	
+	@Override
+	public Quat4M interpolate(Quat4M second, float percent){
+		return interpolate(this, this, second, percent);
+	}
+	
+	@Override
+	public Quat4M interpolate(Quat4M first, Quat4M second, float percent){
+		return interpolate(this, first, second, percent);
+	}
+	
 }

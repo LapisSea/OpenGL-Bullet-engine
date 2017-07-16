@@ -1,16 +1,12 @@
 package com.lapissea.opengl.program.game.world;
 
-import static com.bulletphysics.linearmath.DebugDrawModes.DRAW_CONTACT_POINTS;
-import static com.bulletphysics.linearmath.DebugDrawModes.DRAW_WIREFRAME;
-import static com.bulletphysics.linearmath.DebugDrawModes.ENABLE_CCD;
-import static com.bulletphysics.linearmath.DebugDrawModes.MAX_DEBUG_DRAW_MODE;
+import static com.bulletphysics.linearmath.DebugDrawModes.*;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Vector3f;
@@ -41,6 +37,7 @@ import com.lapissea.opengl.program.game.entity.entitys.EntityTree;
 import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.program.game.terrain.Chunk;
 import com.lapissea.opengl.program.game.terrain.IHeightMapProvider;
+import com.lapissea.opengl.program.rendering.gl.Fog;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
 import com.lapissea.opengl.program.util.RandUtil;
@@ -52,19 +49,20 @@ import com.lapissea.util.LogUtil;
 
 public class World{
 	
-	public static int		PHYSICS_CUBE_AMMOUNT=3,CHUNK_GRID_SIZE=20;
+	public static int		PHYSICS_CUBE_AMMOUNT=3,CHUNK_GRID_SIZE=50;
 	public DynamicsWorld	bulletWorld;
 	private List<Entity>	entitys				=new ArrayList<>();
 	private List<EntityUpd>	entitysUpd			=new ArrayList<>();
 	private boolean			checkDead;
 	private long			ticksPassed;
 	private double			dayDuration			=1000;
+	public Fog				fog					=new Fog();
 	
 	public final OffsetArray<OffsetArray<Chunk>> chunks=new OffsetArray<>();
 	
 	public World(){
 		setUpPhysics();
-		setUpEntity();
+		setUpWorld();
 	}
 	
 	private void setUpPhysics(){
@@ -117,7 +115,7 @@ public class World{
 		
 	}
 	
-	private void setUpEntity(){
+	private void setUpWorld(){
 		BufferedImage img;
 		try{
 			img=ImageIO.read(UtilM.getResource("textures/h-maps/hm.png"));
@@ -133,23 +131,13 @@ public class World{
 			y/=2;
 			x*=img.getWidth();
 			y*=img.getHeight();
-			return new Color(img.getRGB((int)Math.abs(x)%img.getWidth(), (int)Math.abs(y)%img.getHeight())).getRed()*Chunk.WORLD_H/26F;
-			//			double h=SimplexNoise.noise(x, y);
-			//			h-=0.5;
-			//
-			//			h+=(SimplexNoise.noise(x*10, y*10)-0.5)/10;
-			//			return (float)(h*Terrain.WORLD_H);
+			return new Color(img.getRGB((int)Math.abs(x)%img.getWidth(), (int)Math.abs(y)%img.getHeight())).getRed()/4F;
 		};
-		LogUtil.println("Generating chunks...");
-		
-		
-		
-		IntStream.range(0, CHUNK_GRID_SIZE).parallel().forEach(x->IntStream.range(0, CHUNK_GRID_SIZE).forEach(z->{
-			Chunk t=new Chunk(x-CHUNK_GRID_SIZE/2, z-CHUNK_GRID_SIZE/2, hMap);
-			synchronized(chunks){
-				addChunk(t);
+		for(int x=0;x<CHUNK_GRID_SIZE;x++){
+			for(int z=0;z<CHUNK_GRID_SIZE;z++){
+				addChunk(new Chunk(x-CHUNK_GRID_SIZE/2, z-CHUNK_GRID_SIZE/2, hMap));
 			}
-		}));
+		}
 		
 		LogUtil.println("Done!");
 		
@@ -160,9 +148,10 @@ public class World{
 		//		}
 		
 		List<EntityTree> t=new ArrayList<>(100);
-		for(int i=0, j=20;i<j;i++){
+		for(int i=0, j=40;i<j;i++){
 			t.add(new EntityTree(this, new Vec3f(RandUtil.CRF(worldSize), 0, RandUtil.CRF(worldSize))));
 		}
+		
 		int i=0;
 		int cSiz=PHYSICS_CUBE_AMMOUNT;
 		for(int x=0;x<cSiz;x++){
@@ -178,7 +167,6 @@ public class World{
 				}
 			}
 		}
-		
 		
 		t.forEach(this::spawn);
 		
@@ -218,8 +206,11 @@ public class World{
 		entitys.add(e);
 	}
 	
-	
 	public void update(){
+		dayDuration=2000;
+		fog.setDensity(0.0015F);
+		fog.setGradient(2);
+		
 		float step=1F/Game.get().timer.getUps();
 		bulletWorld.stepSimulation(step, 1, step);
 		
@@ -293,10 +284,10 @@ public class World{
 	}
 	
 	public double getSunPos(double pt){
-		//return ((time()+pt)/dayDuration)%1;
+		//return (time()+pt)/dayDuration%1;
 		//return 0.75;
-		return 0.25;
-		//return 0.5;
+		//return 0.25;
+		return 0.5;
 	}
 	
 	public double getSunBrightness(){
@@ -313,8 +304,7 @@ public class World{
 				if(pos<gradientSize) result=0.5+pos/gradientSize/2;
 				else result=1;
 			}
-		}
-		else{
+		}else{
 			pos-=0.5;
 			
 			if(pos<gradientSize) result=0.5-pos/gradientSize/2;

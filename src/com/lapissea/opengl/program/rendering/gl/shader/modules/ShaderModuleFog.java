@@ -1,6 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.rendering.gl.Fog;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.Global;
@@ -30,14 +31,16 @@ public class ShaderModuleFog extends ShaderModule implements Global{
 	@Override
 	public void uploadUniformsGlobal(){
 		Renderer r=Game.get().renderer;
+		
 		if(r==null){
 			fogDensity.upload(1.5F);
 			fogGradient.upload(0.007F);
-			skyColor.upload(1,0,1);
+			skyColor.upload(1, 0, 1);
 		}else{
-			fogDensity.upload(r.worldFog.density);
-			fogGradient.upload(r.worldFog.gradient);
-			skyColor.upload(r.worldFog.color);
+			Fog fog=Game.get().world.fog;
+			fogDensity.upload(fog.getDensity());
+			fogGradient.upload(fog.getGradient());
+			if(skyColor!=null) skyColor.upload(fog.color);
 		}
 	}
 	

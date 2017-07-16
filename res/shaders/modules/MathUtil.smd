@@ -1,0 +1,11 @@
+
+float cutOff(float value, float cut){
+	if(value<0){
+		value+=cut;
+		if(value>0)return 0;
+	}else{
+		value-=cut;
+		if(value<0)return 0;
+	}
+	return value/(1-cut);
+}

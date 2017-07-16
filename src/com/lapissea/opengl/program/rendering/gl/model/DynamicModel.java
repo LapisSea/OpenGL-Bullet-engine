@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
@@ -14,6 +13,7 @@ import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
+import com.lapissea.opengl.window.assets.Vbo;
 import com.lapissea.opengl.window.impl.assets.Model;
 
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
@@ -30,14 +30,13 @@ public class DynamicModel extends Model{
 	}
 	
 	@Override
-	public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, int[] vbos, ModelAttribute vertexType, ModelAttribute[] attributes, IFrustrumShape shape){
+	public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, Vbo[] vbos, ModelAttribute vertexType, ModelAttribute[] attributes, IFrustrumShape shape){
 		if(onload!=null){
 			Consumer<IModel> onload0=onload;
 			onload=null;
 			super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributes, shape);
 			onload=onload0;
-		}
-		else super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributes, shape);
+		}else super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributes, shape);
 		
 		if(data==null||data.length!=vbos.length) data=new FloatBuffer[vbos.length];
 		vtIds.clear();
@@ -115,7 +114,7 @@ public class DynamicModel extends Model{
 		if(type.size!=toAdd) throw new IllegalAccessError("Bad attibute size!"+type.size+"/"+toAdd);
 		int id=vtIds.get(type.id);
 		FloatBuffer b=data[id];
-		if(b.limit()<=b.position()+toAdd) b=data[id]=BufferUtil.expand(b, b.position()+toAdd);
+		if(b.limit()<=b.position()+toAdd) b=data[id]=BufferUtil.expand(b, (int)((b.position()+toAdd)*1.5));
 		dirty=true;
 		return b;
 	}
@@ -157,9 +156,10 @@ public class DynamicModel extends Model{
 		for(int i=0;i<getAttributeCount();i++){
 			FloatBuffer f=data[i];
 			f.flip();
-			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbos[i]);
-			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, f, GL15.GL_STREAM_DRAW);
-			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+			Vbo vbo=vbos[i];
+			vbo.bind();
+			vbo.storeData(f);
+			vbo.unbind();
 		}
 		clear();
 		dirty=false;

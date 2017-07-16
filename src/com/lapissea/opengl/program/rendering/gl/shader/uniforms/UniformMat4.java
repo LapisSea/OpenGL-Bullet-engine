@@ -37,4 +37,9 @@ public class UniformMat4 extends AbstractUniform{
 		upload(prev);
 	}
 	
+	public Matrix4f getLastKnown(Matrix4f mat){
+		mat.load(prev);
+		return mat;
+	}
+	
 }

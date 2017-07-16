@@ -14,7 +14,7 @@ import com.lapissea.opengl.program.util.OperatingSystem;
 import com.lapissea.util.LogUtil;
 
 /**
- * Usage: folder1.folder2.filename:keyname.keyname = file at "config/folder1/folder2/filename.cfg" with value inside keyname.keyname 
+ * Usage: folder1.folder2.filename:keyname.keyname = file at "config/folder1/folder2/filename.cfg" with value inside keyname.keyname
  */
 public class Config{
 	
@@ -160,7 +160,10 @@ public class Config{
 				obj.put(k, v.obj);
 			});
 			try{
-				Files.write(new File(OperatingSystem.APP_DATA+"/OpenGL engine/config/"+f.path).toPath(), obj.toString(4).getBytes());
+				File fil=new File(OperatingSystem.APP_DATA+"/OpenGL engine/config/"+f.path);
+				if(!fil.getParentFile().exists()) fil.getParentFile().mkdirs();
+				if(!fil.exists()) fil.createNewFile();
+				Files.write(fil.toPath(), obj.toString(4).getBytes());
 			}catch(Exception e){
 				e.printStackTrace();
 			}

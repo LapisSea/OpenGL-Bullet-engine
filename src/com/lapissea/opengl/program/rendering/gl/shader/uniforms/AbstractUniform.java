@@ -19,7 +19,7 @@ public abstract class AbstractUniform{
 		this.shader=shader;
 	}
 	
-	protected String name(){
+	public String name(){
 		return name;
 	}
 	

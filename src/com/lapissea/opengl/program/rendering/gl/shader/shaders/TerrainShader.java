@@ -2,13 +2,18 @@ package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
 import java.util.Collection;
 
+import org.lwjgl.opengl.GL13;
+
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.terrain.Chunk;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
+import com.lapissea.opengl.program.rendering.gl.shader.uniforms.UniformSampler2D;
 import com.lapissea.opengl.program.util.data.OffsetArray;
 
 public class TerrainShader extends ShaderRenderer.Basic3D<Chunk>{
+	
+	UniformSampler2D skyBuffer;
 	
 	public TerrainShader(){
 		super("entity");
@@ -33,6 +38,22 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Chunk>{
 	@Override
 	@Deprecated
 	public void renderBatch(Collection<? extends Chunk> entitysWithSameModel){}
+	
+	@Override
+	protected void setUpUniforms(){
+		super.setUpUniforms();
+		skyBuffer=getUniform("skyBuffer");
+	}
+	
+	@Override
+	public void prepareGlobal(){
+		super.prepareGlobal();
+		if(skyBuffer!=null){
+			GL13.glActiveTexture(GL13.GL_TEXTURE0+1);
+			getRenderer().skyFbo.getTexture().bind();
+			skyBuffer.upload(1);
+		}
+	}
 	
 	@Override
 	public void render(){

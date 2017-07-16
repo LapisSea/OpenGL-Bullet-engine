@@ -32,15 +32,16 @@ public class EntityPlayer extends EntityUpd{
 	@Override
 	public void update(){
 		updatePrevs();
-		if(model.isLoaded()&&!model.getFrustrumShape().withTransform(scale, rot).isVisibleAt(pos, Game.get().renderer.frustrum)){
-			Vec3f vec=new Vec3f(0,-((FrustrumCube)model.getFrustrumShape()).getSizeY()*scale.y()*2,0);
+		pos.y(46);
+		if(model.isLoaded()/*&&!model.getFrustrumShape().withTransform(scale, rot).isVisibleAt(pos, Game.get().renderer.frustrum)*/){
+			Vec3f vec=new Vec3f(0, -((FrustrumCube)model.getFrustrumShape()).getSizeY()*scale.y()*1.6F, 0);
 			rot.rotate(vec);
 			
 			vec.add(Game.get().renderer.getCamera().pos).sub(pos).normalize().toAngular();
 			Matrix4f mat=new Matrix4f();
 			MatrixUtil.rotateX(mat, vec.x());
 			MatrixUtil.rotateY(mat, vec.y());
-			Quat4M.interpolate(rot, rot, new Quat4M().fromMatrix(mat), 0.3F);
+			Quat4M.interpolate(rot, rot, new Quat4M().fromMatrix(mat), 0.2F);
 		}
 		//		rot.set(Game.get().renderer.getCamera().activeRotQuat);
 		//this.pos.add(RandUtil.RF(0.1), RandUtil.RF(0.1), RandUtil.RF(0.1));

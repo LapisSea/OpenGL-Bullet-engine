@@ -16,11 +16,20 @@ public class Globals{
 	
 	static{
 		String path=GameStart.class.getResource(GameStart.class.getSimpleName()+".class").getFile();
-		if(path.startsWith("/")) SOURCE_LOCATION=new File("").getAbsoluteFile();
+		LogUtil.println(path);
+		if(path.startsWith("file:/")){
+			try{
+				path=URLDecoder.decode(path.substring(path.startsWith("file:")?6:0, path.lastIndexOf('!')), "UTF-8");
+			}catch(UnsupportedEncodingException e){
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			SOURCE_LOCATION=new File(path);
+		}else if(path.startsWith("/")) SOURCE_LOCATION=new File("").getAbsoluteFile();
 		else{
 			try{
 				path=URLDecoder.decode(ClassLoader.getSystemClassLoader().getResource(path).getFile(), "UTF-8");
-			}catch(UnsupportedEncodingException e){
+			}catch(Exception e){
 				e.printStackTrace();
 				System.exit(-1);
 			}
@@ -37,8 +46,7 @@ public class Globals{
 				fil.delete();
 			}
 			LogUtil.println("Done clearing!");
-		}
-		else{
+		}else{
 			String pth=SOURCE_LOCATION.getParentFile().toString();
 			if(!pth.equals(System.getProperty("user.dir"))) System.setProperty("user.dir", pth);
 		}

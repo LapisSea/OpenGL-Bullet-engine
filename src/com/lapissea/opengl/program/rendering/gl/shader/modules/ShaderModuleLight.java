@@ -1,5 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
+import static com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleArrayList.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,23 +74,21 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 	@Override
 	public void setUpUniforms(){
 		//FS
-		pointLightColor=getUniformArray(i->"pointLights["+i+"].color");
-		pointLightAttenuation=getUniformArray(i->"pointLights["+i+"].attenuation");
-		pointLightPos=getUniformArray(i->"pointLights["+i+"].pos");
+		pointLightColor=getUniformArray(arrayList("pointLights", "color"));
+		pointLightAttenuation=getUniformArray(arrayList("pointLights", "attenuation"));
+		pointLightPos=getUniformArray(arrayList("pointLights", "pos"));
+		numberOfPointLights=getUniform(arrayListSize("pointLights"));
 		
-		numberOfPointLights=getUniform("numberOfPointLights");
+		lineLightColor=getUniformArray(arrayList("lineLights", "color"));
+		lineLightAttenuation=getUniformArray(arrayList("lineLights", "attenuation"));
+		lineLightPos1=getUniformArray(arrayList("lineLights", "pos1"));
+		lineLightPos2=getUniformArray(arrayList("lineLights", "pos2"));
+		numberOfLineLights=getUniform(arrayListSize("lineLights"));
 		
-		lineLightColor=getUniformArray(i->"lineLights["+i+"].color");
-		lineLightAttenuation=getUniformArray(i->"lineLights["+i+"].attenuation");
-		lineLightPos1=getUniformArray(i->"lineLights["+i+"].pos1");
-		lineLightPos2=getUniformArray(i->"lineLights["+i+"].pos2");
+		dirLightColor=getUniformArray(arrayList("dirLights", "color"));
+		dirLightDirection=getUniformArray(arrayList("dirLights", "direction"));
+		numberOfDirLights=getUniform(arrayListSize("dirLights"));
 		
-		numberOfLineLights=getUniform("numberOfLineLights");
-		
-		dirLightColor=getUniformArray(i->"dirLights["+i+"].color");
-		dirLightDirection=getUniformArray(i->"dirLights["+i+"].direction");
-		
-		numberOfDirLights=getUniform("numberOfDirLights");
 		minBrightness=getUniform("minBrightness");
 		
 	}
@@ -120,6 +120,7 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 			if(r.dirLights.size()>MAX_DIR_LIGHT) s.sorted((l1, l2)->Float.compare(l1.color.a(), l2.color.a()));
 			s.forEach(DIRS::add);
 		}
+		
 		
 		numberOfPointLights.upload(POINTS.size());
 		for(int i=0;i<POINTS.size();i++){

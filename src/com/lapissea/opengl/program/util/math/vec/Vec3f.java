@@ -3,12 +3,13 @@ package com.lapissea.opengl.program.util.math.vec;
 import org.lwjgl.util.vector.ReadableVector3f;
 import org.lwjgl.util.vector.Vector3f;
 
+import com.lapissea.opengl.program.interfaces.Interpolateble;
 import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.window.api.util.Calculateable;
 import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.api.util.MathUtil;
 
-public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
+public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Interpolateble<Vec3f>{
 	
 	private static final long serialVersionUID=8084946802516068121L;
 	
@@ -150,9 +151,9 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 	
 	@Override
 	public Vec3f abs(){
-		x(Math.abs(x()));
-		y(Math.abs(y()));
-		z(Math.abs(z()));
+		if(x()<0) x(-x());
+		if(y()<0) y(-y());
+		if(z()<0) z(-z());
 		return this;
 	}
 	
@@ -300,17 +301,34 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 	}
 	
 	public Vec3f toAngular(){
+		
 		float distanceX=-x(),distanceY=-y(),distanceZ=-z();
 		x((float)-Math.atan2(distanceY, MathUtil.length(-distanceX, -distanceZ)));
 		y((float)Math.atan2(distanceX, -distanceZ));
+		z(0);
+		return this;
+	}
+	
+	public void set(double x, double y, double z){
+		set((float)x, (float)y, (float)z);
+	}
+	
+	public Vec3f eulerToVector(){
+		double xCos=Math.cos(x());
+		double xSin=Math.sin(x());
 		
+		double y=-y()+Math.PI/2;
+		double yCos=Math.cos(y);
+		double ySin=Math.sin(y);
+		
+		set(xCos*yCos, -xSin, -xCos*ySin);
 		return this;
 	}
 	
 	@Override
 	public String toString(){
-		StringBuilder sb = new StringBuilder(20);
-
+		StringBuilder sb=new StringBuilder(20);
+		
 		sb.append("Vec3f[");
 		sb.append(x);
 		sb.append(", ");
@@ -319,6 +337,16 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f{
 		sb.append(z);
 		sb.append(']');
 		return sb.toString();
+	}
+	
+	@Override
+	public Vec3f interpolate(Vec3f second, float percent){
+		return interpolate(this, this, second, percent);
+	}
+	
+	@Override
+	public Vec3f interpolate(Vec3f first, Vec3f second, float percent){
+		return interpolate(this, first, second, percent);
 	}
 	
 }

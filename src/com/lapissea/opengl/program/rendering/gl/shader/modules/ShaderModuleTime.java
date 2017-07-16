@@ -34,8 +34,9 @@ public class ShaderModuleTime extends ShaderModule implements Global{
 	
 	@Override
 	public void uploadUniformsGlobal(){
-		if(worldTime!=null) worldTime.upload((float)(Game.get().world.time()/(double)Game.get().timer.getUps()+Game.getPartialTicks()));
-		if(systemTime!=null) worldTime.upload((float)(System.currentTimeMillis()/1000D));
+		if(worldTime!=null) worldTime.upload((float)((Game.get().world.time()+(double)Game.getPartialTicks())/Game.get().timer.getUps()));
+		
+		if(systemTime!=null) systemTime.upload((float)(System.currentTimeMillis()/1000D));
 		
 	}
 	

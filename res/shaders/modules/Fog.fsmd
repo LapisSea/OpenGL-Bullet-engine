@@ -1,18 +1,18 @@
 
 #include "Noise2D.smd"
+#include "Time.smd"
 
 in float fogVisibility;
+in float fog_grad;
 
 float fogCalculated;
 
 void initFog(vec2 wPos){
-	float n=(1+snoise(wPos/200))/2;
-	n*=n;
-	fogCalculated=fogVisibility-n/5;
-	if(fogCalculated<1/255.0){
-		fogCalculated=0;
-		discard;
-	}
+	if(fogVisibility<1/255.0)discard;
+	
+	float n=(1+snoise(wPos/200+worldTime/10))/2;
+	fogCalculated=fogVisibility-n/8;
+	if(fogCalculated<0)fogCalculated=0;
 }
 
 vec4 applyFog(vec4 initalColor, vec3 skyColor){
