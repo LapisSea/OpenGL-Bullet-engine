@@ -20,6 +20,7 @@ void transform(vec3 &position, vec3 &normal){
 		totalNormal += worldNormal * weights[i];
 	}
 	
-	
+	position=totalLocalPos;
+	normal=totalNormal;
 	
 }

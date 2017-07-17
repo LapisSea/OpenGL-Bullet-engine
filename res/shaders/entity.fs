@@ -23,7 +23,7 @@ uniform ListDirectionalLight dirLights;
 
 
 void main(void){
-	initFog(wPos.xz);
+	initFog(wPos);
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
 	
@@ -33,13 +33,7 @@ void main(void){
 	pixelColor=applyLighting(pixelColor, minBrightness, m);
 	
 	vec2 screenPos=(gl_FragCoord.xy/screenSize);
-	//screenPos.y=1-screenPos.y;
-	vec3 bg=texture(skyBuffer, screenPos).rgb;
-	//bg=applyLighting(vec4(bg,1), 0, m).rgb;
-	//bg=mix(bg,applyLighting(vec4(bg,1), 0, m).rgb, fogCalculated*fogCalculated);
-//	float b=(bg.r+bg.g+bg.b)/3;
-//	bg=mix(skyColor,bg,b);
-	vec4 fog=applyFog(pixelColor, bg);
+	vec4 fog=applyFog(pixelColor, texture(skyBuffer, screenPos).rgb);
 	pixelColor=mix(pixelColor,fog,1-fogCalculated);
 	
 }

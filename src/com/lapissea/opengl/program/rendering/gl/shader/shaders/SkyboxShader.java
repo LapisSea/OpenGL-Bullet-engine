@@ -66,7 +66,7 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 		sunPos.upload(dir);
 		if(viewFarPlane!=null) viewFarPlane.upload((float)world.fog.getMaxDistance());
 		
-		if(eyeHeight!=null) eyeHeight.upload(PartialTick.calc(getRenderer().getCamera().prevPos.y, getRenderer().getCamera().pos.y));
+		if(eyeHeight!=null) eyeHeight.upload(PartialTick.calc(getRenderer().getCamera().prevPos.y, getRenderer().getCamera().pos.y)/2);
 	}
 	
 	@Override

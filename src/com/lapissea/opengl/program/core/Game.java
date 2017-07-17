@@ -102,6 +102,8 @@ public class Game{
 	
 	private void render(){
 		timer.setInfiniteFps(false);
+//		win().setVSync(true);
+		
 		if(win().isClosed()){
 			timer.end();
 			return;

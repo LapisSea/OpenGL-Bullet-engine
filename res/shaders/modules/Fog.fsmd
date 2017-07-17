@@ -7,11 +7,11 @@ in float fog_grad;
 
 float fogCalculated;
 
-void initFog(vec2 wPos){
+void initFog(vec3 wPos){
 	if(fogVisibility<1/255.0)discard;
 	
-	float n=(1+snoise(wPos/200+worldTime/10))/2;
-	fogCalculated=fogVisibility-n/8;
+	float n=(1+snoise(wPos.xz/250+worldTime/10)-min(2,pow(wPos.y/40,2)))/16;
+	fogCalculated=fogVisibility-max(0,n);
 	if(fogCalculated<0)fogCalculated=0;
 }
 
