@@ -25,19 +25,20 @@ public class GuiPause extends Gui{
 		e.backgroundNormal=new GuiElementMaterial(7, new ColorM(0, 0.2, 0.3, 0.3), -1);
 		e.borderNormal=new GuiElementMaterial(15, new ColorM(0.6, 0.8, 1, 1), 200);
 		
-		e.borderHighlight.color=new ColorM(1,1,0,0.6);
+		e.borderHighlight.color=new ColorM(1, 1, 0, 0.6);
 		//e.backgroundHighlight.color=new ColorM(0,0,1,0.4);
 		e.backgroundHighlight.blurRad=0;
 		
-		e.borderActive.color=new ColorM(1,0,0,1);
-		e.backgroundActive.color=new ColorM(0,1,1,0.2);
+		e.borderActive.color=new ColorM(1, 0, 0, 1);
+		e.backgroundActive.color=new ColorM(0, 1, 1, 0.2);
 		e.backgroundActive.blurRad=0;
 		
 		e.borderWidth=4;
-		addChild(e); 
+		addChild(e);
 		e.onClick=this::close;
 		
 		l=new GuiLabel("Continue", 50){
+			
 			@Override
 			public void update(){
 				super.update();

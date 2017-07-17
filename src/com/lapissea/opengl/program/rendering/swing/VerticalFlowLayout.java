@@ -16,11 +16,11 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 
 /**
- *  A vertical flow layout is similar to a flow layuot but it layouts the
- *  components vertically instead of horizontally.
+ * A vertical flow layout is similar to a flow layuot but it layouts the
+ * components vertically instead of horizontally.
  *
- * @author     Vassili Dzuba
- * @since      March 24, 2001
+ * @author Vassili Dzuba
+ * @since March 24, 2001
  */
 public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 	
@@ -32,53 +32,56 @@ public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 	int	_vgap;
 	
 	/**
-	 *  Description of the Field
+	 * Description of the Field
 	 */
 	public final static int	TOP		=0;
 	/**
-	 *  Description of the Field
+	 * Description of the Field
 	 */
 	public final static int	CENTER	=1;
 	/**
-	 *  Description of the Field
+	 * Description of the Field
 	 */
 	public final static int	BOTTOM	=2;
 	/**
-	 *  Description of the Field
+	 * Description of the Field
 	 */
 	public final static int	LEFT	=3;
 	/**
-	 *  Description of the Field
+	 * Description of the Field
 	 */
 	public final static int	RIGHT	=4;
 	
-	
 	/**
-	 *  Constructor for the VerticalFlowLayout object
+	 * Constructor for the VerticalFlowLayout object
 	 */
 	public VerticalFlowLayout(){
 		this(CENTER, CENTER, 5, 5);
 	}
 	
-	
 	/**
-	 *  Constructor for the VerticalFlowLayout object
+	 * Constructor for the VerticalFlowLayout object
 	 *
-	 *@param  halign  Description of Parameter
-	 *@param  valign  Description of Parameter
+	 * @param halign
+	 *            Description of Parameter
+	 * @param valign
+	 *            Description of Parameter
 	 */
 	public VerticalFlowLayout(int halign, int valign){
 		this(halign, valign, 5, 5);
 	}
 	
-	
 	/**
-	 *  Constructor for the VerticalFlowLayout object
+	 * Constructor for the VerticalFlowLayout object
 	 *
-	 *@param  halign  Description of Parameter
-	 *@param  valign  Description of Parameter
-	 *@param  hgap    Description of Parameter
-	 *@param  vgap    Description of Parameter
+	 * @param halign
+	 *            Description of Parameter
+	 * @param valign
+	 *            Description of Parameter
+	 * @param hgap
+	 *            Description of Parameter
+	 * @param vgap
+	 *            Description of Parameter
 	 */
 	public VerticalFlowLayout(int halign, int valign, int hgap, int vgap){
 		_hgap=hgap;
@@ -86,104 +89,102 @@ public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 		setAlignment(halign, valign);
 	}
 	
-	
 	/**
-	 *  Sets the Alignment attribute of the VerticalFlowLayout object
+	 * Sets the Alignment attribute of the VerticalFlowLayout object
 	 *
-	 *@param  halign  The new Alignment value
-	 *@param  valign  The new Alignment value
+	 * @param halign
+	 *            The new Alignment value
+	 * @param valign
+	 *            The new Alignment value
 	 */
 	public void setAlignment(int halign, int valign){
 		_halign=halign;
 		_valign=valign;
 	}
 	
-	
 	/**
-	 *  Sets the Hgap attribute of the VerticalFlowLayout object
+	 * Sets the Hgap attribute of the VerticalFlowLayout object
 	 *
-	 *@param  hgap  The new Hgap value
+	 * @param hgap
+	 *            The new Hgap value
 	 */
 	public void setHgap(int hgap){
 		_hgap=hgap;
 	}
 	
-	
 	/**
-	 *  Sets the Vgap attribute of the VerticalFlowLayout object
+	 * Sets the Vgap attribute of the VerticalFlowLayout object
 	 *
-	 *@param  vgap  The new Vgap value
+	 * @param vgap
+	 *            The new Vgap value
 	 */
 	public void setVgap(int vgap){
 		_vgap=vgap;
 	}
 	
-	
 	/**
-	 *  Gets the Halignment attribute of the VerticalFlowLayout object
+	 * Gets the Halignment attribute of the VerticalFlowLayout object
 	 *
-	 *@return    The Halignment value
+	 * @return The Halignment value
 	 */
 	public int getHalignment(){
 		return _halign;
 	}
 	
-	
 	/**
-	 *  Gets the Valignment attribute of the VerticalFlowLayout object
+	 * Gets the Valignment attribute of the VerticalFlowLayout object
 	 *
-	 *@return    The Valignment value
+	 * @return The Valignment value
 	 */
 	public int getValignment(){
 		return _valign;
 	}
 	
-	
 	/**
-	 *  Gets the Hgap attribute of the VerticalFlowLayout object
+	 * Gets the Hgap attribute of the VerticalFlowLayout object
 	 *
-	 *@return    The Hgap value
+	 * @return The Hgap value
 	 */
 	public int getHgap(){
 		return _hgap;
 	}
 	
-	
 	/**
-	 *  Gets the Vgap attribute of the VerticalFlowLayout object
+	 * Gets the Vgap attribute of the VerticalFlowLayout object
 	 *
-	 *@return    The Vgap value
+	 * @return The Vgap value
 	 */
 	public int getVgap(){
 		return _vgap;
 	}
 	
-	
 	/**
-	 *  Adds a feature to the LayoutComponent attribute of the VerticalFlowLayout
-	 *  object
+	 * Adds a feature to the LayoutComponent attribute of the VerticalFlowLayout
+	 * object
 	 *
-	 *@param  name  The feature to be added to the LayoutComponent attribute
-	 *@param  comp  The feature to be added to the LayoutComponent attribute
+	 * @param name
+	 *            The feature to be added to the LayoutComponent attribute
+	 * @param comp
+	 *            The feature to be added to the LayoutComponent attribute
 	 */
 	@Override
 	public void addLayoutComponent(String name, Component comp){}
 	
-	
 	/**
-	 *  Description of the Method
+	 * Description of the Method
 	 *
-	 *@param  comp  Description of Parameter
+	 * @param comp
+	 *            Description of Parameter
 	 */
 	@Override
 	public void removeLayoutComponent(Component comp){}
 	
-	
 	/**
-	 *  Description of the Method
+	 * Description of the Method
 	 *
-	 *@param  target  Description of Parameter
-	 *@return         Description of the Returned Value
+	 * @param target
+	 *            Description of Parameter
+	 * @return Description of the Returned Value
 	 */
 	@Override
 	public Dimension preferredLayoutSize(Container target){
@@ -199,8 +200,7 @@ public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 					dim.width=Math.max(dim.width, d.width);
 					if(firstVisibleComponent){
 						firstVisibleComponent=false;
-					}
-					else{
+					}else{
 						dim.height+=_vgap;
 					}
 					dim.height+=d.height;
@@ -213,12 +213,12 @@ public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 		}
 	}
 	
-	
 	/**
-	 *  Description of the Method
+	 * Description of the Method
 	 *
-	 *@param  target  Description of Parameter
-	 *@return         Description of the Returned Value
+	 * @param target
+	 *            Description of Parameter
+	 * @return Description of the Returned Value
 	 */
 	@Override
 	public Dimension minimumLayoutSize(Container target){
@@ -234,8 +234,7 @@ public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 					dim.width=Math.max(dim.width, d.width);
 					if(firstVisibleComponent){
 						firstVisibleComponent=false;
-					}
-					else{
+					}else{
 						dim.height+=_vgap;
 					}
 					dim.height+=d.height;
@@ -248,11 +247,11 @@ public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 		}
 	}
 	
-	
 	/**
-	 *  Description of the Method
+	 * Description of the Method
 	 *
-	 *@param  target  Description of Parameter
+	 * @param target
+	 *            Description of Parameter
 	 */
 	@Override
 	public void layoutContainer(Container target){
@@ -305,15 +304,13 @@ public class VerticalFlowLayout implements LayoutManager,java.io.Serializable{
 						
 						y+=d.getHeight();
 						
-					}
-					else{
+					}else{
 						break;
 					}
 				}
 			}
 		}
 	}
-	
 	
 	/** {@inheritDoc} */
 	@Override

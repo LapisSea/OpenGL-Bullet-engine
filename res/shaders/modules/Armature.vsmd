@@ -1,3 +1,6 @@
+
+#include "TextureBinary.smd"
+
 const int MAX_JOINTS = 50;
 const int MAX_WEIGHTS = 3;
 
@@ -20,7 +23,7 @@ void transform(vec3 &position, vec3 &normal){
 		totalNormal += worldNormal * weights[i];
 	}
 	
-	position=totalLocalPos;
-	normal=totalNormal;
+	position=totalLocalPos.xyz;
+	normal=totalNormal.xyz;
 	
 }

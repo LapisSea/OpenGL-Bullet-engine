@@ -1,11 +1,12 @@
 package com.lapissea.opengl.program.rendering;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL20.*;
+
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.OpenGLException;
 
 import com.lapissea.opengl.window.api.util.IVec2i;
@@ -40,8 +41,8 @@ public class GLUtil{
 		@Override
 		public void set(boolean enabled){
 			if(enabled!=prevEnabled){
-				if(prevEnabled=enabled) GL11.glEnable(enumId);
-				else GL11.glDisable(enumId);
+				if(prevEnabled=enabled) glEnable(enumId);
+				else glDisable(enumId);
 			}
 		}
 		
@@ -90,15 +91,15 @@ public class GLUtil{
 		@Override
 		public void set(boolean enabled){
 			if(enabled!=prevEnabled){
-				if(prevEnabled=enabled) GL11.glEnable(enumId);
-				else GL11.glDisable(enumId);
+				if(prevEnabled=enabled) glEnable(enumId);
+				else glDisable(enumId);
 			}
 		}
 		
 	}
 	
 	public static enum CullFace{
-		FRONT(GL11.GL_FRONT),BACK(GL11.GL_BACK),FRONT_BACK(GL11.GL_FRONT_AND_BACK);
+		FRONT(GL_FRONT),BACK(GL_BACK),FRONT_BACK(GL_FRONT_AND_BACK);
 		
 		public final int key;
 		
@@ -109,7 +110,7 @@ public class GLUtil{
 	
 	public static enum BlendFunc{
 		
-		NORMAL(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA),ADD(GL11.GL_SRC_ALPHA, GL11.GL_ONE),ADD2(GL11.GL_ONE, GL11.GL_ONE),INVERT(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ZERO);
+		NORMAL(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),ADD(GL_SRC_ALPHA, GL_ONE),ADD2(GL_ONE, GL_ONE),INVERT(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 		
 		public final int sfactor,dfactor;
 		
@@ -119,19 +120,19 @@ public class GLUtil{
 		}
 	}
 	
-	public static final IGlStateBool			DEPTH_TEST	=new GlBool(GL11.GL_DEPTH_TEST);
-	public static final IGlStateBool			BLEND		=new GlBool(GL11.GL_BLEND);
-	public static final IGlStateBool			MULTISAMPLE	=new GlBool(GL13.GL_MULTISAMPLE);
-	public static final IGlStateMix<CullFace>	CULL_FACE	=new GlMix<>(GL11.GL_CULL_FACE, v->GL11.glCullFace(v.key));
-	public static final IGlStateObj<BlendFunc>	BLEND_FUNC	=new GlObj<>(v->GL11.glBlendFunc(v.sfactor, v.dfactor));
-	public static final IGlStateObj<IColorM>	CLEAR_COLOR	=new GlObj<>(v->GL11.glClearColor(v.r(), v.g(), v.b(), v.a()));
+	public static final IGlStateBool			DEPTH_TEST	=new GlBool(GL_DEPTH_TEST);
+	public static final IGlStateBool			BLEND		=new GlBool(GL_BLEND);
+	public static final IGlStateBool			MULTISAMPLE	=new GlBool(GL_MULTISAMPLE);
+	public static final IGlStateMix<CullFace>	CULL_FACE	=new GlMix<>(GL_CULL_FACE, v->glCullFace(v.key));
+	public static final IGlStateObj<BlendFunc>	BLEND_FUNC	=new GlObj<>(v->glBlendFunc(v.sfactor, v.dfactor));
+	public static final IGlStateObj<IColorM>	CLEAR_COLOR	=new GlObj<>(v->glClearColor(v.r(), v.g(), v.b(), v.a()));
 	
 	public static void printAllUniforms(int program){
-		GL20.glUseProgram(program);
+		glUseProgram(program);
 		
 		int id=0;
 		String name,last="";
-		while(!(name=GL20.glGetActiveUniform(program, id, 512)).isEmpty()){
+		while(!(name=glGetActiveUniform(program, id, 512)).isEmpty()){
 			if(last.equals(name)) break;
 			LogUtil.println(id, last=name);
 			id++;
@@ -140,11 +141,11 @@ public class GLUtil{
 	}
 	
 	public static void getAllUniforms(int program, Map<Integer,String> dest){
-		GL20.glUseProgram(program);
+		glUseProgram(program);
 		
 		int id=0;
 		String name,last="";
-		while(!(name=GL20.glGetActiveUniform(program, id, 512)).isEmpty()){
+		while(!(name=glGetActiveUniform(program, id, 512)).isEmpty()){
 			if(last.equals(name)) break;
 			dest.put(id, last=name);
 			id++;
@@ -158,8 +159,8 @@ public class GLUtil{
 	public static void checkError(boolean willThrow){
 		if(!RUN_GL_ERROR_CHECK) return;
 		
-		int err=GL11.glGetError();
-		if(err!=GL11.GL_NO_ERROR){
+		int err=glGetError();
+		if(err!=GL_NO_ERROR){
 			OpenGLException e=new OpenGLException(err);
 			if(willThrow) throw e;
 			e.printStackTrace();
@@ -174,7 +175,7 @@ public class GLUtil{
 	}
 	
 	public static void viewport(int width, int height){
-		GL11.glViewport(0, 0, viewportWidth=width, viewportHeight=height);
+		glViewport(0, 0, viewportWidth=width, viewportHeight=height);
 	}
 	
 	public static int getViewportWidth(){
@@ -191,15 +192,15 @@ public class GLUtil{
 	}
 	
 	public static void deleteShader(int shader){
-		if(shader>0) GL20.glDeleteShader(shader);
+		if(shader>0) glDeleteShader(shader);
 	}
 	
 	public static void detachShader(int program, int shader){
-		if(program>0&&shader>0) GL20.glDetachShader(program, shader);
+		if(program>0&&shader>0) glDetachShader(program, shader);
 	}
 	
 	public static void attachShader(int program, int shader){
-		if(program>0&&shader>0) GL20.glAttachShader(program, shader);
+		if(program>0&&shader>0) glAttachShader(program, shader);
 	}
 	
 }

@@ -32,6 +32,7 @@ public class Gui extends IngameDisplay{
 	public Vec2f getSize(){
 		return SCREEN_SIZE_F;
 	}
+	
 	@Override
 	public Vec2f getElementSize(){
 		return SCREEN_SIZE_F;

@@ -23,7 +23,6 @@ class NativeSetUp{
 		String nativeLocation=new File(OperatingSystem.APP_DATA+"/LWJGL/2/"+OperatingSystem.ACTIVE_OS).getPath();
 		checkNatives(nativeLocation);
 		
-		
 		if(paths==null||paths.isEmpty()) paths=nativeLocation;
 		else paths+=File.pathSeparator+nativeLocation;
 		System.setProperty("java.library.path", paths);

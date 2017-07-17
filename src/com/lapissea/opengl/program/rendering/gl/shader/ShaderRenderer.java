@@ -1,10 +1,11 @@
 package com.lapissea.opengl.program.rendering.gl.shader;
 
+import static org.lwjgl.opengl.GL30.*;
+
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.game.events.Renderable;
@@ -156,7 +157,7 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 	
 	protected void unbindModel(IModel model){
 		model.disableAttributes();
-		GL30.glBindVertexArray(0);
+		glBindVertexArray(0);
 	}
 	
 	//----SINGLE----//

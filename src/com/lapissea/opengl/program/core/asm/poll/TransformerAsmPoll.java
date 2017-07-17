@@ -24,7 +24,6 @@ public class TransformerAsmPoll implements ClassTransformer{
 	
 	protected static final String ASM_POLL_NAME=AsmPoll.class.getName().replace('.', '/');
 	
-	
 	public static void register(LapisClassLoader loader){
 		loader.registerTransformer("com.lapissea.opengl.launch", new TransformerAsmPoll());
 	}
@@ -90,7 +89,6 @@ public class TransformerAsmPoll implements ClassTransformer{
 							funct.instructions.remove(method);
 							funct.instructions.remove(type);
 							
-							
 							dirty=true;
 							
 							//							node.fields.add(e)
@@ -99,7 +97,6 @@ public class TransformerAsmPoll implements ClassTransformer{
 					}
 				}
 			}
-			
 			
 		}
 		

@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints;
 
-import org.lwjgl.opengl.GL20;
+import static org.lwjgl.opengl.GL20.*;
 
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
@@ -20,7 +20,7 @@ public class UniformInt4 extends AbstractUniform{
 		prev2=i2;
 		prev3=i3;
 		prev4=i4;
-		GL20.glUniform4i(id(), i1, i2, i3, i4);
+		glUniform4i(id(), i1, i2, i3, i4);
 		checkError(()->upload(i1, i2, i3, i4));
 	}
 	

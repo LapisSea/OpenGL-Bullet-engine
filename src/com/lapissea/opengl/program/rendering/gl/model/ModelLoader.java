@@ -1,6 +1,10 @@
 package com.lapissea.opengl.program.rendering.gl.model;
 
 import static com.lapissea.opengl.window.assets.ModelAttribute.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 
 import java.lang.reflect.Constructor;
 import java.nio.FloatBuffer;
@@ -10,11 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumBool;
@@ -229,7 +228,7 @@ public class ModelLoader{
 		if(vertexType==null) vertexType=ModelAttribute.VERTEX_ATTR_3D;
 		
 		Object vertObj=Objects.requireNonNull(data.get("vertices"));
-		float[] vert=vertObj instanceof Number&&((Number)vertObj).intValue()==0?new float[(format==GL11.GL_QUADS?4:3)*vertexType.size]:(float[])vertObj;
+		float[] vert=vertObj instanceof Number&&((Number)vertObj).intValue()==0?new float[(format==GL_QUADS?4:3)*vertexType.size]:(float[])vertObj;
 		
 		Object killSmoothObj=data.get("killSmooth");
 		boolean killSmooth=hasIds&&(killSmoothObj==null||(boolean)killSmoothObj);
@@ -248,7 +247,7 @@ public class ModelLoader{
 			if(materialIds!=null) materialIds=new float[indices.length];
 			if(primitiveColor!=null) primitiveColor=new float[indices.length*4];
 			
-			if(format==GL11.GL_QUADS){
+			if(format==GL_QUADS){
 				int counter=0;
 				for(int i=0;i<indices.length;i+=4){
 					vert[counter++]=vert0[indices[i+0]*3+0];
@@ -486,12 +485,12 @@ public class ModelLoader{
 	//
 	//		int vbo=createVbo();
 	//
-	//		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+	//		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	//
-	//		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, BufferUtil.store(data), GL15.GL_STATIC_DRAW);
-	//		GL20.glVertexAttribPointer(attrListId, partSize, GL11.GL_INT, false, 0, 0);
+	//		glBufferData(GL_ARRAY_BUFFER, BufferUtil.store(data), GL_STATIC_DRAW);
+	//		glVertexAttribPointer(attrListId, partSize, GL_INT, false, 0, 0);
 	//
-	//		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+	//		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	//
 	//		vbos.add(vbo);
 	//		attributes.add(attrListId);
@@ -499,11 +498,11 @@ public class ModelLoader{
 	
 	private static void putAttribute(List<Vbo> vbos, List<ModelAttribute> attributes, ModelAttribute attr, float[] data){
 		if(data==null||data.length==0) return;
-		Vbo vbo=Vbo.create(GL15.GL_ARRAY_BUFFER);
+		Vbo vbo=Vbo.create(GL_ARRAY_BUFFER);
 		
 		vbo.bind();
 		vbo.storeData(data);
-		GL20.glVertexAttribPointer(attr.id, attr.size, GL11.GL_FLOAT, false, 0, 0);
+		glVertexAttribPointer(attr.id, attr.size, GL_FLOAT, false, 0, 0);
 		vbo.unbind();
 		
 		vbos.add(vbo);
@@ -512,11 +511,11 @@ public class ModelLoader{
 	
 	private static void putAttribute(List<Vbo> vbos, List<ModelAttribute> attributes, ModelAttribute attr, int[] data){
 		if(data==null||data.length==0) return;
-		Vbo vbo=Vbo.create(GL15.GL_ARRAY_BUFFER);
+		Vbo vbo=Vbo.create(GL_ARRAY_BUFFER);
 		
 		vbo.bind();
 		vbo.storeData(data);
-		GL20.glVertexAttribPointer(attr.id, attr.size, GL11.GL_INT, false, 0, 0);
+		glVertexAttribPointer(attr.id, attr.size, GL_INT, false, 0, 0);
 		vbo.unbind();
 		
 		vbos.add(vbo);
@@ -615,21 +614,21 @@ public class ModelLoader{
 	}
 	
 	private static int createVao(){
-		int vao=GL30.glGenVertexArrays();
-		GL30.glBindVertexArray(vao);
+		int vao=glGenVertexArrays();
+		glBindVertexArray(vao);
 		return vao;
 	}
 	
 	private static void bindIndices(int[] indicies){
-		int vbo=GL15.glGenBuffers();
+		int vbo=glGenBuffers();
 		
-		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vbo);
-		GL15.glBufferSubData(GL15.GL_ELEMENT_ARRAY_BUFFER, 0, BufferUtil.store(indicies));
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, BufferUtil.store(indicies));
 		
 	}
 	
 	private static void unbindVao(){
-		GL30.glBindVertexArray(0);
+		glBindVertexArray(0);
 	}
 	
 	public static void deleteAll(){

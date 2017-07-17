@@ -1,9 +1,9 @@
 package com.lapissea.opengl.program.util;
 
-public class PairM<Obj1, Obj2>{
+public class PairM<Obj1,Obj2>{
 	
-	public Obj1 obj1;
-	public Obj2 obj2;
+	public Obj1	obj1;
+	public Obj2	obj2;
 	
 	public PairM(){}
 	

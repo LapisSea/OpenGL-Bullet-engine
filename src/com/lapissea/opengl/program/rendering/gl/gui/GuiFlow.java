@@ -120,7 +120,6 @@ public class GuiFlow{
 			return 0;
 		}
 		
-		
 	}
 	
 	public static class SizeCalcPercent implements ISizeCalc{

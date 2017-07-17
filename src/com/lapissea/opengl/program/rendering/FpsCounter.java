@@ -21,7 +21,7 @@ public class FpsCounter{
 		long time=useNano?System.nanoTime():System.currentTimeMillis();
 		
 		frames.removeIf(f->time-f>second);
-		frames.add(frames.size(),time);
+		frames.add(frames.size(), time);
 	}
 	
 	public int getFps(){
@@ -36,6 +36,7 @@ public class FpsCounter{
 		active=false;
 		frames.clear();
 	}
+	
 	@Override
 	public String toString(){
 		return "FPS: "+getFps();

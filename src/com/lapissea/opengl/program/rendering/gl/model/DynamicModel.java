@@ -1,11 +1,12 @@
 package com.lapissea.opengl.program.rendering.gl.model;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.*;
+
 import java.nio.FloatBuffer;
 import java.util.function.Consumer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
 import com.lapissea.opengl.window.api.util.BufferUtil;
@@ -134,7 +135,7 @@ public class DynamicModel extends Model{
 	private void upload(){
 		vertexCount=data[0].position()/getAttribute(0).size;
 		
-		if(glDrawId!=GL11.GL_LINES){
+		if(glDrawId!=GL_LINES){
 			data[0].flip();
 			shape=ModelLoader.calcShape(data[0], getVertexType().size);
 			data[0].position(data[0].limit());
@@ -152,7 +153,7 @@ public class DynamicModel extends Model{
 			}
 		}
 		
-		GL30.glBindVertexArray(vao);
+		glBindVertexArray(vao);
 		for(int i=0;i<getAttributeCount();i++){
 			FloatBuffer f=data[i];
 			f.flip();

@@ -18,7 +18,6 @@ import com.lapissea.util.LogUtil;
 
 public class Launch{
 	
-	
 	public static void start(String[] args) throws Exception{
 		SplashScreenHost.open("Splash.jar", "LWJGL 2 game", OperatingSystem.APP_DATA+"/OpenGL engine/LTD.bin");
 		Thread.sleep(1);
@@ -33,13 +32,15 @@ public class Launch{
 			
 			SplashScreenHost.sendMsg("Injected logger!");
 			
+//			LogUtil.println(badImg.getColorModel().getm);
+			
 			//			TransformerAsmPoll.register();
 			//			try{
 			//				new Test().lel();
 			//			}catch(Exception e){
 			//				e.printStackTrace();
 			//			}
-			//			System.exit(0);
+//			System.exit(0);
 			
 			LogUtil.printWrapped("=====PRE_GAME_INIT=====");
 			
@@ -64,12 +65,12 @@ public class Launch{
 				
 				//window.setTitle("Genine and Lee");
 				window
-				.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
-				.setPos(-10000, -10000)
-				.setTitle("The abandoned")
-				.setFullScreen(false)
-				.setResizable(true)
-				.setVSync(true);
+						.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
+						.setPos(-10000, -10000)
+						.setTitle("The abandoned")
+						.setFullScreen(false)
+						.setResizable(true)
+						.setVSync(true);
 				
 				//				window.setPos(winCfg.position);
 				//				window.setSize(winCfg.size);

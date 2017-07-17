@@ -1,8 +1,9 @@
 package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.Collection;
 
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -23,12 +24,12 @@ import com.lapissea.opengl.window.impl.assets.BasicTextureCube;
 
 public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	
-	private IModel cube=ModelLoader.buildModel("Skybox", GL11.GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false, "textures", TextureLoader.loadTexture("skybox/ame_nebula", BasicTextureCube.class));
+	private IModel cube=ModelLoader.buildModel("Skybox", GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false, "textures", TextureLoader.loadTexture("skybox/ame_nebula", BasicTextureCube.class));
 	
 	UniformFloat3	sunPos;
 	UniformFloat1	eyeHeight;
 	UniformFloat1	viewFarPlane;
-	Vec3f dir=new Vec3f();
+	Vec3f			dir	=new Vec3f();
 	
 	@Override
 	@Deprecated

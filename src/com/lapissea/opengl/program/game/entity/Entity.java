@@ -33,7 +33,6 @@ public abstract class Entity implements Renderable,ModelTransformed{
 		scale=initScale();
 	}
 	
-	
 	protected Vec3f initPos(Vec3f pos){
 		return pos;
 	}

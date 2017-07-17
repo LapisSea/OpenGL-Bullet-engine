@@ -29,7 +29,6 @@ public class Timer_Ver2 extends GameTimer{
 		super(ups, fps);
 	}
 	
-	
 	@Override
 	public synchronized int getFps(){
 		return framesPerSecond;

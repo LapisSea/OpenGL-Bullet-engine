@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.rendering.gl.gui.elements;
 
-import org.lwjgl.opengl.GL11;
+import static org.lwjgl.opengl.GL11.*;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
@@ -30,9 +30,8 @@ public class GuiLabel extends GuiElement{
 			FrustrumCube c=(FrustrumCube)model.getFrustrumShape();
 			preferedWidth=new SizeCalcStatic(c.getSizeX()*2);
 			preferedHeight=new SizeCalcStatic(c.getSizeY()*2);
-		}
-		else{
-			model=ModelLoader.buildModel(DynamicModel.class, "changing label", GL11.GL_TRIANGLES, "vertices", new float[6], "uvs", new float[6], "genNormals", false, "vertexType", ModelAttribute.VERTEX_ATTR_2D).culface(false);
+		}else{
+			model=ModelLoader.buildModel(DynamicModel.class, "changing label", GL_TRIANGLES, "vertices", new float[6], "uvs", new float[6], "genNormals", false, "vertexType", ModelAttribute.VERTEX_ATTR_2D).culface(false);
 			setText(text);
 		}
 		size.set(1, -1);

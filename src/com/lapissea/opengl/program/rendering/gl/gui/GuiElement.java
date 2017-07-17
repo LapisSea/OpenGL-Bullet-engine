@@ -1,11 +1,12 @@
 package com.lapissea.opengl.program.rendering.gl.gui;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
@@ -27,7 +28,7 @@ import com.lapissea.opengl.window.assets.ModelAttribute;
 
 public class GuiElement implements ModelTransformed{
 	
-	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel("UNIT_QUAD", GL11.GL_TRIANGLE_STRIP, "genNormals", false, "vertices", new float[]{
+	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel("UNIT_QUAD", GL_TRIANGLE_STRIP, "genNormals", false, "vertices", new float[]{
 			0,0,
 			0,1,
 			1,0,
@@ -65,16 +66,13 @@ public class GuiElement implements ModelTransformed{
 	}
 	
 	public static enum Align{
-		STATIC((e, axis)->axis?e.pos.x():e.pos.y()),
-		NEGATIVE((e, axis)->{
+		STATIC((e, axis)->axis?e.pos.x():e.pos.y()),NEGATIVE((e, axis)->{
 			if(e.parent==null) return axis?e.pos.x():e.pos.y();
 			return axis?e.margin.left:e.margin.top;
-		}),
-		CENTER((e, axis)->{
+		}),CENTER((e, axis)->{
 			if(e.parent==null) return axis?e.pos.x():e.pos.y();
 			return (axis?e.parent.getElementSize().x()-e.getElementSize().x():e.parent.getElementSize().y()-e.getElementSize().y())/2;
-		}),
-		POSITIVE((e, axis)->{
+		}),POSITIVE((e, axis)->{
 			if(e.parent==null) return axis?e.pos.x():e.pos.y();
 			return axis?e.parent.getElementSize().x()-e.getElementSize().x()-e.margin.right:e.parent.getElementSize().y()-e.getElementSize().y()-e.margin.bottom;
 		});
@@ -138,7 +136,6 @@ public class GuiElement implements ModelTransformed{
 	public Vec2f getElementSize(){
 		return elementSize;
 	}
-	
 	
 	public void update(){
 		children.forEach(GuiElement::update);
@@ -206,7 +203,7 @@ public class GuiElement implements ModelTransformed{
 	
 	public void updateFlow(){
 		//		this.elementSize.set(preferedWidth!=null?preferedWidth.calc(parent!=null?parent.size.x():Game.win().getSize().x()):elementSize.x(), preferedHeight!=null?preferedHeight.calc(parent!=null?parent.size.y():Game.win().getSize().y()):elementSize.y());
-		this.pos.set(preferedX.calc(this, true), preferedY.calc(this, false));
+		pos.set(preferedX.calc(this, true), preferedY.calc(this, false));
 		children.forEach(GuiElement::updateFlow);
 	}
 	

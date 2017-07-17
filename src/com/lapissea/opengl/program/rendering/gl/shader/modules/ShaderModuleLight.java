@@ -121,7 +121,6 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 			s.forEach(DIRS::add);
 		}
 		
-		
 		numberOfPointLights.upload(POINTS.size());
 		for(int i=0;i<POINTS.size();i++){
 			PointLight light=POINTS.get(i);

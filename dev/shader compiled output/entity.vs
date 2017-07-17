@@ -68,6 +68,43 @@ uniform float systemTime;
 /*MODULE_END: Time.smd*/
 
 
+/*MODULE_START: TextureBinary.smd*/
+struct BinTextureReader{
+	
+	int pos;
+	int width;
+	int height;
+	
+	float readFloat(sampler2D data){
+		return readByte(data, pos++, width, height, 1);
+	}
+	vec2 readVec2(sampler2D data){
+		return vec2(readFloat(data),readFloat(data));
+	}
+	vec3 readVec3(sampler2D data){
+		return vec3(readVec2(data),readFloat(data));
+	}
+	vec4 readVec4(sampler2D data){
+		return vec4(readVec3(data),readFloat(data));
+	}
+	
+};
+
+float readByte(sampler2D data, int pos, int width, int height, int channelCount){
+	
+	int pixelId=pos/channelCount;
+	if(pixelId>width*height)return -1;
+	
+	int whatInPixel=pos%channelCount;
+	
+	float x=pixelId%width;
+	float y=pixelId/width;
+	
+	return texture(data, vec2(x/width,y/height))[whatInPixel];
+}
+/*MODULE_END: TextureBinary.smd*/
+
+
 
 
 void main(void){

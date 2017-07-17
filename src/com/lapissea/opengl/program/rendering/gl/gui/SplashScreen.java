@@ -1,8 +1,8 @@
 package com.lapissea.opengl.program.rendering.gl.gui;
 
-import java.util.Collection;
+import static org.lwjgl.opengl.GL11.*;
 
-import org.lwjgl.opengl.GL11;
+import java.util.Collection;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.GLUtil;
@@ -123,8 +123,8 @@ public class SplashScreen{
 			return;
 		}
 		GLUtil.checkError();
-		GL11.glClearColor(1, 1, 1, 1);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);
+		glClearColor(1, 1, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		
 		float scale=1;
 		if(endBegin>0){
@@ -138,10 +138,10 @@ public class SplashScreen{
 		
 		GLUtil.checkError();
 		Fbo.bindDefault();
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		glEnable(GL_DEPTH_TEST);
 		GLUtil.checkError();
-		GL11.glEnable(GL11.GL_CULL_FACE);
-		GL11.glCullFace(GL11.GL_BACK);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		double tim=System.currentTimeMillis();
 		shader.renderSingle(MatrixUtil.createTransformMat(new Vec3f(0, 0, -1F), new Quat4M(
 				(float)Math.sin(tim/500%(Math.PI*2))*0.1F,

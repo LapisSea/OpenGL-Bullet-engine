@@ -8,9 +8,9 @@ public class TimerOld extends GameTimer{
 	
 	private long		lastTimeUpdated;
 	private long		lastTimeRendered;
-	/**update period*/
+	/** update period */
 	private long		up;
-	/**frame period*/
+	/** frame period */
 	private long		fp;
 	private long		lastSec;
 	private int			updateQueue;
@@ -26,8 +26,6 @@ public class TimerOld extends GameTimer{
 	private float		partialUpdate;
 	private Runnable	updateHook;
 	private Runnable	renderHook;
-	
-	
 	
 	public TimerOld(int ups, int fps, Runnable update, Runnable render){
 		super(ups, fps, update, render);
@@ -72,7 +70,8 @@ public class TimerOld extends GameTimer{
 	}
 	
 	/**
-	 * Save CPU from checking if anything should update many times in a millisecond
+	 * Save CPU from checking if anything should update many times in a
+	 * millisecond
 	 */
 	private void throttleLooping(){
 		if(infiniteFps&&fps<ctxFrames*1.2&&ups<ctxUpdates*1.2) UtilM.sleep(0, 500000);
@@ -129,13 +128,11 @@ public class TimerOld extends GameTimer{
 		return running;
 	}
 	
-	
 	@Override
 	public GameTimer setUpdate(Runnable updateHook){
 		this.updateHook=Objects.requireNonNull(updateHook);
 		return this;
 	}
-	
 	
 	@Override
 	public GameTimer setRender(Runnable renderHook){
@@ -186,6 +183,5 @@ public class TimerOld extends GameTimer{
 	public boolean getInfiniteFps(){
 		return infiniteFps;
 	}
-	
 	
 }

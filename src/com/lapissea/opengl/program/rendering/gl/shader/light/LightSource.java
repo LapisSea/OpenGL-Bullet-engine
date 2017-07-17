@@ -10,7 +10,6 @@ public class LightSource{
 		this.color=color;
 	}
 	
-	
 	public LightSource(){}
 	
 }

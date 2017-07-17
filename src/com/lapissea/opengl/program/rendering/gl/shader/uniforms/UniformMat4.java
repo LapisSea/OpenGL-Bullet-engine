@@ -1,9 +1,10 @@
 package com.lapissea.opengl.program.rendering.gl.shader.uniforms;
 
+import static org.lwjgl.opengl.GL20.*;
+
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
@@ -28,7 +29,7 @@ public class UniformMat4 extends AbstractUniform{
 		
 		mat.store(BUFF);
 		BUFF.flip();
-		GL20.glUniformMatrix4(id(), false, BUFF);
+		glUniformMatrix4(id(), false, BUFF);
 		checkError(this::retryUpload);
 	}
 	

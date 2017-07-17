@@ -1,12 +1,13 @@
 package com.lapissea.opengl.program.rendering.gl.gui;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.GLUtil;
@@ -16,8 +17,8 @@ import com.lapissea.opengl.program.rendering.gl.FboRboTextured;
 import com.lapissea.opengl.program.rendering.gl.gui.guis.DebugDisplay;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.rendering.gl.shader.shaders.GuiRectShader;
-import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.window.assets.ITexture;
+import com.lapissea.util.UtilL;
 
 public class GuiHandler{
 	
@@ -28,7 +29,6 @@ public class GuiHandler{
 	private FboRboTextured				drawFbo		=new FboRboTextured();
 	private Fbo							lastZLayer	=new Fbo();
 	private boolean						first		=true;
-	
 	
 	public GuiHandler(){
 		lastZLayer.setDepth(false);
@@ -67,13 +67,11 @@ public class GuiHandler{
 		
 	}
 	
-	
 	public void update(){
 		Gui g=getOpenGui();
 		if(g!=null) g.update();
 		displays.forEach(GuiElement::update);
 	}
-	
 	
 	private List<List<GuiElement>> renderList=new ArrayList<>();
 	
@@ -84,12 +82,11 @@ public class GuiHandler{
 		lastZLayer.setSize(Game.win().getSize());
 		
 		drawFbo.bind();
-		GL11.glClearColor(0, 0, 0, 0);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		GLUtil.BLEND.set(true);
 		GLUtil.DEPTH_TEST.set(true);
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
-		
 		
 		GuiRectShader rect=Shaders.GUI_RECT;
 		
@@ -100,7 +97,7 @@ public class GuiHandler{
 			if(first) first=false;
 			drawFbo.bind();
 			
-			UtilM.doAndClear(l, e->{
+			UtilL.doAndClear(l, e->{
 				List<ITexture> tx=e.getModel().getTextures();
 				if(tx.isEmpty()) tx.add(lastZLayer.getTexture());
 				else tx.set(0, lastZLayer.getTexture());

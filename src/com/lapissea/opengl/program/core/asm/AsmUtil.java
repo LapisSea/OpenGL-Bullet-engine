@@ -7,7 +7,6 @@ import org.objectweb.asm.tree.ClassNode;
 
 public class AsmUtil{
 	
-	
 	public static String classNameToAsm(Class<?> c1ass){
 		return classNameToAsm(c1ass.getName());
 	}

@@ -1,8 +1,8 @@
 package com.lapissea.opengl.program.rendering.gl.shader.modules;
 
-import java.util.List;
+import static org.lwjgl.opengl.GL13.*;
 
-import org.lwjgl.opengl.GL13;
+import java.util.List;
 
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.ModelMdl;
@@ -35,8 +35,7 @@ public class ShaderModuleTexture extends ShaderModule implements ModelMdl{
 				if(colSplit==-1){
 					name=args[i];
 					color="1";
-				}
-				else{
+				}else{
 					name=args[i].substring(0, colSplit);
 					color=args[i].substring(colSplit+1);
 				}
@@ -80,7 +79,7 @@ public class ShaderModuleTexture extends ShaderModule implements ModelMdl{
 				boolean valid=texture!=null&&texture.isLoaded();
 				
 				texturesUsed[i].upload(valid);
-				GL13.glActiveTexture(GL13.GL_TEXTURE0+i);
+				glActiveTexture(GL_TEXTURE0+i);
 				if(valid) texture.bind();
 			}
 		}

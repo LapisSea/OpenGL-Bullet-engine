@@ -24,39 +24,31 @@ public abstract class GameTimer{
 		return running;
 	}
 	
-	
 	protected long time(){
 		return System.nanoTime();
 	}
-	
 	
 	public abstract int getFps();
 	
 	public abstract GameTimer setFps(int fps);
 	
-	
 	public abstract int getUps();
 	
 	public abstract GameTimer setUps(int ups);
-	
 	
 	public abstract float getSpeed();
 	
 	public abstract GameTimer setSpeed(float speed);
 	
-	
 	public abstract GameTimer setInfiniteFps(boolean flag);
 	
 	public abstract boolean getInfiniteFps();
 	
-	
 	public abstract float getPartialTick();
-	
 	
 	public abstract GameTimer setRender(Runnable hook);
 	
 	public abstract GameTimer runRender();
-	
 	
 	public abstract GameTimer setUpdate(Runnable hook);
 	

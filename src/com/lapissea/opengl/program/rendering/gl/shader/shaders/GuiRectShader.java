@@ -17,13 +17,11 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 		UniformFloat4	color;
 		UniformFloat1	mouseRad,blurRad;
 		
-		
 		public RenderType(String name){
 			blurRad=getUniform(name+".blurRad");
 			color=getUniform(name+".color");
 			mouseRad=getUniform(name+".mouseRad");
 		}
-		
 		
 		void upload(float blur, ColorM col, float mouse){
 			blurRad.upload(blur);
@@ -37,17 +35,14 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 		
 	}
 	
-	
 	UniformFloat1	borderWidth;
 	UniformFloat1	blurDiv;
 	UniformFloat2	size;
 	RenderType		background,border;
 	
-	
 	public GuiRectShader(){
 		super("gui/rect");
 	}
-	
 	
 	@Override
 	protected void setUpUniforms(){

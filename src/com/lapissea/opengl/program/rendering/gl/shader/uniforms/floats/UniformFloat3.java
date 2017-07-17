@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats;
 
-import org.lwjgl.opengl.GL20;
+import static org.lwjgl.opengl.GL20.*;
 
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
@@ -30,7 +30,7 @@ public class UniformFloat3 extends AbstractUniform{
 		prev1=f1;
 		prev2=f2;
 		prev3=f3;
-		GL20.glUniform3f(id(), f1, f2, f3);
+		glUniform3f(id(), f1, f2, f3);
 		checkError(()->{
 			prev1=Float.NaN;
 			upload(f1, f2, f3);

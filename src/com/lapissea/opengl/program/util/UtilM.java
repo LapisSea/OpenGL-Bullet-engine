@@ -163,7 +163,6 @@ public class UtilM extends UtilL{
 		return result;
 	}
 	
-	
 	private static final List<Class<?>> WRAPPER_TYPES=new ArrayList<>();
 	static{
 		WRAPPER_TYPES.add(Boolean.class);
@@ -186,4 +185,3 @@ public class UtilM extends UtilL{
 	}
 	
 }
-

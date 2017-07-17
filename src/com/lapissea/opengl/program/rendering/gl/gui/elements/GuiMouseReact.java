@@ -7,14 +7,12 @@ import com.lapissea.opengl.window.api.events.MouseButtonEvent.Action;
 import com.lapissea.opengl.window.api.events.MouseButtonEvent.Button;
 import com.lapissea.opengl.window.api.events.MouseMoveEvent;
 
-
 public class GuiMouseReact extends GuiElement{
 	
 	protected FloatSmooth	highlightProgress	=new FloatSmooth(),activateProgress=new FloatSmooth();
 	private boolean			mouseOver,mouseDown;
 	
 	protected float selectSpeed=5,unselectSpeed=6,activateSpeed=2,unactivateSpeed=3;
-	
 	
 	@Override
 	public void update(){
@@ -30,8 +28,7 @@ public class GuiMouseReact extends GuiElement{
 				value.setValue(value.getValue()+1/add);
 				if(value.getValue()>1) value.setValue(1);
 			}
-		}
-		else{
+		}else{
 			if(value.getValue()>0){
 				value.setValue(value.getValue()-1/sub);
 				if(value.getValue()<0) value.setValue(0);

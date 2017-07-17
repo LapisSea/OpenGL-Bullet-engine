@@ -18,7 +18,7 @@ public class Camera implements IMouseMoveEventListener{
 	
 	private static final Vec3f EFF_POS=new Vec3f(),MOVE=new Vec3f();
 	
-	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();						//,prevRot=new Vec3f();
+	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();								//,prevRot=new Vec3f();
 	public float	zoom=1,farPlane=1000,nearPlane=0.1F,fov=80,lastRenderFow;
 	
 	private final Matrix4f	projection		=new Matrix4f();

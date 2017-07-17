@@ -1,8 +1,8 @@
 package com.lapissea.opengl.program.rendering.gl.shader.shaders;
 
-import java.util.Collection;
+import static org.lwjgl.opengl.GL13.*;
 
-import org.lwjgl.opengl.GL13;
+import java.util.Collection;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.terrain.Chunk;
@@ -49,7 +49,7 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Chunk>{
 	public void prepareGlobal(){
 		super.prepareGlobal();
 		if(skyBuffer!=null){
-			GL13.glActiveTexture(GL13.GL_TEXTURE0+1);
+			glActiveTexture(GL_TEXTURE0+1);
 			getRenderer().skyFbo.getTexture().bind();
 			skyBuffer.upload(1);
 		}

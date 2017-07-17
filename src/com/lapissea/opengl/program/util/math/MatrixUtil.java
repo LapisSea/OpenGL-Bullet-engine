@@ -10,7 +10,6 @@ public class MatrixUtil{
 	private static final Vec3f		X_AXIS	=new Vec3f(1, 0, 0),Y_AXIS=new Vec3f(0, 1, 0),Z_AXIS=new Vec3f(0, 0, 1);
 	private static final Matrix4f	ROT_MAT	=new Matrix4f();
 	
-	
 	public static Matrix4f createTransformMat(Vec3f translation, Quat4M rotation, Vec3f scale){
 		return createTransformMat(new Matrix4f(), translation, rotation, scale);
 	}
@@ -24,10 +23,11 @@ public class MatrixUtil{
 	}
 	
 	public static Matrix4f createTransformMat(Matrix4f src, Vec3f translation, Vec3f rotation, Vec3f scale){
-		return rotate(src.translate(translation),rotation).scale(scale);
+		return rotate(src.translate(translation), rotation).scale(scale);
 	}
+	
 	public static Matrix4f createTransformMat(Matrix4f src, Vec3f translation, Quat4M rotation, Vec3f scale){
-		return rotate(src.translate(translation),rotation).scale(scale);
+		return rotate(src.translate(translation), rotation).scale(scale);
 	}
 	
 	public static synchronized Matrix4f rotate(Matrix4f mat, Quat4M rot){
@@ -39,12 +39,15 @@ public class MatrixUtil{
 	public static Matrix4f rotate(Matrix4f mat, Vec3f rot){
 		return mat.rotate(rot.x(), X_AXIS).rotate(rot.y(), Y_AXIS).rotate(rot.z(), Z_AXIS);
 	}
+	
 	public static Matrix4f rotateX(Matrix4f mat, float angle){
 		return mat.rotate(angle, X_AXIS);
 	}
+	
 	public static Matrix4f rotateY(Matrix4f mat, float angle){
 		return mat.rotate(angle, Y_AXIS);
 	}
+	
 	public static Matrix4f rotateZ(Matrix4f mat, float angle){
 		return mat.rotate(angle, Z_AXIS);
 	}

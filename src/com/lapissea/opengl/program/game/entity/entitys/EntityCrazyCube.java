@@ -72,7 +72,7 @@ public class EntityCrazyCube extends EntityUpd{
 			
 			20,21,23,
 			23,21,22
-			
+	
 	};
 	
 	private static IModel getModel0(){
@@ -99,7 +99,6 @@ public class EntityCrazyCube extends EntityUpd{
 //		model.getMaterial(0).getDiffuse().set(0x0000FF);
 		
 		float massKg=0.5F*scale.x*scale.y*scale.z;
-		
 		
 		physicsBody=new RigidBodyEntity(this, massKg, new MotionStateM(transform), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), null, 0.9F, 0).antiTunnel();
 		physicsBody.setDamping(0.15F, 0.15F);
@@ -138,6 +137,5 @@ public class EntityCrazyCube extends EntityUpd{
 			getRenderer().addLight(light);
 		}
 	}
-	
 	
 }

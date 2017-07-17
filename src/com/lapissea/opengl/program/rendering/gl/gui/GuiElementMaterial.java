@@ -7,7 +7,7 @@ public class GuiElementMaterial{
 	public static final float INHERIT=-100;
 	
 	public float	blurRad	=-1;
-	public ColorM	color	=new ColorM(0,0,0,0);
+	public ColorM	color	=new ColorM(0, 0, 0, 0);
 	public float	mouseRad=-1;
 	
 	public GuiElementMaterial(){
@@ -29,9 +29,9 @@ public class GuiElementMaterial{
 	}
 	
 	public GuiElementMaterial set(GuiElementMaterial src){
-		if(src.blurRad!=INHERIT)blurRad=src.blurRad;
-		if(src.color!=null)color.set(src.color);
-		if(src.mouseRad!=INHERIT)mouseRad=src.mouseRad;
+		if(src.blurRad!=INHERIT) blurRad=src.blurRad;
+		if(src.color!=null) color.set(src.color);
+		if(src.mouseRad!=INHERIT) mouseRad=src.mouseRad;
 		return this;
 	}
 	

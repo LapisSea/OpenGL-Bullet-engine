@@ -19,11 +19,15 @@ public class BytecodePrettyPrinter{
 	
 	/**
 	 * Gets us the bytecode method body of a given method.
-	 * @param className The class name to search for.
-	 * @param methodName The method name.
-	 * @param methodDescriptor The method's descriptor. 
-	 *                         Can be null if one wishes to just get the first 
-	 *                         method with the given name.
+	 * 
+	 * @param className
+	 *            The class name to search for.
+	 * @param methodName
+	 *            The method name.
+	 * @param methodDescriptor
+	 *            The method's descriptor.
+	 *            Can be null if one wishes to just get the first
+	 *            method with the given name.
 	 * @throws IOException
 	 */
 	public static String[] getMethod(byte[] src, String methodName, String methodDescriptor) throws IOException{
@@ -39,8 +43,11 @@ public class BytecodePrettyPrinter{
 	
 	/**
 	 * Gets us the bytecode method body of a given method.
-	 * @param className The class name to search for.
-	 * @param methodName The method name.
+	 * 
+	 * @param className
+	 *            The class name to search for.
+	 * @param methodName
+	 *            The method name.
 	 * @throws IOException
 	 */
 	public static String[] getMethod(byte[] src, String methodName) throws IOException{
@@ -94,7 +101,6 @@ public class BytecodePrettyPrinter{
 		@Override
 		public void visitMaxs(int maxStack, int maxLocals){}
 	}
-	
 	
 	private static class SourceCodeTextifier extends Printer{
 		
@@ -168,7 +174,6 @@ public class BytecodePrettyPrinter{
 		
 		@Override
 		public void visit(final String name, final Object value){}
-		
 		
 		@Override
 		public void visitEnum(

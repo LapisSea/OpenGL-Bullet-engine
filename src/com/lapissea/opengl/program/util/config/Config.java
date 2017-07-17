@@ -14,7 +14,8 @@ import com.lapissea.opengl.program.util.OperatingSystem;
 import com.lapissea.util.LogUtil;
 
 /**
- * Usage: folder1.folder2.filename:keyname.keyname = file at "config/folder1/folder2/filename.cfg" with value inside keyname.keyname
+ * Usage: folder1.folder2.filename:keyname.keyname = file at
+ * "config/folder1/folder2/filename.cfg" with value inside keyname.keyname
  */
 public class Config{
 	
@@ -44,7 +45,6 @@ public class Config{
 			}catch(NoSuchFileException e){}catch(Exception e){
 				e.printStackTrace();
 			}
-			
 			
 		}
 		
@@ -150,11 +150,11 @@ public class Config{
 			f.data.forEach((k, v)->{
 				JSONObject target=obj;
 				String[] parts=k.split(".");
-				for(int i=0,j=parts.length-1;i<j;i++){
+				for(int i=0, j=parts.length-1;i<j;i++){
 					String part=parts[i];
 					LogUtil.println(part);
 					if(target.has(part)){
-						
+					
 					}
 				}
 				obj.put(k, v.obj);

@@ -8,8 +8,7 @@ import java.util.function.BiConsumer;
 import com.lapissea.opengl.window.api.util.Calculateable;
 import com.lapissea.opengl.window.api.util.IVec2i;
 
-
-public class Vec2i implements Calculateable<Vec2i>,Serializable, IVec2i{
+public class Vec2i implements Calculateable<Vec2i>,Serializable,IVec2i{
 	
 	private static final long serialVersionUID=7737581116406153679L;
 	
@@ -118,7 +117,6 @@ public class Vec2i implements Calculateable<Vec2i>,Serializable, IVec2i{
 		return this;
 	}
 	
-	
 	public void putXY(BiConsumer<String,Integer> put){
 		put.accept("x", x());
 		put.accept("y", y());
@@ -148,6 +146,7 @@ public class Vec2i implements Calculateable<Vec2i>,Serializable, IVec2i{
 	public Vec2i set(Vec2i src){
 		return set(src.x(), src.y());
 	}
+	
 	public Vec2i set(IVec2i src){
 		return set(src.x(), src.y());
 	}

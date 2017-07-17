@@ -48,7 +48,7 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelMdl{
 	
 	@Override
 	public void uploadUniformsModel(IModel model){
-		if(tim!=null)tim.upload((float)((Game.get().world.time()+(double)Game.getPartialTicks())/20D%(Math.PI*2)));
+		if(tim!=null) tim.upload((float)((Game.get().world.time()+(double)Game.getPartialTicks())/20D%(Math.PI*2)));
 		for(int i=0, j=Math.min(model.getMaterialCount(), ambient.length-1);i<j;i++){
 			IMaterial mat=model.getMaterial(i);
 			uploadMaterial(mat.getId(), mat);

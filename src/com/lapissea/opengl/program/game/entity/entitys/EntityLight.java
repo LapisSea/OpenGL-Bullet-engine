@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.game.entity.entitys;
 
-import org.lwjgl.opengl.GL11;
+import static org.lwjgl.opengl.GL11.*;
 
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
@@ -103,7 +103,7 @@ public class EntityLight extends EntityUpd{
 			for(int i=0;i<vertices.length;i++){
 				vertices[i]/=10;
 			}
-			MODEL=ModelLoader.buildModel("LileCube", GL11.GL_TRIANGLES, "vertices", vertices, "uvs", uvs, "indices", indices, "genNormals", true, "textures", new String[]{"WCveg256"});
+			MODEL=ModelLoader.buildModel("LileCube", GL_TRIANGLES, "vertices", vertices, "uvs", uvs, "indices", indices, "genNormals", true, "textures", new String[]{"WCveg256"});
 		}
 		return MODEL;
 	}

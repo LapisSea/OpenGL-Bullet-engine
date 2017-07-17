@@ -79,8 +79,7 @@ public class ConsoleWindow extends JFrame{
 					setLocation(e.getXOnScreen()-clickPos.x(), e.getYOnScreen()-clickPos.y());
 				}
 			});
-		}
-		else scrollE.setBorder(new EmptyBorder(0, 0, 0, 0));
+		}else scrollE.setBorder(new EmptyBorder(0, 0, 0, 0));
 		doc=text.getStyledDocument();
 		
 		outStyle=text.addStyle("out_style", null);

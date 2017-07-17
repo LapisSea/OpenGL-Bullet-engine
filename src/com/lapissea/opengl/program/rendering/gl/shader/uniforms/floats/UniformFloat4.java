@@ -1,6 +1,6 @@
 package com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats;
 
-import org.lwjgl.opengl.GL20;
+import static org.lwjgl.opengl.GL20.*;
 
 import com.lapissea.opengl.program.rendering.gl.shader.Shader;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
@@ -25,7 +25,7 @@ public class UniformFloat4 extends AbstractUniform{
 		prev2=f2;
 		prev3=f3;
 		prev4=f4;
-		GL20.glUniform4f(id(), f1, f2, f3, f4);
+		glUniform4f(id(), f1, f2, f3, f4);
 		checkError(()->upload(f1, f2, f3, f4));
 	}
 	

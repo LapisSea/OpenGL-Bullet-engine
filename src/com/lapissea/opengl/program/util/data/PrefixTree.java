@@ -21,7 +21,6 @@ public class PrefixTree<T>{
 			setValue(value);
 		}
 		
-		
 		public void setValue(T value){
 			hasValue=true;
 			this.value=value;
@@ -131,8 +130,7 @@ public class PrefixTree<T>{
 			int len=name.length(),end=start+l;
 			if(start>=len||(end>len&&name.regionMatches(start, namePart, 0, Math.min(end, len)-start))){
 				if(hasValue) hook.accept(value);
-			}
-			else if(!match(name, start)) return;
+			}else if(!match(name, start)) return;
 			for(Node node:children){
 				node.getStartMatches(name, end, hook);
 			}
@@ -144,8 +142,7 @@ public class PrefixTree<T>{
 			
 			if(len>=end&&match){
 				if(hasValue) hook.accept(value);
-			}
-			else if(!match) return;
+			}else if(!match) return;
 			
 			for(Node node:children){
 				node.getStartMatchesReverse(name, end, hook);

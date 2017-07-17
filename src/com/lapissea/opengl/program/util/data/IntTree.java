@@ -27,8 +27,7 @@ public class IntTree<T>{
 			else if(key>this.key){
 				if(more==null) more=new Node(key, value);
 				else more.set(key, value);
-			}
-			else{
+			}else{
 				if(less==null) less=new Node(key, value);
 				else less.set(key, value);
 			}

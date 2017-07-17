@@ -1,6 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.shader.uniforms;
 
-import org.lwjgl.opengl.GL20;
+import static org.lwjgl.opengl.GL20.*;
+
 import org.lwjgl.opengl.OpenGLException;
 
 import com.lapissea.opengl.program.rendering.GLUtil;
@@ -34,13 +35,12 @@ public abstract class AbstractUniform{
 		try{
 			GLUtil.checkError();
 		}catch(Throwable e){
-			id=GL20.glGetUniformLocation(shader.program, name);
-			String realName=GL20.glGetActiveUniform(shader.program, id, 128);
+			id=glGetUniformLocation(shader.program, name);
+			String realName=glGetActiveUniform(shader.program, id, 128);
 			if(realName.isEmpty()){
 				throw new OpenGLException("Non existant uniform "+name, e);
-			}
-			else if(!realName.equals(name)){
-				LogUtil.printlnEr("correct name:",realName, "false name:",name);
+			}else if(!realName.equals(name)){
+				LogUtil.printlnEr("correct name:", realName, "false name:", name);
 				throw e;
 			}
 			onSolve.run();

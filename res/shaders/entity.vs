@@ -21,6 +21,7 @@ uniform float fogGradient;
 #include "Light.vsmd"
 #include "Fog.vsmd"
 #include "Time.smd"
+#include "TextureBinary.smd"
 
 
 void main(void){

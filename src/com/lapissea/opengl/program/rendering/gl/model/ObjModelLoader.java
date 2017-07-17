@@ -1,11 +1,11 @@
 package com.lapissea.opengl.program.rendering.gl.model;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.lwjgl.opengl.GL11;
 
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
@@ -111,7 +111,7 @@ public class ObjModelLoader{
 			if(line.isEmpty()||line.charAt(0)=='#') continue;
 			if(line.startsWith("mtllib ")){
 				int pos=name.lastIndexOf('/');
-				String s=(pos!=-1?name.substring(0, pos+1):"");
+				String s=pos!=-1?name.substring(0, pos+1):"";
 				mtllib=s+line.substring("mtllib ".length());
 				break;
 			}
@@ -177,19 +177,15 @@ public class ObjModelLoader{
 			if(line.startsWith("v ")){
 				String[] parts=line.split(" ");
 				vertecies.add(new Vec3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
-			}
-			else if(line.startsWith("vn ")){
+			}else if(line.startsWith("vn ")){
 				String[] parts=line.split(" ");
 				normals.add(new Vec3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
-			}
-			else if(line.startsWith("vt ")){
+			}else if(line.startsWith("vt ")){
 				String[] parts=line.split(" ");
 				uvs.add(new Vec2f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2])));
-			}
-			else if(line.startsWith("usemtl ")){
+			}else if(line.startsWith("usemtl ")){
 				material=materials.get(line.substring("usemtl ".length()));
-			}
-			else if(line.startsWith("f ")){
+			}else if(line.startsWith("f ")){
 				
 				String[] parts=line.substring(2).split(" ");
 				
@@ -241,8 +237,7 @@ public class ObjModelLoader{
 					idsUv.add(idsUv0.get(i));
 					idsNorm.add(idsNorm0.get(i));
 					idsMater.add(idsMater0.get(i));
-				}
-				else{
+				}else{
 					
 					int[] ids=idsVert0.get(i);
 					idsVert.add(new int[]{ids[3],ids[0],ids[1]});
@@ -252,8 +247,7 @@ public class ObjModelLoader{
 					if(ids==null){
 						idsUv.add(null);
 						idsUv.add(null);
-					}
-					else{
+					}else{
 						idsUv.add(new int[]{ids[3],ids[0],ids[1]});
 						idsUv.add(new int[]{ids[3],ids[1],ids[2]});
 					}
@@ -262,8 +256,7 @@ public class ObjModelLoader{
 					if(ids==null){
 						idsNorm.add(null);
 						idsNorm.add(null);
-					}
-					else{
+					}else{
 						idsNorm.add(new int[]{ids[3],ids[0],ids[1]});
 						idsNorm.add(new int[]{ids[3],ids[1],ids[2]});
 					}
@@ -288,8 +281,7 @@ public class ObjModelLoader{
 				for(int id:idsUv.get(i)){
 					model.uvs.add(uvs.get(id));
 				}
-			}
-			else{
+			}else{
 				model.uvs.add(new Vec2f(0, 0));
 				model.uvs.add(new Vec2f(1, 0));
 				model.uvs.add(new Vec2f(1, 1));
@@ -301,8 +293,7 @@ public class ObjModelLoader{
 				for(int id:idsNorm.get(i)){
 					model.normals.add(normals.get(id));
 				}
-			}
-			else{
+			}else{
 				model.normals.add(null);
 				model.normals.add(null);
 				model.normals.add(null);
@@ -318,7 +309,7 @@ public class ObjModelLoader{
 			model.materialIds.add(matId);
 			if(hasQuad) model.materialIds.add(matId);
 		}
-		model.format=hasQuad?GL11.GL_QUADS:GL11.GL_TRIANGLES;
+		model.format=hasQuad?GL_QUADS:GL_TRIANGLES;
 		
 		if(!model.hasMaterials) model.materialIds=null;
 		else materials.values().forEach(model.materials::add);

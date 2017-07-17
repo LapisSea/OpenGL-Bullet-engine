@@ -30,19 +30,19 @@ import com.lapissea.opengl.program.rendering.animation.Joint;
  * @author Karl
  *
  */
-public class Animator {
+public class Animator{
 	
 	private final AnimatedModel entity;
 	
-	private Animation currentAnimation;
-	private float animationTime = 0;
+	private Animation	currentAnimation;
+	private float		animationTime	=0;
 	
 	/**
 	 * @param entity
 	 *            - the entity which will by animated by this animator.
 	 */
-	public Animator(AnimatedModel entity) {
-		this.entity = entity;
+	public Animator(AnimatedModel entity){
+		this.entity=entity;
 	}
 	
 	/**
@@ -52,9 +52,9 @@ public class Animator {
 	 * @param animation
 	 *            - the new animation to carry out.
 	 */
-	public void doAnimation(Animation animation) {
-		animationTime = 0;
-		currentAnimation = animation;
+	public void doAnimation(Animation animation){
+		animationTime=0;
+		currentAnimation=animation;
 	}
 	
 	/**
@@ -64,12 +64,10 @@ public class Animator {
 	 * time of the animation, and then applies that pose to all the model's
 	 * joints by setting the joint transforms.
 	 */
-	public void update() {
-		if (currentAnimation == null) {
-			return;
-		}
+	public void update(){
+		if(currentAnimation==null){ return; }
 		increaseAnimationTime();
-		Map<String, Matrix4f> currentPose = calculateCurrentAnimationPose();
+		Map<String,Matrix4f> currentPose=calculateCurrentAnimationPose();
 		applyPoseToJoints(currentPose, entity.getRootJoint(), new Matrix4f());
 	}
 	
@@ -78,10 +76,10 @@ public class Animator {
 	 * progress. If the current animation has reached the end then the timer is
 	 * reset, causing the animation to loop.
 	 */
-	private void increaseAnimationTime() {
+	private void increaseAnimationTime(){
 		animationTime+=0.1;
-		if (animationTime > currentAnimation.getLength()) {
-			animationTime %= currentAnimation.getLength();
+		if(animationTime>currentAnimation.getLength()){
+			animationTime%=currentAnimation.getLength();
 		}
 	}
 	
@@ -104,9 +102,9 @@ public class Animator {
 	 *         for all the joints. The transforms are indexed by the name ID of
 	 *         the joint that they should be applied to.
 	 */
-	private Map<String, Matrix4f> calculateCurrentAnimationPose() {
-		KeyFrame[] frames = getPreviousAndNextFrames();
-		float progression = calculateProgression(frames[0], frames[1]);
+	private Map<String,Matrix4f> calculateCurrentAnimationPose(){
+		KeyFrame[] frames=getPreviousAndNextFrames();
+		float progression=calculateProgression(frames[0], frames[1]);
 		return interpolatePoses(frames[0], frames[1], progression);
 	}
 	
@@ -143,10 +141,10 @@ public class Animator {
 	 *            - the desired model-space transform of the parent joint for
 	 *            the pose.
 	 */
-	private void applyPoseToJoints(Map<String, Matrix4f> currentPose, Joint joint, Matrix4f parentTransform) {
-		Matrix4f currentLocalTransform = currentPose.get(joint.name);
-		Matrix4f currentTransform = Matrix4f.mul(parentTransform, currentLocalTransform, null);
-		for (Joint childJoint : joint.children) {
+	private void applyPoseToJoints(Map<String,Matrix4f> currentPose, Joint joint, Matrix4f parentTransform){
+		Matrix4f currentLocalTransform=currentPose.get(joint.name);
+		Matrix4f currentTransform=Matrix4f.mul(parentTransform, currentLocalTransform, null);
+		for(Joint childJoint:joint.children){
 			applyPoseToJoints(currentPose, childJoint, currentTransform);
 		}
 		Matrix4f.mul(currentTransform, joint.getInverseBindTransform(), currentTransform);
@@ -164,18 +162,18 @@ public class Animator {
 	 * @return The previous and next keyframes, in an array which therefore will
 	 *         always have a length of 2.
 	 */
-	private KeyFrame[] getPreviousAndNextFrames() {
-		KeyFrame[] allFrames = currentAnimation.getKeyFrames();
-		KeyFrame previousFrame = allFrames[0];
-		KeyFrame nextFrame = allFrames[0];
-		for (int i = 1; i < allFrames.length; i++) {
-			nextFrame = allFrames[i];
-			if (nextFrame.getTimeStamp() > animationTime) {
+	private KeyFrame[] getPreviousAndNextFrames(){
+		KeyFrame[] allFrames=currentAnimation.getKeyFrames();
+		KeyFrame previousFrame=allFrames[0];
+		KeyFrame nextFrame=allFrames[0];
+		for(int i=1;i<allFrames.length;i++){
+			nextFrame=allFrames[i];
+			if(nextFrame.getTimeStamp()>animationTime){
 				break;
 			}
-			previousFrame = allFrames[i];
+			previousFrame=allFrames[i];
 		}
-		return new KeyFrame[] { previousFrame, nextFrame };
+		return new KeyFrame[]{previousFrame,nextFrame};
 	}
 	
 	/**
@@ -189,10 +187,10 @@ public class Animator {
 	 * @return A number between 0 and 1 indicating how far between the two
 	 *         keyframes the current animation time is.
 	 */
-	private float calculateProgression(KeyFrame previousFrame, KeyFrame nextFrame) {
-		float totalTime = nextFrame.getTimeStamp() - previousFrame.getTimeStamp();
-		float currentTime = animationTime - previousFrame.getTimeStamp();
-		return currentTime / totalTime;
+	private float calculateProgression(KeyFrame previousFrame, KeyFrame nextFrame){
+		float totalTime=nextFrame.getTimeStamp()-previousFrame.getTimeStamp();
+		float currentTime=animationTime-previousFrame.getTimeStamp();
+		return currentTime/totalTime;
 	}
 	
 	/**
@@ -211,12 +209,12 @@ public class Animator {
 	 *         current pose. They are returned in a map, indexed by the name of
 	 *         the joint to which they should be applied.
 	 */
-	private Map<String, Matrix4f> interpolatePoses(KeyFrame previousFrame, KeyFrame nextFrame, float progression) {
-		Map<String, Matrix4f> currentPose = new HashMap<>();
-		for (String jointName : previousFrame.getJointKeyFrames().keySet()) {
-			JointTransform previousTransform = previousFrame.getJointKeyFrames().get(jointName);
-			JointTransform nextTransform = nextFrame.getJointKeyFrames().get(jointName);
-			JointTransform currentTransform = JointTransform.interpolate(previousTransform, nextTransform, progression);
+	private Map<String,Matrix4f> interpolatePoses(KeyFrame previousFrame, KeyFrame nextFrame, float progression){
+		Map<String,Matrix4f> currentPose=new HashMap<>();
+		for(String jointName:previousFrame.getJointKeyFrames().keySet()){
+			JointTransform previousTransform=previousFrame.getJointKeyFrames().get(jointName);
+			JointTransform nextTransform=nextFrame.getJointKeyFrames().get(jointName);
+			JointTransform currentTransform=JointTransform.interpolate(previousTransform, nextTransform, progression);
 			currentPose.put(jointName, currentTransform.getLocalTransform());
 		}
 		return currentPose;

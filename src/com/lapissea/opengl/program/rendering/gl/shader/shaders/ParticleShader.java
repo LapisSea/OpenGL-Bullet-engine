@@ -9,5 +9,4 @@ public class ParticleShader extends ShaderRenderer.Basic3D<Particle<?>>{
 		super("entity");
 	}
 	
-	
 }

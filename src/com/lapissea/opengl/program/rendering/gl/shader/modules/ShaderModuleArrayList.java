@@ -22,13 +22,13 @@ public class ShaderModuleArrayList extends ShaderModule{
 				String size=arr[1].trim();
 				
 				src
-				.append("\nstruct List").append(type).append("{")
-				.append("\n\t").append(type).append(" data[").append(size).append("];")
-				.append("\n\tint size;")
-				.append("\n\t").append(type).append(" get(int id){\n\t\treturn data[id];")
-				.append("\n\t}")
-				.append("\n};")
-				.append("\n");
+						.append("\nstruct List").append(type).append("{")
+						.append("\n\t").append(type).append(" data[").append(size).append("];")
+						.append("\n\tint size;")
+						.append("\n\t").append(type).append(" get(int id){\n\t\treturn data[id];")
+						.append("\n\t}")
+						.append("\n};")
+						.append("\n");
 			}
 			
 			return src.toString();

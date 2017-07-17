@@ -1,5 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +9,6 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
@@ -83,12 +84,11 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	private NanoTimer renderBuildBechmark=new NanoTimer(),renderBechmark=new NanoTimer();
 	
-	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL11.GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
+	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
 	private IModel			moon		=ObjModelLoader.loadAndBuild("moon");
 	public FboRboTextured	worldFbo	=new FboRboTextured();
 	public Fbo				skyFbo		=new Fbo();
 	public GuiHandler		guiHandler	=new GuiHandler();
-	
 	
 	private boolean renderWorldFlag=true;
 	
@@ -98,7 +98,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		worldFbo.initHook=()->renderWorldFlag=true;
 		fpsCounter.activate();
 		particleHandler=new ParticleHandler<>((parent, pos)->new ParticleFoo(parent, pos));
-		particleHandler.models.add(ModelLoader.buildModel("ParticleQuad", GL11.GL_TRIANGLES, "genNormals", false, "vertices", new float[]{
+		particleHandler.models.add(ModelLoader.buildModel("ParticleQuad", GL_TRIANGLES, "genNormals", false, "vertices", new float[]{
 				-0.5F,-0.5F,0,
 				+0.5F,-0.5F,0,
 				+0.5F,+0.5F,0,
@@ -115,7 +115,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 						0,0,
 						1,1,
 						0,1,
-		}, "textures", "particle/SoftBloom"));
+				}, "textures", "particle/SoftBloom"));
 		
 	}
 	
@@ -275,14 +275,14 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		skyFbo.setSize(worldFbo.getWidth()/SKY_RESOLUTION_DEVIDER, worldFbo.getHeight()/SKY_RESOLUTION_DEVIDER);
 		skyFbo.bind();
 		Shaders.SKYBOX.render();
-		skyFbo.copyTo(worldFbo, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_LINEAR);
+		skyFbo.copyTo(worldFbo, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		GLUtil.MULTISAMPLE.set(true);
 		worldFbo.bind();
-		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 		
 		//BACKGROUND
 		
-		GL11.glDepthMask(false);
+		glDepthMask(false);
 		GLUtil.DEPTH_TEST.set(false);
 		
 		//
@@ -293,7 +293,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		Shaders.ENTITY.renderSingle(mat, moon);
 		
 		GLUtil.DEPTH_TEST.set(true);
-		GL11.glDepthMask(true);
+		glDepthMask(true);
 		
 		//BUILD
 		addShader(Shaders.TERRAIN);
@@ -307,7 +307,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		renderBechmark.start();
 		renderBechmark.end();
 		UtilL.doAndClear(toRender, ShaderRenderer::render);
-		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		glEnable(GL_LINE_SMOOTH);
 		GLUtil.DEPTH_TEST.set(false);
 		Shaders.LINE.renderSingle(identity, lines);
 		GLUtil.DEPTH_TEST.set(true);

@@ -7,27 +7,36 @@ import javax.swing.JComponent;
 public final class ScrollUtil{
 	
 	public static final int		NONE	=0,TOP=1,VCENTER=2,BOTTOM=4,LEFT=8,HCENTER=16,RIGHT=32;
-	private static final int	OFFSET	=100;													// Required for hack (see below).
+	private static final int	OFFSET	=100;																										// Required for hack (see below).
 	
 	private ScrollUtil(){}
 	
 	/**
-	 * Scroll to specified location.  e.g. <tt>scroll(component, BOTTOM);</tt>.
+	 * Scroll to specified location. e.g. <tt>scroll(component, BOTTOM);</tt>.
 	 *
-	 * @param c JComponent to scroll.
-	 * @param part Location to scroll to.  Should be a bit-wise OR of one or moe of the values:
-	 * NONE, TOP, VCENTER, BOTTOM, LEFT, HCENTER, RIGHT.
+	 * @param c
+	 *            JComponent to scroll.
+	 * @param part
+	 *            Location to scroll to. Should be a bit-wise OR of one or moe
+	 *            of the values:
+	 *            NONE, TOP, VCENTER, BOTTOM, LEFT, HCENTER, RIGHT.
 	 */
 	public static void scroll(JComponent c, int part){
 		scroll(c, part&(LEFT|HCENTER|RIGHT), part&(TOP|VCENTER|BOTTOM));
 	}
 	
 	/**
-	 * Scroll to specified location.  e.g. <tt>scroll(component, LEFT, BOTTOM);</tt>.
+	 * Scroll to specified location. e.g.
+	 * <tt>scroll(component, LEFT, BOTTOM);</tt>.
 	 *
-	 * @param c JComponent to scroll.
-	 * @param horizontal Horizontal location.  Should take the value: LEFT, HCENTER or RIGHT.
-	 * @param vertical Vertical location.  Should take the value: TOP, VCENTER or BOTTOM.
+	 * @param c
+	 *            JComponent to scroll.
+	 * @param horizontal
+	 *            Horizontal location. Should take the value: LEFT, HCENTER or
+	 *            RIGHT.
+	 * @param vertical
+	 *            Vertical location. Should take the value: TOP, VCENTER or
+	 *            BOTTOM.
 	 */
 	public static void scroll(JComponent c, int horizontal, int vertical){
 		Rectangle visible=c.getVisibleRect();

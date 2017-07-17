@@ -1,12 +1,12 @@
 package com.lapissea.opengl.program.game.particle;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
-
-import org.lwjgl.opengl.GL11;
 
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.GLUtil.BlendFunc;
@@ -18,12 +18,12 @@ import com.lapissea.opengl.window.assets.IModel;
 @SuppressWarnings("unchecked")
 public class ParticleHandler<T extends Particle<T>>{
 	
-	private final List<T>			particles	=new ArrayList<>();
+	private final List<T> particles=new ArrayList<>();
 //	public final Class<T>				type;
 	private boolean						deadDirty;
 	private final ParticleFactory<T>	factory;
 	
-	public final List<IModel>	models	=new ArrayList<>();
+	public final List<IModel>		models	=new ArrayList<>();
 	private Queue<Particle<?>>[]	toRender=new Queue[0];
 	
 	NanoTimer upd=new NanoTimer(),rend=new NanoTimer();
@@ -52,8 +52,7 @@ public class ParticleHandler<T extends Particle<T>>{
 				return false;
 			});
 			deadDirty=false;
-		}
-		else particles.forEach(Particle::update);
+		}else particles.forEach(Particle::update);
 		upd.end();
 //		LogUtil.println(upd.msAvrg100(),rend.msAvrg100());
 	}
@@ -68,14 +67,14 @@ public class ParticleHandler<T extends Particle<T>>{
 		particles.forEach(p->toRender[p.getModelIndex()].add(p));
 		GLUtil.BLEND.set(true);
 		GLUtil.BLEND_FUNC.set(BlendFunc.ADD);
-		GL11.glDepthMask(false);
+		glDepthMask(false);
 		for(Queue<Particle<?>> batch:toRender){
 			Shaders.ENTITY.renderBatch(batch);
 			batch.clear();
 		}
 		rend.end();
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
-		GL11.glDepthMask(true);
+		glDepthMask(true);
 	}
 	
 	public void notifyDeath(){

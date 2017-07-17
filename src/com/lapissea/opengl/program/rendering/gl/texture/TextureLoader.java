@@ -1,5 +1,12 @@
 package com.lapissea.opengl.program.rendering.gl.texture;
 
+import static java.awt.image.BufferedImage.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL14.*;
+import static org.lwjgl.opengl.GL30.*;
+
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -12,11 +19,6 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL14;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GLContext;
 
 import com.lapissea.opengl.program.core.Game;
@@ -40,29 +42,73 @@ public class TextureLoader{
 	
 	private static class TextureData{
 		
-		final int			width,height;
+		final int			width,height,internalFormat,format;
 		final ByteBuffer	data;
 		
-		public TextureData(int width, int height, ByteBuffer data){
+		public TextureData(int width, int height, int internalFormat, int format, ByteBuffer data){
 			this.width=width;
 			this.height=height;
 			this.data=data;
+			this.internalFormat=internalFormat;
+			this.format=format;
 		}
 		
 		public TextureData(BufferedImage image){
-			this(image.getWidth(), image.getHeight(), imgToBuff(image));
+			this(image.getWidth(), image.getHeight(), getInternalFormat(image), getFormat(image), imgToBuff(image));
+		}
+		
+		private static int getFormat(BufferedImage image){
+			//@formatter:off
+			switch(image.getType()){
+			case TYPE_INT_RGB:return GL_RGB;
+			case TYPE_INT_ARGB:return GL_RGBA;
+			case TYPE_BYTE_GRAY:return GL_R;
+			case TYPE_USHORT_GRAY:return GL_R;
+			}
+			//@formatter:on
+			throw new IllegalStateException("Unknown type image format: "+image.getColorModel().toString());
+		}
+		
+		private static int getInternalFormat(BufferedImage image){
+			//@formatter:off
+			switch(image.getType()){
+			case TYPE_INT_RGB:{
+				switch(image.getColorModel().getComponentSize(0)){
+				case 4:return GL_RGB4;
+				case 5:return GL_RGB5;
+				case 8:return GL_RGB8;
+				case 10:return GL_RGB10;
+				case 12:return GL_RGB12;
+				case 16:return GL_RGB16;
+				}
+				throw new IllegalStateException("Unknown size "+image.getColorModel().getComponentSize(0)+" for RGB!");
+			}
+			case TYPE_INT_ARGB:{
+				switch(image.getColorModel().getComponentSize(0)){
+				case 4:return GL_RGBA4;
+				case 8:return GL_RGBA8;
+				case 12:return GL_RGBA12;
+				case 16:return GL_RGBA16;
+				}
+				throw new IllegalStateException("Unknown size "+image.getColorModel().getComponentSize(0)+" for RGBA!");
+			}
+			case TYPE_BYTE_GRAY:return GL_R8I;
+			case TYPE_USHORT_GRAY:return GL_R16F;
+			}
+			//@formatter:on
+			throw new IllegalStateException("Unknown type image format: "+image.getColorModel().toString());
 		}
 		
 	}
 	
 	static{
-		//		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_WRAP_S, GL13.GL_CLAMP_TO_BORDER);
-		//		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_WRAP_T, GL13.GL_CLAMP_TO_BORDER);
+		//		DEFAULT_PARAMS.put(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		//		DEFAULT_PARAMS.put(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		
-		//		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
-		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
-		DEFAULT_PARAMS.put(GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-		DEFAULT_PARAMS.put(GL14.GL_TEXTURE_LOD_BIAS, -1);
+		//		DEFAULT_PARAMS.put(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		DEFAULT_PARAMS.put(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		DEFAULT_PARAMS.put(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		DEFAULT_PARAMS.put(GL_TEXTURE_LOD_BIAS, -1);
 		
 		BufferedImage badImg=new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB);
 		badImg.setRGB(0, 0, 0xFF02FF41);
@@ -129,11 +175,10 @@ public class TextureLoader{
 			writeToNewObj(texture, image);
 			
 			GLUtil.checkError();
-		}
-		else{
+		}else{
 			texture.bind();
 			GLUtil.checkError();
-			GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, texture.getWidth(), texture.getHeight(), GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, image.data);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, texture.getWidth(), texture.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, image.data);
 			GLUtil.checkError();
 		}
 		
@@ -229,24 +274,24 @@ public class TextureLoader{
 		Game.glCtx(()->{
 			if(code!=texture.loadingKey()) return;//another loading process was called, this will have no effect hence it is pointless
 			
-			int id=GL11.glGenTextures();
+			int id=glGenTextures();
 			
 			///////////////////////////////////////////
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
+			glBindTexture(GL_TEXTURE_2D, id);
 			
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.width, image.height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, image.data);
+			glTexImage2D(GL_TEXTURE_2D, 0, image.internalFormat, image.width, image.height, 0, image.format, GL_UNSIGNED_BYTE, image.data);
 			
-			if(mergeParams(texture.params()).get(GL11.GL_TEXTURE_MIN_FILTER)!=GL11.GL_NEAREST){
-				GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+			if(mergeParams(texture.params()).get(GL_TEXTURE_MIN_FILTER)!=GL_NEAREST){
+				glGenerateMipmap(GL_TEXTURE_2D);
 				if(GLContext.getCapabilities().GL_EXT_texture_filter_anisotropic){
-					float ammount=Math.min(4, GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
-					GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, ammount);
-					GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, 0);
+					float ammount=Math.min(4, glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
+					glTexParameterf(GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, ammount);
+					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0);
 				}
 			}
-			CUSTOM_PARAMS.forEach((k, v)->GL11.glTexParameteri(GL11.GL_TEXTURE_2D, k, v));
+			CUSTOM_PARAMS.forEach((k, v)->glTexParameteri(GL_TEXTURE_2D, k, v));
 			
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
 			///////////////////////////////////////////
 			
 			texture.load(id, image.width, image.height);
@@ -269,22 +314,20 @@ public class TextureLoader{
 		Game.glCtx(()->{
 			if(code!=texture.loadingKey()) return;//another loading process was called, this will have no effect hence it is pointless
 			
-			int id=GL11.glGenTextures();
+			int id=glGenTextures();
 			
-			GL13.glActiveTexture(GL13.GL_TEXTURE0);
-			GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, id);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 			
 			for(int i=0;i<data.length;i++){
 				TextureData image=data[i];
-				GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL11.GL_RGBA,
-						image.width, image.height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
-						image.data);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
 			}
-			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-			GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-			//			mergeParams(texture.params()).forEach((k, v)->GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, k, v));
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			//			mergeParams(texture.params()).forEach((k, v)->glTexParameteri(GL_TEXTURE_CUBE_MAP, k, v));
 			
 			texture.load(id, -1, -1);
 			LogUtil.println("Loaded cube texture:", texture.getPath());
@@ -347,8 +390,7 @@ public class TextureLoader{
 		if(params==null||params.length==0){
 			CUSTOM_PARAMS.clear();
 			CUSTOM_PARAMS.putAll(DEFAULT_PARAMS);
-		}
-		else{
+		}else{
 			if(params.length%2!=0) throw new IllegalArgumentException("Params need to have x*2 elements!");
 			CUSTOM_PARAMS.clear();
 			CUSTOM_PARAMS.putAll(DEFAULT_PARAMS);

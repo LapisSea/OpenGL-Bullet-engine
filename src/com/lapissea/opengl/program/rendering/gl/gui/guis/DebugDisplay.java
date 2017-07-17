@@ -5,7 +5,6 @@ import com.lapissea.opengl.program.rendering.gl.gui.GuiFlow.SizeCalcStatic;
 import com.lapissea.opengl.program.rendering.gl.gui.IngameDisplay;
 import com.lapissea.opengl.program.rendering.gl.gui.elements.GuiLabel;
 
-
 public class DebugDisplay extends IngameDisplay{
 	
 	GuiLabel l;
@@ -33,9 +32,9 @@ public class DebugDisplay extends IngameDisplay{
 		l.preferedX=Align.NEGATIVE;
 		l.preferedY=Align.NEGATIVE;
 //		size.set(Game.win().getSize());
-		background.color.set(0,0,0,0.2F);
+		background.color.set(0, 0, 0, 0.2F);
 		borderWidth=5;
 		border.blurRad=10;
-		border.color.set(0,0,0,0.25F);
+		border.color.set(0, 0, 0, 0.25F);
 	}
 }

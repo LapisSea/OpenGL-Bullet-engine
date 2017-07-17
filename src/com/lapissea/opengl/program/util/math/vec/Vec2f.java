@@ -53,12 +53,13 @@ public class Vec2f implements Calculateable<Vec2f>{
 		this.y=y;
 		return this;
 	}
-
-	public Vec2f add(float x,float y){
+	
+	public Vec2f add(float x, float y){
 		x(x()+x);
 		y(y()+y);
 		return this;
 	}
+	
 	@Override
 	public Vec2f add(Vec2f c){
 		return add(c.x(), c.y());
@@ -136,7 +137,7 @@ public class Vec2f implements Calculateable<Vec2f>{
 	public String toString(){
 		return "Vec2f{x="+x()+", y="+y()+"}";
 	}
-
+	
 	public Vec2f set(IVec2i src){
 		x(src.x());
 		y(src.y());

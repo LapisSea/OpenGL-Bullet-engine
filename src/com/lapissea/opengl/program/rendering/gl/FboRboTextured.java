@@ -26,7 +26,6 @@ public class FboRboTextured extends Fbo{
 		if(renderBufferType){
 			textureReference.setSize(width, height);
 			copyColorTo(textureReference);
-		}
-		else textureReference.delete();
+		}else textureReference.delete();
 	}
 }

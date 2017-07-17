@@ -23,7 +23,4 @@ public class ShaderCtx{
 		parts.set(pos, part);
 	}
 	
-	
-	
-	
 }

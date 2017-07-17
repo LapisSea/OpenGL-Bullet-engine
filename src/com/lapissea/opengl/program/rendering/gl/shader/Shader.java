@@ -1,5 +1,9 @@
 package com.lapissea.opengl.program.rendering.gl.shader;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL32.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -16,9 +20,6 @@ import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.OpenGLException;
 
 import com.lapissea.opengl.program.core.Game;
@@ -73,15 +74,15 @@ public abstract class Shader{
 	}
 	
 	static{
-		registerUniform(GL20.GL_FLOAT_MAT4, UniformMat4.class);
-		registerUniform(GL11.GL_FLOAT, UniformFloat1.class);
-		registerUniform(GL20.GL_FLOAT_VEC2, UniformFloat2.class);
-		registerUniform(GL20.GL_FLOAT_VEC3, UniformFloat3.class);
-		registerUniform(GL20.GL_FLOAT_VEC4, UniformFloat4.class);
-		registerUniform(GL20.GL_BOOL, UniformBoolean.class);
-		registerUniform(GL11.GL_INT, UniformInt1.class);
-		registerUniform(GL20.GL_SAMPLER_2D, UniformSampler2D.class);
-		registerUniform(GL20.GL_SAMPLER_CUBE, UniformSamplerCube.class);
+		registerUniform(GL_FLOAT_MAT4, UniformMat4.class);
+		registerUniform(GL_FLOAT, UniformFloat1.class);
+		registerUniform(GL_FLOAT_VEC2, UniformFloat2.class);
+		registerUniform(GL_FLOAT_VEC3, UniformFloat3.class);
+		registerUniform(GL_FLOAT_VEC4, UniformFloat4.class);
+		registerUniform(GL_BOOL, UniformBoolean.class);
+		registerUniform(GL_INT, UniformInt1.class);
+		registerUniform(GL_SAMPLER_2D, UniformSampler2D.class);
+		registerUniform(GL_SAMPLER_CUBE, UniformSamplerCube.class);
 	}
 	
 	public int			program,vertex=NOT_LOADED,geometry=NOT_LOADED,fragment=NOT_LOADED;
@@ -126,9 +127,9 @@ public abstract class Shader{
 		
 		loader.setShader(this);
 		
-		loadShader(loader.getVertex(), GL20.GL_VERTEX_SHADER, ".vs", id->vertex=id);
-		loadShader(loader.getGeometry(), GL32.GL_GEOMETRY_SHADER, ".gs", id->geometry=id);
-		loadShader(loader.getFragment(), GL20.GL_FRAGMENT_SHADER, ".fs", id->fragment=id);
+		loadShader(loader.getVertex(), GL_VERTEX_SHADER, ".vs", id->vertex=id);
+		loadShader(loader.getGeometry(), GL_GEOMETRY_SHADER, ".gs", id->geometry=id);
+		loadShader(loader.getFragment(), GL_FRAGMENT_SHADER, ".fs", id->fragment=id);
 		glCtx(()->{
 			
 			if(fragment<0) throw new OpenGLException("Could not load shader: "+name+" (vs="+vertex+", gs="+geometry+", fs="+fragment+")");
@@ -139,7 +140,7 @@ public abstract class Shader{
 				if(module instanceof ShaderModule.ModelMdl) modulesModelUniforms.add((ShaderModule.ModelMdl)module);
 			});
 			
-			program=GL20.glCreateProgram();
+			program=glCreateProgram();
 			
 			GLUtil.attachShader(program, vertex);
 			GLUtil.attachShader(program, geometry);
@@ -149,8 +150,8 @@ public abstract class Shader{
 			
 			modules.forEach(ShaderModule::bindAttributes);
 			
-			GL20.glLinkProgram(program);
-			GL20.glValidateProgram(program);
+			glLinkProgram(program);
+			glValidateProgram(program);
 			HashMap<Integer,String> uniforms=new HashMap<>();
 			GLUtil.getAllUniforms(program, uniforms);
 			
@@ -189,15 +190,15 @@ public abstract class Shader{
 		}
 		
 		glCtx(()->{
-			GL20.glUseProgram(0);
+			glUseProgram(0);
 			
-			int shaderID=GL20.glCreateShader(type);
+			int shaderID=glCreateShader(type);
 			
-			GL20.glShaderSource(shaderID, data.obj1);
-			GL20.glCompileShader(shaderID);
+			glShaderSource(shaderID, data.obj1);
+			glCompileShader(shaderID);
 			String errTxt;
-			if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS)==GL11.GL_FALSE&&!(errTxt=GL20.glGetShaderInfoLog(shaderID, 2048)).isEmpty()){
-				GL20.glDeleteShader(shaderID);
+			if(glGetShaderi(shaderID, GL_COMPILE_STATUS)==GL_FALSE&&!(errTxt=glGetShaderInfoLog(shaderID, 2048)).isEmpty()){
+				glDeleteShader(shaderID);
 				shaderID=FAILED;
 				
 				LogUtil.printlnEr("Could not compile", name+ext);
@@ -291,7 +292,7 @@ public abstract class Shader{
 		
 		if(id==-1) return null;
 		
-		int type=GL20.glGetActiveUniformType(program, id);
+		int type=glGetActiveUniformType(program, id);
 		UniformFactory fac=UNIFORMS.get(type);
 		if(fac==null) throw new RuntimeException("Unknown uniform type "+type+" with name "+name+" and id "+id+" at shader "+this.name);
 		
@@ -301,13 +302,13 @@ public abstract class Shader{
 	public void bind(){
 		if(isBound()) return;
 		bound=true;
-		GL20.glUseProgram(program);
+		glUseProgram(program);
 	}
 	
 	public void unbind(){
 		if(!isBound()) return;
 		bound=false;
-		GL20.glUseProgram(0);
+		glUseProgram(0);
 	}
 	
 	public boolean isBound(){
@@ -327,7 +328,7 @@ public abstract class Shader{
 		GLUtil.deleteDetachShader(program, geometry);
 		GLUtil.deleteDetachShader(program, fragment);
 		
-		GL20.glDeleteProgram(program);
+		glDeleteProgram(program);
 		
 		vertex=fragment=geometry=program=NOT_LOADED;
 		loaded=false;
@@ -345,7 +346,7 @@ public abstract class Shader{
 	
 	public void bindAttribute(int attr, String name){
 		GLUtil.checkError();
-		GL20.glBindAttribLocation(program, attr, name);
+		glBindAttribLocation(program, attr, name);
 		GLUtil.checkError();
 	}
 	

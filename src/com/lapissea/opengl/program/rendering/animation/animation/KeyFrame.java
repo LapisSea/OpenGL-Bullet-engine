@@ -17,10 +17,10 @@ import java.util.Map;
  * @author Karl
  *
  */
-public class KeyFrame {
+public class KeyFrame{
 	
-	private final float timeStamp;
-	private final Map<String, JointTransform> pose;
+	private final float							timeStamp;
+	private final Map<String,JointTransform>	pose;
 	
 	/**
 	 * @param timeStamp
@@ -31,15 +31,15 @@ public class KeyFrame {
 	 *            keyframe, indexed by the name of the joint that they should be
 	 *            applied to.
 	 */
-	public KeyFrame(float timeStamp, Map<String, JointTransform> jointKeyFrames) {
-		this.timeStamp = timeStamp;
-		pose = jointKeyFrames;
+	public KeyFrame(float timeStamp, Map<String,JointTransform> jointKeyFrames){
+		this.timeStamp=timeStamp;
+		pose=jointKeyFrames;
 	}
 	
 	/**
 	 * @return The time in seconds of the keyframe in the animation.
 	 */
-	protected float getTimeStamp() {
+	protected float getTimeStamp(){
 		return timeStamp;
 	}
 	
@@ -49,7 +49,7 @@ public class KeyFrame {
 	 *         they correspond to. This basically represents the "pose" at this
 	 *         keyframe.
 	 */
-	protected Map<String, JointTransform> getJointKeyFrames() {
+	protected Map<String,JointTransform> getJointKeyFrames(){
 		return pose;
 	}
 	

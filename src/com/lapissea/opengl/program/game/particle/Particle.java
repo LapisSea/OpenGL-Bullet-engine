@@ -57,7 +57,6 @@ public class Particle<T extends Particle<T>> implements ModelTransformed{
 		return dead;
 	}
 	
-	
 	public Vec3f getModelPos(){
 		return PartialTick.calc(POS, prevPos, pos);
 	}

@@ -21,7 +21,7 @@ public class ShaderModuleMousePosition extends ShaderModule implements Global{
 	
 	@Override
 	public void uploadUniformsGlobal(){
-		if(mousePos!=null) mousePos.upload(Mouse.getX(),Mouse.getY());
+		if(mousePos!=null) mousePos.upload(Mouse.getX(), Mouse.getY());
 	}
 	
 }
