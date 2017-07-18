@@ -1,26 +1,32 @@
 
 #include "TextureBinary.smd"
 
-const int MAX_JOINTS = 50;
-const int MAX_WEIGHTS = 3;
+uniform mat4 jointTransforms[<MAX_JOINT_TRANSFORMS>];
 
-uniform mat4 jointTransforms[20];
+uniform BinTextureReader jointTransformData;
 
-in ivec3 jointIndices;
-in vec3 weights;
+in int armaturePtr;
+
 
 void transform(vec3 &position, vec3 &normal){
+	int pos = armaturePtr;
+	
+	int weightCount = int(round(jointTransformData.getFloat(pos)));
 	
 	vec4 totalLocalPos = vec4(0.0);
 	vec4 totalNormal = vec4(0.0);
 	
-	for(int i=0;i<MAX_WEIGHTS;i++){
-		mat4 jointTransform = jointTransforms[jointIndices[i]];
-		vec4 posePosition = jointTransform * vec4(position, 1);
-		totalLocalPos += posePosition * weights[i];
+	for(int i=0;i<weightCount;i++){
 		
-		vec4 worldNormal = jointTransform * vec4(normal, 0);
-		totalNormal += worldNormal * weights[i];
+		float weight=jointTransformData.getFloat(pos));
+		
+		int jointId = int(round(jointTransformData.getFloat(pos)));
+		mat4 jointTransform = jointTransforms[jointId];
+		
+		
+		totalLocalPos += jointTransform*vec4(position, 1) * weight;
+		
+		totalNormal += jointTransform*vec4(normal, 0) * weight;
 	}
 	
 	position=totalLocalPos.xyz;

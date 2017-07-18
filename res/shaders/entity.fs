@@ -1,7 +1,7 @@
 #version 400 core
 
 in vec2 uv;
-in float materialId;
+flat in int materialId;
 
 out vec4 pixelColor;
 
@@ -27,7 +27,7 @@ void main(void){
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
 	
-	ModelMaterial m=getMaterial(int(round(materialId)));
+	ModelMaterial m=getMaterial(materialId);
 	
 	calculateLighting(m, pointLights, lineLights, dirLights);
 	pixelColor=applyLighting(pixelColor, minBrightness, m);

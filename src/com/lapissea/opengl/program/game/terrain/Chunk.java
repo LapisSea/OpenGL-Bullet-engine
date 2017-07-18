@@ -59,9 +59,8 @@ public class Chunk implements ModelTransformed{
 	private void generateModel(int gridX, int gridZ, IHeightMapProvider hMap){
 		int r1=RESOLUTION+1;
 		
-		FloatList vertices=new FloatArrayList(),mats=new FloatArrayList();
-		
-		IntList indices=new IntArrayList();
+		FloatList vertices=new FloatArrayList();
+		IntList mats=new IntArrayList(),indices=new IntArrayList();
 		
 		float mul=SIZE/RESOLUTION;
 		for(int z=0;z<r1;z++){
@@ -118,18 +117,18 @@ public class Chunk implements ModelTransformed{
 				mats.add(1);
 			}
 		}
-		model=ModelLoader.buildModel("Gen_Chunk-"+gridX+"_"+gridZ, GL_TRIANGLES, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toFloatArray(), "genNormals", true, "materials", new Material(0, "ground")).culface(false);
+		model=ModelLoader.buildModel("Gen_Chunk-"+gridX+"_"+gridZ, GL_TRIANGLES, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toIntArray(), "genNormals", true, "materials", new Material(0, "ground")).culface(false);
 		
 		model.createMaterial("grass")
-				.setDiffuse(0.2F, 1, 0.25F, 1)
-				.setLightTroughput(0.5F)
-				.setJelly(0.3F);
+		.setDiffuse(0.2F, 1, 0.25F, 1)
+		.setLightTroughput(0.5F)
+		.setJelly(0.3F);
 		
 		model.getMaterial("ground")
-				.setShineDamper(50)
-				.setReflectivity(1)
-				.setDiffuse(0.2F, 1, 0.25F, 1)
-				.setSpecular(1, 1, 1, 1);
+		.setShineDamper(50)
+		.setReflectivity(1)
+		.setDiffuse(0.2F, 1, 0.25F, 1)
+		.setSpecular(1, 1, 1, 1);
 	}
 	
 	@Override

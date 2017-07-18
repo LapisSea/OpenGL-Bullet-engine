@@ -198,7 +198,7 @@ public class ModelLoader{
 	 * <br>
 	 * normals = float[]
 	 * <br>
-	 * materialIds = float[] (only round numbers)
+	 * materialIds = int[]
 	 * <br>
 	 * indices = int[]
 	 * <br>
@@ -237,14 +237,15 @@ public class ModelLoader{
 		boolean genNormal=genNormalObj==null?!data.containsKey("normals"):(boolean)genNormalObj;
 		if(!killSmooth&&genNormal) data.put("normals", hasIds?generateNormals(vert, indices):generateNormals(vert));
 		
-		float[] uvs=(float[])data.get("uvs"),normals=(float[])data.get("normals"),materialIds=(float[])data.get("materialIds"),primitiveColor=(float[])data.get("primitiveColor");
-		
+		float[] uvs=(float[])data.get("uvs"),normals=(float[])data.get("normals"),primitiveColor=(float[])data.get("primitiveColor");
+		int[] materialIds=(int[])data.get("materialIds");
 		if(killSmooth){
-			float[] vert0=vert,uvs0=uvs,normals0=normals,materialIds0=materialIds,primitiveColor0=primitiveColor;
+			float[] vert0=vert,uvs0=uvs,normals0=normals,primitiveColor0=primitiveColor;
+			int[] materialIds0=materialIds;
 			vert=new float[indices.length*3];
 			if(uvs!=null) uvs=new float[indices.length*2];
 			if(normals!=null) normals=new float[indices.length*3];
-			if(materialIds!=null) materialIds=new float[indices.length];
+			if(materialIds!=null) materialIds=new int[indices.length];
 			if(primitiveColor!=null) primitiveColor=new float[indices.length*4];
 			
 			if(format==GL_QUADS){
@@ -420,7 +421,7 @@ public class ModelLoader{
 		
 		if(vert.length%vertexType.size!=0) throw new IllegalArgumentException(vert.length+" is not a valid vertex count for dimensions of "+vertexType.size+" in model "+name);
 		
-		T model=create(type, name, format, hasIds?indices:null, vertexType, vert, new float[][]{uvs,normals,materialIds,primitiveColor}, UV_ATTR, NORMAL_ATTR, MATERIAL_ID_ATTR, COLOR_ATTR);
+		T model=create(type, name, format, hasIds?indices:null, vertexType, vert, new Object[]{uvs,normals,materialIds,primitiveColor}, UV_ATTR, NORMAL_ATTR, MATERIAL_ID_ATTR, COLOR_ATTR);
 		
 		//INJECT TEXTURE
 		UtilL.iterate(data.get("textures"), obj->model.addTexture(obj instanceof ITexture?(ITexture)obj:TextureLoader.loadTexture((String)obj)));
@@ -431,19 +432,19 @@ public class ModelLoader{
 		return model;
 	}
 	
-	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, float[] vertex, float[][] data, ModelAttribute...attrs){
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, float[] vertex, Object[] data, ModelAttribute...attrs){
 		return create(type, name, format, indices, vertex, true, data, attrs);
 	}
 	
-	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, float[] vertex, boolean print, float[][] data, ModelAttribute...attrs){
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, float[] vertex, boolean print, Object[] data, ModelAttribute...attrs){
 		return create(type, name, format, indices, ModelAttribute.VERTEX_ATTR_3D, vertex, data, attrs);
 	}
 	
-	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, ModelAttribute vertexType, float[] vertex, float[][] data, ModelAttribute...attrs){
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, ModelAttribute vertexType, float[] vertex, Object[] data, ModelAttribute...attrs){
 		return create(type, name, format, indices, vertexType, vertex, true, data, attrs);
 	}
 	
-	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, ModelAttribute vertexType, float[] vertex, boolean print, float[][] data, ModelAttribute...attrs){
+	public static <T extends IModel> T create(Class<T> type, String name, int format, int[] indices, ModelAttribute vertexType, float[] vertex, boolean print, Object[] data, ModelAttribute...attrs){
 		if(attrs.length!=data.length) throw new RuntimeException("Attributes not equal size as data!");
 		
 		T model;
@@ -469,7 +470,10 @@ public class ModelLoader{
 			if(hasIds) bindIndices(indices);
 			putAttribute(vbos, attributes, vertexType, vertex);
 			for(int i=0;i<data.length;i++){
-				putAttribute(vbos, attributes, attrs[i], data[i]);
+				Object dataPart=data[i];
+				if(dataPart==null) continue;
+				if(dataPart.getClass().equals(float[].class)) putAttribute(vbos, attributes, attrs[i], (float[])dataPart);
+				else putAttribute(vbos, attributes, attrs[i], (int[])dataPart);
 			}
 			
 			unbindVao();
@@ -512,10 +516,9 @@ public class ModelLoader{
 	private static void putAttribute(List<Vbo> vbos, List<ModelAttribute> attributes, ModelAttribute attr, int[] data){
 		if(data==null||data.length==0) return;
 		Vbo vbo=Vbo.create(GL_ARRAY_BUFFER);
-		
 		vbo.bind();
 		vbo.storeData(data);
-		glVertexAttribPointer(attr.id, attr.size, GL_INT, false, 0, 0);
+		glVertexAttribIPointer(attr.id, attr.size, GL_INT, 0, 0);
 		vbo.unbind();
 		
 		vbos.add(vbo);

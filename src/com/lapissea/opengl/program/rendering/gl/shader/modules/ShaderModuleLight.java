@@ -120,7 +120,6 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 			if(r.dirLights.size()>MAX_DIR_LIGHT) s.sorted((l1, l2)->Float.compare(l1.color.a(), l2.color.a()));
 			s.forEach(DIRS::add);
 		}
-		
 		numberOfPointLights.upload(POINTS.size());
 		for(int i=0;i<POINTS.size();i++){
 			PointLight light=POINTS.get(i);

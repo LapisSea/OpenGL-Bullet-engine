@@ -4,10 +4,10 @@
 in vec3 pos;
 in vec2 uvIn;
 in vec3 normalIn;
-in float materialIdIn;
+in int materialIdIn;
 
 out vec2 uv;
-out float materialId;
+flat out int materialId;
 
 
 uniform mat4 transformMat;
@@ -74,18 +74,20 @@ struct BinTextureReader{
 	int pos;
 	int width;
 	int height;
+	int channelCount;
+	sampler2D data;
 	
-	float readFloat(sampler2D data){
-		return readByte(data, pos++, width, height, 1);
+	float readFloat(){
+		return readByte(data, pos++, width, height, channelCount);
 	}
-	vec2 readVec2(sampler2D data){
-		return vec2(readFloat(data),readFloat(data));
+	vec2 readVec2(){
+		return vec2(readFloat(),readFloat());
 	}
-	vec3 readVec3(sampler2D data){
-		return vec3(readVec2(data),readFloat(data));
+	vec3 readVec3(){
+		return vec3(readVec2(),readFloat());
 	}
-	vec4 readVec4(sampler2D data){
-		return vec4(readVec3(data),readFloat(data));
+	vec4 readVec4(){
+		return vec4(readVec3(),readFloat());
 	}
 	
 };
@@ -108,7 +110,10 @@ float readByte(sampler2D data, int pos, int width, int height, int channelCount)
 
 
 void main(void){
-	ModelMaterial m=getMaterial(int(round(materialIdIn)));
+	uv=uvIn;
+	
+	ModelMaterial m=getMaterial(materialId=materialIdIn);
+	
 	vec3 pos0=pos;
 	if(m.jelly>0){
 		vec3 v=(transformMat*vec4(pos0,1)).xyz;
@@ -120,8 +125,6 @@ void main(void){
 	vec4 posRelativeToCam=viewMat*worldPos;
 	
 	gl_Position=projectionMat*posRelativeToCam;
-	uv=uvIn;
-	materialId=materialIdIn;
 	
 	
 	lightingSetUp(transformMat, worldPos, normalIn, (inverse(viewMat)*vec4(0,0,0,1)).xyz);

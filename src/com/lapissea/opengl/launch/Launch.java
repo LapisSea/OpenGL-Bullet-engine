@@ -34,19 +34,30 @@ public class Launch{
 			
 //			LogUtil.println(badImg.getColorModel().getm);
 			
-			//			TransformerAsmPoll.register();
-			//			try{
-			//				new Test().lel();
-			//			}catch(Exception e){
-			//				e.printStackTrace();
-			//			}
+//			TransformerAsmPoll.register();
+//			try{
+//				new Test().lel();
+//			}catch(Exception e){
+//				e.printStackTrace();
+//			}
+//			{
+//				File f=new File("img.png");
+//
+//				BufferedImage img=ImageIO.read(f);
+//
+//				LogUtil.println(img.getRGB(0, 0, 1, 1, null, 0, 1));
+//
+//				for(int x=0;x<256;x++){
+//					for(int y=0;y<256;y++){
+//						img.setRGB(x, y, Integer.MAX_VALUE);
+//					}
+//				}
+//				ImageIO.write(img, "png", f);
+//			}
 //			System.exit(0);
 			
-			LogUtil.printWrapped("=====PRE_GAME_INIT=====");
-			
-			LogUtil.println("OS named \""+OperatingSystem.OS_NAME+"\" has been identified as", OperatingSystem.ACTIVE_OS);
-			
 			LogUtil.printWrapped("=======GAME_INIT=======");
+			LogUtil.println("OS named \""+OperatingSystem.OS_NAME+"\" has been identified as", OperatingSystem.ACTIVE_OS);
 			
 			Thread.setDefaultUncaughtExceptionHandler((t, e)->{
 				e.printStackTrace();
@@ -65,12 +76,12 @@ public class Launch{
 				
 				//window.setTitle("Genine and Lee");
 				window
-						.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
-						.setPos(-10000, -10000)
-						.setTitle("The abandoned")
-						.setFullScreen(false)
-						.setResizable(true)
-						.setVSync(true);
+				.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
+				.setPos(-10000, -10000)
+				.setTitle("The abandoned")
+				.setFullScreen(false)
+				.setResizable(true)
+				.setVSync(true);
 				
 				//				window.setPos(winCfg.position);
 				//				window.setSize(winCfg.size);

@@ -54,6 +54,7 @@ public abstract class ShaderModule{
 		registerModule("MousePosition", ShaderModuleMousePosition.class, new ShaderModuleGlobalUniform.Loader("vec2", "mousePos"));
 		registerModule("Time", ShaderModuleTime.class, new ShaderModuleTime.Loader());
 		registerModule("ArrayList", ShaderModuleArrayList.class, new ShaderModuleArrayList.Loader());
+		registerModule("Armature", ShaderModuleArmature.class);
 	}
 	
 	public static void registerModule(String name, Class<? extends ShaderModule> module){

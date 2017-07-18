@@ -4,10 +4,10 @@
 in vec3 pos;
 in vec2 uvIn;
 in vec3 normalIn;
-in float materialIdIn;
+in int materialIdIn;
 
 out vec2 uv;
-out float materialId;
+flat out int materialId;
 
 
 uniform mat4 transformMat;
@@ -21,11 +21,13 @@ uniform float fogGradient;
 #include "Light.vsmd"
 #include "Fog.vsmd"
 #include "Time.smd"
-#include "TextureBinary.smd"
 
 
 void main(void){
-	ModelMaterial m=getMaterial(int(round(materialIdIn)));
+	uv=uvIn;
+	
+	ModelMaterial m=getMaterial(materialId=materialIdIn);
+	
 	vec3 pos0=pos;
 	if(m.jelly>0){
 		vec3 v=(transformMat*vec4(pos0,1)).xyz;
@@ -37,8 +39,6 @@ void main(void){
 	vec4 posRelativeToCam=viewMat*worldPos;
 	
 	gl_Position=projectionMat*posRelativeToCam;
-	uv=uvIn;
-	materialId=materialIdIn;
 	
 	
 	lightingSetUp(transformMat, worldPos, normalIn, (inverse(viewMat)*vec4(0,0,0,1)).xyz);

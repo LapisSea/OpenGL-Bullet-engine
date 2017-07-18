@@ -18,8 +18,6 @@ import com.lapissea.opengl.window.impl.assets.Model;
 import com.lapissea.util.LogUtil;
 import com.lapissea.util.UtilL;
 
-import it.unimi.dsi.fastutil.floats.FloatArrayList;
-import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
@@ -31,7 +29,7 @@ public class ObjModelLoader{
 		
 		public List<Vec3f>		vertecies	=new ArrayList<>();
 		public List<Vec2f>		uvs			=new ArrayList<>();
-		public FloatList		materialIds	=new FloatArrayList();
+		public IntList			materialIds	=new IntArrayList();
 		public List<Vec3f>		normals		=new ArrayList<>();
 		public List<IMaterial>	materials	=new ArrayList<>();
 		public boolean			hasUvs,hasMaterials,hasNormals;
@@ -49,8 +47,8 @@ public class ObjModelLoader{
 			return data;
 		}
 		
-		public float[] getMat(){
-			return hasMaterials?materialIds.toFloatArray():null;
+		public int[] getMat(){
+			return hasMaterials?materialIds.toIntArray():null;
 		}
 		
 		public float[] getNorm(){

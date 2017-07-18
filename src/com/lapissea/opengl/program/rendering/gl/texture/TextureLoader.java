@@ -1,6 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.texture;
 
 import static java.awt.image.BufferedImage.*;
+import static org.lwjgl.opengl.EXTTextureFilterAnisotropic.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
 import static org.lwjgl.opengl.GL13.*;
@@ -18,7 +19,6 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
 import org.lwjgl.opengl.GLContext;
 
 import com.lapissea.opengl.program.core.Game;
@@ -60,18 +60,22 @@ public class TextureLoader{
 		private static int getFormat(BufferedImage image){
 			//@formatter:off
 			switch(image.getType()){
+			case TYPE_3BYTE_BGR:
 			case TYPE_INT_RGB:return GL_RGB;
+			case TYPE_4BYTE_ABGR:
 			case TYPE_INT_ARGB:return GL_RGBA;
 			case TYPE_BYTE_GRAY:return GL_R;
 			case TYPE_USHORT_GRAY:return GL_R;
 			}
 			//@formatter:on
+			LogUtil.printlnEr(image.getType());
 			throw new IllegalStateException("Unknown type image format: "+image.getColorModel().toString());
 		}
 		
 		private static int getInternalFormat(BufferedImage image){
 			//@formatter:off
 			switch(image.getType()){
+			case TYPE_3BYTE_BGR:
 			case TYPE_INT_RGB:{
 				switch(image.getColorModel().getComponentSize(0)){
 				case 4:return GL_RGB4;
@@ -83,6 +87,7 @@ public class TextureLoader{
 				}
 				throw new IllegalStateException("Unknown size "+image.getColorModel().getComponentSize(0)+" for RGB!");
 			}
+			case TYPE_4BYTE_ABGR:
 			case TYPE_INT_ARGB:{
 				switch(image.getColorModel().getComponentSize(0)){
 				case 4:return GL_RGBA4;
@@ -96,6 +101,7 @@ public class TextureLoader{
 			case TYPE_USHORT_GRAY:return GL_R16F;
 			}
 			//@formatter:on
+			LogUtil.printlnEr(image.getType());
 			throw new IllegalStateException("Unknown type image format: "+image.getColorModel().toString());
 		}
 		
@@ -278,14 +284,14 @@ public class TextureLoader{
 			
 			///////////////////////////////////////////
 			glBindTexture(GL_TEXTURE_2D, id);
-			
+			LogUtil.println(image.data.toString());
 			glTexImage2D(GL_TEXTURE_2D, 0, image.internalFormat, image.width, image.height, 0, image.format, GL_UNSIGNED_BYTE, image.data);
 			
 			if(mergeParams(texture.params()).get(GL_TEXTURE_MIN_FILTER)!=GL_NEAREST){
 				glGenerateMipmap(GL_TEXTURE_2D);
 				if(GLContext.getCapabilities().GL_EXT_texture_filter_anisotropic){
-					float ammount=Math.min(4, glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
-					glTexParameterf(GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, ammount);
+					float ammount=Math.min(4, glGetFloat(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
+					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, ammount);
 					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0);
 				}
 			}
@@ -321,7 +327,7 @@ public class TextureLoader{
 			
 			for(int i=0;i<data.length;i++){
 				TextureData image=data[i];
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, image.internalFormat, image.width, image.height, 0, image.format, GL_UNSIGNED_BYTE, image.data);
 			}
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -403,21 +409,43 @@ public class TextureLoader{
 		return CUSTOM_PARAMS;
 	}
 	
-	public static ByteBuffer imgToBuff(BufferedImage img){
-		BufferedImage image=img;
+	public static ByteBuffer imgToBuff(BufferedImage image){
 		
 		int[] pixels=new int[image.getWidth()*image.getHeight()];
 		image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
-		
-		ByteBuffer buffer=BufferUtils.createByteBuffer(image.getWidth()*image.getHeight()*4); //4 for RGBA, 3 for RGB
+		ByteBuffer buffer=BufferUtils.createByteBuffer(image.getWidth()*image.getHeight()*image.getColorModel().getPixelSize()/8);
 		
 		for(int y=0;y<image.getHeight();y++){
 			for(int x=0;x<image.getWidth();x++){
 				int pixel=pixels[y*image.getWidth()+x];
-				buffer.put((byte)(pixel>>16&0xFF)); // Red component
-				buffer.put((byte)(pixel>>8&0xFF)); // Green component
-				buffer.put((byte)(pixel&0xFF)); // Blue component
-				buffer.put((byte)(pixel>>24&0xFF)); // Alpha component. Only for RGBA
+				switch(image.getType()){
+				case TYPE_3BYTE_BGR:
+				case TYPE_INT_RGB:{
+					buffer.put((byte)(pixel>>16&0xFF)); // Red component
+					buffer.put((byte)(pixel>>8&0xFF)); // Green component
+					buffer.put((byte)(pixel&0xFF)); // Blue component
+				}
+				break;
+				case TYPE_4BYTE_ABGR:
+				case TYPE_INT_ARGB:{
+					buffer.put((byte)(pixel>>16&0xFF)); // Red component
+					buffer.put((byte)(pixel>>8&0xFF)); // Green component
+					buffer.put((byte)(pixel&0xFF)); // Blue component
+					buffer.put((byte)(pixel>>24&0xFF)); // Alpha component. Only for RGBA
+				}
+				break;
+				case TYPE_BYTE_GRAY:{
+					buffer.put((byte)pixel);
+				}
+				break;
+				case TYPE_USHORT_GRAY:{
+					buffer.putShort((short)pixel);
+				}
+				break;
+				default:
+					LogUtil.printlnEr(image.getType());
+					throw new IllegalStateException("Unknown type image format: "+image.getColorModel().toString());
+				}
 			}
 		}
 		
