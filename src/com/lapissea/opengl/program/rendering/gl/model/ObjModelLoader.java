@@ -283,21 +283,21 @@ public class ObjModelLoader{
 		return model;
 	}
 	
-	private static void lines(InputStream steam, Consumer<String> cons) throws IOException{
+	private static void lines(InputStream stream, Consumer<String> cons) throws IOException{
 		StringBuilder lineBuild=new StringBuilder();
 		int ch;
 		
 		while(true){
 			String line;
 			while(true){
-				ch=steam.read();
+				ch=stream.read();
 				if(ch==-1){
 					line=lineBuild.toString();
 					lineBuild.setLength(0);
 					break;
 				}
 				if(ch=='\n'){
-					ch=steam.read();
+					ch=stream.read();
 					line=lineBuild.toString();
 					lineBuild.setLength(0);
 					if(ch!='\r'&&ch!='\n') lineBuild.append((char)ch);
