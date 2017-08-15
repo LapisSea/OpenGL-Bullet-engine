@@ -24,9 +24,9 @@ struct ModelMaterial{
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+	vec3 emission;
 	float jelly;
 	float shineDamper;
-	float reflectivity;
 	float lightTroughput;
 };
 
@@ -58,24 +58,26 @@ float cutOff(float value, float cut){
 
 
 struct PointLight{
-	vec4 color;
+	vec3 color;
 	vec3 attenuation;
 	vec3 pos;
 };
 struct LineLight{
-	vec4 color;
+	vec3 color;
 	vec3 attenuation;
 	vec3 pos1;
 	vec3 pos2;
 };
 struct DirectionalLight{
-	vec4 color;
+	vec3 color;
+	vec3 ambient;
 	vec3 direction;
 };
 
 
 vec3 light_diffuseTotal=vec3(0,0,0);
 vec3 light_specularTotal=vec3(0,0,0);
+vec3 light_AmbientTotal=vec3(0,0,0);
 
 #define EPSILON 2.220446049250313e-16
 
@@ -139,8 +141,15 @@ vec3 calculateLineLineIntersection(vec3 line1Point1, vec3 line1Point2, vec3 line
 	return resultSegmentPoint;
 }
 
+void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, ModelMaterial material, vec3 wPos, float howFacingToCam, bool hasSpecular){
+	vec3 toLight=light.pos-wPos;
+	float dist=length(toLight);
+	float attFact= 1/(
+		light.attenuation.x+
+		light.attenuation.y*dist+
+		light.attenuation.z*dist*dist
+	);
 
-void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 toLight, vec3 lightColor, ModelMaterial material, float howFacingToCam){
 	vec3 unitToLight=normalize(toLight);
 	float cutOff=6/256.0;
 	attFact-=cutOff;
@@ -148,16 +157,14 @@ void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 to
 	attFact*=1+cutOff;
 	
 	float brightness=1;
-	if(abs(unitNormal.x)+abs(unitNormal.y)+abs(unitNormal.z)>0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
+	if(unitNormal.x!=0||unitNormal.y!=0||unitNormal.z!=0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
 	
 	if(brightness<0)return;
-	vec3 col=lightColor*attFact;
+	vec3 col=light.color*attFact;
 	
 	light_diffuseTotal+=brightness*col;
 	
-	if(material.reflectivity>0){
-		vec3 camreaReflect=reflect(unitToCamera,unitNormal);
-		
+	if(hasSpecular){
 		
 		vec3 lightDir=-unitToLight; 
 		
@@ -167,20 +174,10 @@ void calcGenericLight(vec3 unitToCamera, vec3 unitNormal, float attFact, vec3 to
 		
 		float dampedSpecular=pow(max(0,rawSpecular),material.shineDamper);
 		
-		light_specularTotal+=dampedSpecular*brightness*(material.reflectivity*(1+howFacingToCam*2))*col;
+		light_specularTotal+=dampedSpecular*brightness*(1+howFacingToCam*2)*col;
 	}
 }
-void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, ModelMaterial material, vec3 wPos, float howFacingToCam){
-	vec3 toLight=light.pos-wPos;
-	float dist=length(toLight);
-	float attFact= 
-		 light.attenuation.x+
-		(light.attenuation.y*dist)+
-		(light.attenuation.z * dist*dist)
-	;
-	calcGenericLight(unitToCamera, unitNormal, 1/attFact, toLight, light.color.rgb*light.color.a,material, howFacingToCam);
-}
-void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, ModelMaterial material, vec3 wPos, float howFacingToCam){
+void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, ModelMaterial material, vec3 wPos, float howFacingToCam, bool hasSpecular){
 	vec3 toLight=getClosetPoint(light.pos1,light.pos2, wPos)-wPos;
 	
 	float dist=length(toLight);
@@ -190,7 +187,6 @@ void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, Mod
 		(light.attenuation.z * dist*dist)
 	;
 	attFact=1/attFact;
-	vec3 lightColor=light.color.rgb*light.color.a;
 	
 	vec3 unitToLight=normalize(toLight);
 	
@@ -200,14 +196,14 @@ void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, Mod
 	attFact*=1+cutOff;
 	
 	float brightness=1;
-	if(abs(unitNormal.x)+abs(unitNormal.y)+abs(unitNormal.z)>0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
+	if(unitNormal.x!=0||unitNormal.y!=0||unitNormal.z!=0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
 	
 	if(brightness<0)return;
-	vec3 col=lightColor*attFact;
+	vec3 col=light.color*attFact;
 	
 	light_diffuseTotal+=brightness*col;
 	
-	if(material.reflectivity>0){
+	if(hasSpecular){
 		vec3 onLightPoint=light.pos1;
 		if(light.pos1!=light.pos2){
 			vec3 reflectedCam=reflect(unitToCamera,unitNormal);
@@ -229,18 +225,45 @@ void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, Mod
 		
 		float dampedSpecular=pow(max(0,rawSpecular),material.shineDamper);
 		
-		light_specularTotal+=dampedSpecular*brightness*(material.reflectivity*(1+howFacingToCam))*col;
+		light_specularTotal+=dampedSpecular*brightness*(1+howFacingToCam)*col;
 	}
 }
 
-void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, ModelMaterial material, float howFacingToCam){
-	calcGenericLight(unitToCamera, unitNormal, 1, light.direction, light.color.rgb*light.color.a,material,howFacingToCam);
+void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, ModelMaterial material, float howFacingToCam, bool hasSpecular){
+	
+	vec3 unitToLight=light.direction;
+	float brightness=1;
+	if(unitNormal.x!=0||unitNormal.y!=0||unitNormal.z!=0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
+
+	float amb;
+	if(brightness>-0.5)amb=(1-brightness)/1.5;
+	else amb=1.25+brightness/2;
+	
+	light_AmbientTotal+=light.ambient*sqrt(amb);
+	
+	if(brightness<0)return;
+	vec3 col=light.color;
+	
+	light_diffuseTotal+=col*brightness;
+
+	if(hasSpecular){
+		
+		vec3 lightDir=-unitToLight; 
+		
+		vec3 reflectedDir=reflect(lightDir,unitNormal);
+		
+		float rawSpecular=dot(reflectedDir, unitToCamera);
+		
+		float dampedSpecular=pow(max(0,rawSpecular),material.shineDamper);
+		
+		light_specularTotal+=dampedSpecular*brightness*(1+howFacingToCam*2)*col;
+	}
 }
 
 
 /*MODULE_START: ArrayList.smd*/
 struct ListPointLight{
-	PointLight data[2];
+	PointLight data[6];
 	int size;
 	PointLight get(int id){
 		return data[id];
@@ -277,26 +300,25 @@ void calculateLighting(ModelMaterial material, ListPointLight pointLights, ListL
 	
 	if(!gl_FrontFacing)unitNormal*=-1;
 	
-	
 	//fresnel effect
 	float howFacingToCam=1-max(0,dot(unitToCamera,unitNormal));
+	bool hasSpecular=material.specular!=0||material.specular.y!=0||material.specular.z!=0;
 	
 	for(int i=0;i<pointLights.size;i++){
-		calcPointLightColor(unitToCamera, unitNormal, pointLights.get(i), material, wPos, howFacingToCam);
+		calcPointLightColor(unitToCamera, unitNormal, pointLights.get(i), material, wPos, howFacingToCam, hasSpecular);
 	}
 	for(int i=0;i<lineLights.size;i++){
-		calcLineLightColor(unitToCamera,unitNormal,lineLights.get(i),material, wPos, howFacingToCam);
+		calcLineLightColor(unitToCamera,unitNormal,lineLights.get(i),material, wPos, howFacingToCam, hasSpecular);
 	}
 	for(int i=0;i<dirLights.size;i++){
-		calcDirLightColor(unitToCamera,unitNormal,dirLights.get(i), material, howFacingToCam);
+		calcDirLightColor(unitToCamera,unitNormal,dirLights.get(i), material, howFacingToCam, hasSpecular);
 	}
 }
 
 vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material){
-	vec3 diffuseTotal=max(vec3(minBrightness),light_diffuseTotal*material.diffuse+material.ambient);
-	vec3 specularTotal=light_specularTotal*material.specular;
-	baseColor.rgb*=diffuseTotal;
-	baseColor.rgb+=specularTotal;
+	baseColor.rgb*=max(vec3(minBrightness),(light_diffuseTotal+light_AmbientTotal*material.ambient)*material.diffuse);
+	baseColor.rgb+=light_specularTotal*material.specular+material.emission;
+	
 	return baseColor;
 }
 /*MODULE_END: Light.fsmd*/

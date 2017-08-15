@@ -30,10 +30,11 @@ public class UniformMat4 extends AbstractUniform{
 		mat.store(BUFF);
 		BUFF.flip();
 		glUniformMatrix4(id(), false, BUFF);
-		checkError(this::retryUpload);
+		checkError();
 	}
 	
-	protected void retryUpload(){
+	@Override
+	protected void onErrorSolve(){
 		prev.m00=Float.NaN;
 		upload(prev);
 	}

@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.util.UtilL;
 
 @SuppressWarnings("unchecked")
 public class OffsetArray<T> implements Iterable<T>{
@@ -14,41 +14,42 @@ public class OffsetArray<T> implements Iterable<T>{
 	private List<T>	data=new ArrayList<>();
 	private int		dataOffset;
 	
-	public void remove(int index){
-		set(index, null);
+	public T remove(int index){
+		return set(index, null);
 	}
 	
-	public void set(int index, T obj){
+	public T set(int index, T obj){
 		if(data.isEmpty()){
 			dataOffset=index;
 			data.add(obj);
-			return;
+			return null;
 		}
 		if(index<dataOffset){
-			if(obj==null) return;
+			if(obj==null) return null;
 			expandTail(dataOffset-index, (Class<T>)obj.getClass());
 		}
 		
 		index-=dataOffset;
 		
 		if(index>=data.size()){
-			if(obj==null) return;
+			if(obj==null) return null;
 			expandHead(index-data.size()+1, (Class<T>)obj.getClass());
 		}
 		
-		data.set(index, obj);
+		T t=data.set(index, obj);
 		
 		trim();
+		return t;
 	}
 	
 	private void expandHead(int ammount, Class<T> t){
 		if(ammount==1) data.add(null);
-		else data.addAll(Arrays.asList(UtilM.array(t, ammount)));
+		else data.addAll(Arrays.asList(UtilL.array(t, ammount)));
 	}
 	
 	private void expandTail(int ammount, Class<T> t){
 		if(ammount==1) data.add(0, null);
-		else data.addAll(0, Arrays.asList(UtilM.array(t, ammount)));
+		else data.addAll(0, Arrays.asList(UtilL.array(t, ammount)));
 		dataOffset-=ammount;
 	}
 	

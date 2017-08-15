@@ -19,9 +19,9 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelMdl{
 	UniformFloat3[]	ambient;
 	UniformFloat3[]	diffuse;
 	UniformFloat3[]	specular;
+	UniformFloat3[]	emission;
 	UniformFloat1[]	jelly;
 	UniformFloat1[]	shineDamper;
-	UniformFloat1[]	reflectivity;
 	UniformFloat1[]	lightTroughput;
 	UniformFloat1	tim;
 	
@@ -34,9 +34,9 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelMdl{
 		ambient=getUniformArray(i->"materials["+i+"].ambient");
 		diffuse=getUniformArray(i->"materials["+i+"].diffuse");
 		specular=getUniformArray(i->"materials["+i+"].specular");
+		emission=getUniformArray(i->"materials["+i+"].emission");
 		jelly=getUniformArray(i->"materials["+i+"].jelly");
 		shineDamper=getUniformArray(i->"materials["+i+"].shineDamper");
-		reflectivity=getUniformArray(i->"materials["+i+"].reflectivity");
 		lightTroughput=getUniformArray(i->"materials["+i+"].lightTroughput");
 		tim=getUniform("tim");
 	}
@@ -56,12 +56,12 @@ public class ShaderModuleMaterial extends ShaderModule implements ModelMdl{
 	}
 	
 	protected void uploadMaterial(int i, IMaterial material){
-		ambient[i].upload(material.getAmbient());
+		if(ambient!=null)ambient[i].upload(material.getAmbient());
 		diffuse[i].upload(material.getDiffuse());
 		specular[i].upload(material.getSpecular());
+		emission[i].upload(material.getEmission());
 		jelly[i].upload(material.getJelly());
 		shineDamper[i].upload(material.getShineDamper());
-		reflectivity[i].upload(material.getReflectivity());
 		lightTroughput[i].upload(material.getLightTroughput());
 	}
 	

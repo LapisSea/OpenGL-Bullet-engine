@@ -81,12 +81,9 @@ public class Game{
 			timer.setRender(this::render);
 		}, "Loading thread").start();
 		
-		while(timer.isRunning()){
-			timer.runUpdate();
-			timer.runRender();
-			UtilL.sleep(1);
-		}
 		
+		UtilL.runWhileThread("Updating thread", timer::isRunning, timer::runUpdate);
+		UtilL.runWhile(timer::isRunning, timer::runRender);
 	}
 	
 	private void update(){
@@ -94,13 +91,15 @@ public class Game{
 			timer.end();
 			return;
 		}
-		win().updateInput();
 		if(world==null) return;
-		if(!isPaused()) world.update();
+		boolean paused=isPaused();
+		timer.setPaused(paused);
+		if(!paused) world.update();
 		registry.update();
 	}
 	
 	private void render(){
+		
 		timer.setInfiniteFps(false);
 //		win().setVSync(true);
 		

@@ -24,7 +24,6 @@ public class Launch{
 		SplashScreenHost.sendMsg("Starting...");
 		NativeSetUp.haxNatives();
 		SplashScreenHost.sendMsg("Injected natves!");
-		
 		try{
 			LogUtil.__.INJECT_FILE_LOG(OperatingSystem.APP_DATA+"/OpenGL engine/log.txt");
 			//LogUtil.__.INJECT_EXTERNAL_PRINT("dev_log");

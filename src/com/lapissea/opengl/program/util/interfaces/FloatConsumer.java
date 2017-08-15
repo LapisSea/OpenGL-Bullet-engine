@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.interfaces;
+package com.lapissea.opengl.program.util.interfaces;
 
 import java.util.Objects;
 

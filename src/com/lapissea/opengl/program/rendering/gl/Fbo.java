@@ -23,13 +23,17 @@ import com.lapissea.opengl.window.impl.assets.BasicTexture;
 
 public class Fbo{
 	
+	public static final int	TEXTURE	=0b001;
+	public static final int	DEPTH	=0b010;
+	public static final int	STENCIL	=0b100;
+	
 	protected int id;
 	
 	protected ITexture	texture,depth;
 	protected int		colorBuffer	=-1,depthBuffer=-1;
 	
-	protected int		width,height,sample=1;
-	protected boolean	loaded,hasTexture,hasDepth,renderBufferType;
+	protected int		width,height,sample=1,args;
+	protected boolean	loaded,renderBufferType;
 	
 	public Runnable initHook;
 	
@@ -48,14 +52,17 @@ public class Fbo{
 		this(width, height, 1);
 	}
 	
-	public Fbo(int width, int height, int sample){
-		this(width, height, sample, true, true);
+	public Fbo(int args){
+		this(0, 0, 1, TEXTURE|DEPTH);
 	}
 	
-	public Fbo(int width, int height, int sample, boolean hasTexture, boolean hasDepth){
+	public Fbo(int width, int height, int sample){
+		this(width, height, sample, TEXTURE|DEPTH);
+	}
+	
+	public Fbo(int width, int height, int sample, int args){
 		setSize(width, height);
-		this.hasDepth=hasDepth;
-		this.hasTexture=hasTexture;
+		setArgs(args);
 	}
 	
 	/**
@@ -80,6 +87,13 @@ public class Fbo{
 		return this;
 	}
 	
+	public Fbo setArgs(int args){
+		if(this.args==args) return this;
+		this.args=args;
+		delete();
+		return this;
+	}
+	
 	public boolean getRenderBufferType(){
 		return renderBufferType;
 	}
@@ -88,11 +102,8 @@ public class Fbo{
 		return sample;
 	}
 	
-	public Fbo setDepth(boolean depth){
-		if(hasDepth==depth) return this;
-		hasDepth=depth;
-		delete();
-		return this;
+	public int getArgs(){
+		return args;
 	}
 	
 	public static void bindDefault(){
@@ -114,13 +125,15 @@ public class Fbo{
 		glBindFramebuffer(GL_FRAMEBUFFER, id);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		
-		if(hasTexture) createTexture();
-		if(hasDepth) createDepth();
+		if((getArgs()&TEXTURE)==TEXTURE) createTexture();
+		if((getArgs()&DEPTH)==DEPTH) createDepth();
 		
 		if(initHook!=null) initHook.run();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		return this;
 	}
+	
+//	public
 	
 	protected void createTexture(){
 		if(renderBufferType){
@@ -275,11 +288,4 @@ public class Fbo{
 		return loaded;
 	}
 	
-	public boolean hasTexture(){
-		return hasTexture;
-	}
-	
-	public boolean hasDepth(){
-		return hasDepth;
-	}
 }

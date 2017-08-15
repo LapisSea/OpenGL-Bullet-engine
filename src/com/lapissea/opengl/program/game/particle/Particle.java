@@ -1,12 +1,9 @@
 package com.lapissea.opengl.program.game.particle;
 
-import javax.vecmath.Vector3f;
-
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
-import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
@@ -16,9 +13,7 @@ public class Particle<T extends Particle<T>> implements ModelTransformed{
 	
 	static final Matrix4f TRANS=new Matrix4f();
 	
-	protected static final Vec3f	POS			=new Vec3f(),SCAL=new Vec3f(),ACTELERATION=new Vec3f();
-	protected static final Quat4M	ROT			=new Quat4M();
-	protected static final Vector3f	GRAVITY_VEC	=new Vector3f();
+	protected static final Vec3f POS=new Vec3f(),SCAL=new Vec3f(),ACTELERATION=new Vec3f();
 	
 	protected final ParticleHandler<T>	handler;
 	public Vec3f						pos,prevPos,speed=new Vec3f(),scale,prevScale;

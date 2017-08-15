@@ -74,32 +74,6 @@ public class UtilM extends UtilL{
 		});
 	}
 	
-	public static TriangleIndexVertexArray verticesToPhysicsMesh(float[] vts){
-		int[] ids=new int[vts.length/3];
-		for(int i=0;i<ids.length;i++){
-			ids[i]=i;
-		}
-		
-		return verticesToPhysicsMesh(vts, ids);
-	}
-	
-	public static TriangleIndexVertexArray verticesToPhysicsMesh(float[] vts, int[] ids){
-		
-		IndexedMesh indexedMesh=new IndexedMesh();
-		indexedMesh.numTriangles=ids.length/3;
-		indexedMesh.triangleIndexBase=ByteBuffer.allocateDirect(ids.length*4).order(ByteOrder.nativeOrder());
-		indexedMesh.triangleIndexBase.asIntBuffer().put(ids);
-		indexedMesh.triangleIndexStride=3*4;
-		indexedMesh.numVertices=vts.length;
-		indexedMesh.vertexBase=ByteBuffer.allocateDirect(vts.length*4).order(ByteOrder.nativeOrder());
-		indexedMesh.vertexBase.asFloatBuffer().put(vts);
-		indexedMesh.vertexStride=3*4;
-		
-		TriangleIndexVertexArray vertArray=new TriangleIndexVertexArray();
-		vertArray.addIndexedMesh(indexedMesh);
-		return vertArray;
-	}
-	
 	public static InputStream getResource(String...names){
 		for(String name:names){
 			InputStream s=getResource(name);
@@ -149,8 +123,8 @@ public class UtilM extends UtilL{
 		JarFile jar=Globals.getJarFile();
 		List<String> list=new ArrayList<>();
 		stream(jar.entries())
-				.filter(e->e.getName().length()>name0.length()&&e.getName().startsWith(name0))
-				.forEach(e->list.add(e.getName().substring(name0.length())));
+		.filter(e->e.getName().length()>name0.length()&&e.getName().startsWith(name0))
+		.forEach(e->list.add(e.getName().substring(name0.length())));
 		closeSilenty(jar);
 		
 		if(list.isEmpty()){
@@ -184,4 +158,29 @@ public class UtilM extends UtilL{
 		return WRAPPER_TYPES.contains(type);
 	}
 	
+	public static TriangleIndexVertexArray verticesToPhysicsMesh(float[] vts){
+		int[] ids=new int[vts.length/3];
+		for(int i=0;i<ids.length;i++){
+			ids[i]=i;
+		}
+		
+		return verticesToPhysicsMesh(vts, ids);
+	}
+	
+	public static TriangleIndexVertexArray verticesToPhysicsMesh(float[] vts, int[] ids){
+		
+		IndexedMesh indexedMesh=new IndexedMesh();
+		indexedMesh.numTriangles=ids.length/3;
+		indexedMesh.triangleIndexBase=ByteBuffer.allocateDirect(ids.length*4).order(ByteOrder.nativeOrder());
+		indexedMesh.triangleIndexBase.asIntBuffer().put(ids);
+		indexedMesh.triangleIndexStride=3*4;
+		indexedMesh.numVertices=vts.length;
+		indexedMesh.vertexBase=ByteBuffer.allocateDirect(vts.length*4).order(ByteOrder.nativeOrder());
+		indexedMesh.vertexBase.asFloatBuffer().put(vts);
+		indexedMesh.vertexStride=3*4;
+		
+		TriangleIndexVertexArray vertArray=new TriangleIndexVertexArray();
+		vertArray.addIndexedMesh(indexedMesh);
+		return vertArray;
+	}
 }

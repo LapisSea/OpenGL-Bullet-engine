@@ -1,34 +1,38 @@
-package com.lapissea.opengl.program.game;
+package com.lapissea.opengl.program.rendering;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.util.Quat4M;
+import com.lapissea.opengl.program.game.entity.entitys.EntityCrazyCube;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
+import com.lapissea.opengl.program.util.math.vec.FloatSmooth;
+import com.lapissea.opengl.program.util.math.vec.Quat4;
+import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.events.MouseMoveEvent;
 import com.lapissea.opengl.window.api.events.MouseMoveEvent.IMouseMoveEventListener;
+import com.lapissea.opengl.window.api.events.MouseScrollEvent;
 
 public class Camera implements IMouseMoveEventListener{
 	
 	private static final Vec3f EFF_POS=new Vec3f(),MOVE=new Vec3f();
 	
-	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();								//,prevRot=new Vec3f();
-	public float	zoom=1,farPlane=1000,nearPlane=0.1F,fov=80,lastRenderFow;
+	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();
+	public float	zoom=1,farPlane=1000,nearPlane=0.1F,fov=1.39626F,lastRenderFow,viewDistanceWanted=0;
+	public FloatSmooth viewDistance=new FloatSmooth(viewDistanceWanted);
 	
 	private final Matrix4f	projection		=new Matrix4f();
 	protected boolean		projectionDirty	=true;
 	public boolean			noMouseMode		=false;
 	public Vec3f			activeRotVec	=new Vec3f();
-	public Quat4M			activeRotQuat	=new Quat4M();
+	public Quat4			activeRotQuat	=new Quat4();
 	
 	public void update(){
-		
+		viewDistance.update();
 		prevPos.set(pos);
 		
 		MOVE.set(0, 0, 0);
@@ -52,8 +56,15 @@ public class Camera implements IMouseMoveEventListener{
 		MOVE.y=vec4.y;
 		MOVE.z=vec4.z;
 		
-		pos.add(MOVE.mul(1F));
-		
+		if(EntityCrazyCube.CAM!=null&&false){
+			pos.set(EntityCrazyCube.CAM.pos);
+		}
+		else pos.add(MOVE);
+		viewDistance.setValue((viewDistance.getValue()+viewDistanceWanted)/2);
+	}
+	
+	public void onMouseScroll(MouseScrollEvent e){
+		viewDistanceWanted-=e.absolute/120F*Math.sqrt(Math.abs(viewDistanceWanted));
 	}
 	
 	@Override
@@ -78,7 +89,11 @@ public class Camera implements IMouseMoveEventListener{
 		dest.setIdentity();
 		//		MatrixUtil.rotateZXY(dest, PartialTick.calc(activeRotVec, prevRot, rot));
 		MatrixUtil.rotateZXY(dest, activeRotVec.set(rot));
-		dest.translate(PartialTick.calc(EFF_POS, prevPos, pos).mul(-1F));
+		
+		Vec3f rotV=activeRotVec.clone().eulerToVector().mul(-viewDistance.get());
+		if(rotV.y()<0)rotV.y((float)-Math.sqrt(-rotV.y()));
+		
+		dest.translate(PartialTick.calc(EFF_POS, prevPos, pos).add(rotV).mul(-1F));
 		activeRotVec.mul(-1);
 		activeRotQuat.set(activeRotVec);
 		return dest;
@@ -96,12 +111,12 @@ public class Camera implements IMouseMoveEventListener{
 		injectProjection(dest);
 	}
 	
+	private static final Vec2f SIZE_F=new Vec2f();
+	
 	public void calcProjection(){
-		
 		farPlane=(float)Game.get().world.fog.getMaxDistance();
-		
-		float aspectRatio=(float)Display.getWidth()/(float)Display.getHeight();
-		float y_scale=(float)(1f/Math.tan(Math.toRadians(fov/zoom/2f))*aspectRatio);
+		float aspectRatio=SIZE_F.set(Game.win().getSize()).divXy();
+		float y_scale=(float)(1/Math.tan(fov/zoom/2));
 		float x_scale=y_scale/aspectRatio;
 		float frustumLength=farPlane-nearPlane;
 		
@@ -114,12 +129,35 @@ public class Camera implements IMouseMoveEventListener{
 		projection.m33=0;
 	}
 	
+	public void calcOrtho(){
+		
+		float right=Game.win().getSize().x();
+		float left=0;
+		float top=0;
+		float bottom=Game.win().getSize().y();
+		
+		projection.m00=2/(right-left);
+		projection.m01=0;
+		projection.m02=0;
+		projection.m03=0;
+		
+		projection.m10=0;
+		projection.m11=2/(top-bottom);
+		projection.m12=0;
+		projection.m13=0;
+		
+		projection.m20=0;
+		projection.m21=0;
+		projection.m22=2/(farPlane-nearPlane);
+		projection.m23=0;
+		
+		projection.m30=-(right+left)/(right-left);
+		projection.m31=-(top+bottom)/(top-bottom);
+		projection.m32=-(farPlane+nearPlane)/(farPlane-nearPlane);
+		projection.m33=1;
+	}
+	
 	private void injectProjection(Matrix4f dest){
-		dest.m00=projection.m00;
-		dest.m11=projection.m11;
-		dest.m22=projection.m22;
-		dest.m23=projection.m23;
-		dest.m32=projection.m32;
-		dest.m33=projection.m33;
+		dest.load(projection);
 	}
 }

@@ -2,8 +2,9 @@ package com.lapissea.opengl.program.util.math.vec;
 
 import com.lapissea.opengl.window.api.util.Calculateable;
 import com.lapissea.opengl.window.api.util.IVec2i;
+import com.lapissea.opengl.window.api.util.SimpleLoadable;
 
-public class Vec2f implements Calculateable<Vec2f>{
+public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 	
 	public static final Vec2f ZERO=new Vec2f(){
 		
@@ -30,6 +31,13 @@ public class Vec2f implements Calculateable<Vec2f>{
 	
 	public Vec2f(float x, float y){
 		set(x, y);
+	}
+	
+	public Vec2f(String string){
+		load(string);
+	}
+	public Vec2f(String string, int start){
+		load(string, start);
 	}
 	
 	public Vec2f set(float x, float y){
@@ -142,5 +150,38 @@ public class Vec2f implements Calculateable<Vec2f>{
 		x(src.x());
 		y(src.y());
 		return this;
+	}
+	
+	public float divXy(){
+		return x()/y();
+	}
+	
+	public float divYx(){
+		return y()/x();
+	}
+	
+	@Override
+	public int getValueCount(){
+		return 2;
+	}
+	
+	@Override
+	public void loadValue(int id, float value){
+		// @formatter:off
+		switch(id){
+		case 0:x(value);break;
+		case 1:y(value);break;
+		}
+		// @formatter:on
+	}
+	
+	@Override
+	public void loadValue(char c, float value){
+		// @formatter:off
+		switch(c){
+		case 'x':x(value);break;
+		case 'y':y(value);break;
+		}
+		// @formatter:on
 	}
 }

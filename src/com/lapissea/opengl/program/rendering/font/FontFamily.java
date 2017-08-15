@@ -18,7 +18,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.interfaces.Float2Consumer;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
 import com.lapissea.opengl.program.rendering.gl.texture.UvArea;
@@ -26,6 +25,7 @@ import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.TextureTiled;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.data.IntTree;
+import com.lapissea.opengl.program.util.interfaces.Float2Consumer;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;

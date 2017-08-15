@@ -5,19 +5,17 @@ import static org.lwjgl.opengl.GL11.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3f;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.game.Camera;
 import com.lapissea.opengl.program.game.entity.Entity;
 import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.program.game.particle.ParticleHandler;
 import com.lapissea.opengl.program.game.particle.particles.ParticleFoo;
 import com.lapissea.opengl.program.game.world.World;
+import com.lapissea.opengl.program.rendering.Camera;
 import com.lapissea.opengl.program.rendering.FpsCounter;
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.GLUtil.BlendFunc;
@@ -87,13 +85,13 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
 	private IModel			moon		=ObjModelLoader.loadAndBuild("moon");
 	public FboRboTextured	worldFbo	=new FboRboTextured();
-	public Fbo				skyFbo		=new Fbo();
+	public Fbo				skyFbo		=new Fbo(Fbo.TEXTURE);
 	public GuiHandler		guiHandler	=new GuiHandler();
 	
 	private boolean renderWorldFlag=true;
+	private float lastPt;
 	
 	public Renderer(){
-		skyFbo.setDepth(false);
 		
 		worldFbo.initHook=()->renderWorldFlag=true;
 		fpsCounter.activate();
@@ -115,7 +113,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 						0,0,
 						1,1,
 						0,1,
-				}, "textures", "particle/SoftBloom"));
+		}, "textures", "particle/SoftBloom"));
 		
 	}
 	
@@ -185,17 +183,16 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void onMouseMove(MouseMoveEvent e){
 		if(!Game.isPaused()) getCamera().onMouseMove(e);
 		Gui openGui=guiHandler.getOpenGui();
-		if(openGui==null) return;
-		openGui.onMouseMove(e);
+		if(openGui!=null) openGui.onMouseMove(e);
 		
 	}
 	
 	@Override
 	public void onMouseScroll(MouseScrollEvent e){
-		Gui openGui=guiHandler.getOpenGui();
-		if(openGui==null) return;
-		openGui.onMouseScroll(e);
+		getCamera().onMouseScroll(e);
 		
+		Gui openGui=guiHandler.getOpenGui();
+		if(openGui!=null) openGui.onMouseScroll(e);
 	}
 	
 	@Override
@@ -209,12 +206,12 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	}
 	
 	public void render(){
+//		if(UtilL.TRUE())return;
 		
 		//PREPARE
 		RENDER_FRUSTRUM=false;
 		fpsCounter.newFrame();
-		
-		if(renderWorldFlag) renderWorld();
+		if(renderWorldFlag)renderWorld();
 		renderWorldFlag=!Game.isPaused();
 		
 		Fbo.bindDefault();
@@ -231,65 +228,60 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public void renderWorld(){
 		
 		World world=Game.get().world;
-		if(RENDER_FRUSTRUM) world.bulletWorld.debugDrawWorld();
-		float pt=Game.getPartialTicks();
-		double sunPos=world.getSunPos(pt)*Math.PI*2;
-		float bright=(float)world.getSunBrightness(pt);
+		float pt=Game.get().timer.isPaused()?lastPt:Game.getPartialTicks();
+		lastPt=pt;
+		double sunPos=world.getSunPos(pt);
+		float bright=(float)world.getSunBrightnessPos(sunPos);
+		sunPos*=Math.PI*2;
 		
-		ColorM moonCol=new ColorM(0, 0, 0);
 		
 		List<Entity> entitys=Game.get().world.getAll();
 		
-		moonCol.a(1.1F-bright*bright);
 		Vec3f sunDir=new Vec3f((float)(sunPos+Math.PI), 0, 0).eulerToVector();
+		Vec3f moonRot=sunDir.clone().mul(-1);
 		
-		float h=10;
-		float worldSiz=Math.max(0, 6371e3F/Math.max(1, 1+h*h/100));
-		ColorM sunCol=new ColorM(1, 0.3, 0.2);
-		sunCol.a(bright+0.1F);
+		ColorM sunCol=new ColorM(1, 0.3+sunDir.y()*0.5, 0.2+sunDir.y()*0.6, bright*bright);
+		ColorM moonCol=new ColorM(0.1, 0.15, 0.2, 1.1F-bright);
 		
-		Game.get().world.fog.color.set(moonCol.mix(sunCol, bright, 1-bright));
+		dirLights.add(new DirLight(sunDir, sunCol.clone(), sunCol.clone().mulA(0.3F)));
+		dirLights.add(new DirLight(moonRot, moonCol, moonCol.clone().mulA(0.6F)));
 		
-		dirLights.add(new DirLight(sunDir, sunCol));
-		sunPos-=Math.PI;
-		
-		Vec3f moonRot=new Vec3f((float)(sunPos+Math.PI), 0, 0).eulerToVector();
-		dirLights.add(new DirLight(moonRot, moonCol));
+		Game.get().world.fog.color.set(moonCol.mix(sunCol.clone(), bright, 1-bright));
 		
 		getCamera().createProjection(projection);
 		setView();
 		
 		potentialRenders=actualRenders=0;
 		
-		worldFbo.setRenderBufferType(false).setSample(4);
+		worldFbo.setRenderBufferType(true).setSample(8);
 		
 		worldFbo.setSize(Game.win().getSize());
 		worldFbo.bind();
+		glClear(GL_DEPTH_BUFFER_BIT);
 		
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
 		GLUtil.CULL_FACE.set(CullFace.BACK);
 		GLUtil.CULL_FACE.set(true);
 		GLUtil.BLEND.set(true);
 		
+		glDepthMask(false);
+		GLUtil.DEPTH_TEST.set(false);
+		
 		GLUtil.MULTISAMPLE.set(false);
 		skyFbo.setSize(worldFbo.getWidth()/SKY_RESOLUTION_DEVIDER, worldFbo.getHeight()/SKY_RESOLUTION_DEVIDER);
 		skyFbo.bind();
 		Shaders.SKYBOX.render();
-		skyFbo.copyTo(worldFbo, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		skyFbo.copyColorTo(worldFbo);
 		GLUtil.MULTISAMPLE.set(true);
 		worldFbo.bind();
-		glClear(GL_DEPTH_BUFFER_BIT);
 		
 		//BACKGROUND
 		
-		glDepthMask(false);
-		GLUtil.DEPTH_TEST.set(false);
-		
 		//
 		
-		moon.getMaterial(0).getAmbient().set(0.4F, 0.4F, 0.5F, 1);
+		moon.getMaterial(0).getEmission().set(0.4F, 0.4F, 0.5F, 1);
 		Matrix4f mat=new Matrix4f();
-		mat.translate(moonRot.mul(25).add(PartialTick.calc(new Vec3f(), camera.prevPos, camera.pos)));
+		mat.translate(moonRot.clone().mul(25).add(PartialTick.calc(new Vec3f(), camera.prevPos, camera.pos)));
 		Shaders.ENTITY.renderSingle(mat, moon);
 		
 		GLUtil.DEPTH_TEST.set(true);
@@ -317,14 +309,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		particleHandler.render();
 		
-	}
-	
-	public void drawLine(Vector3f from, Vector3f to, Vector3f color){
-		lines.add(ModelAttribute.VERTEX_ATTR_3D, from.x, from.y, from.z);
-		lines.add(ModelAttribute.VERTEX_ATTR_3D, to.x, to.y, to.z);
-		
-		lines.add(ModelAttribute.COLOR_ATTR, color.x, color.y, color.z, 1);
-		lines.add(ModelAttribute.COLOR_ATTR, color.x, color.y, color.z, 1);
 	}
 	
 	public void drawLine(Vec3f from, Vec3f to, IColorM color){

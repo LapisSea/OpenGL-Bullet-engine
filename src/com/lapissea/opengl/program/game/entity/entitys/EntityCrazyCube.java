@@ -4,16 +4,23 @@ import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import org.lwjgl.input.Mouse;
+
 import com.bulletphysics.collision.shapes.BoxShape;
+import com.bulletphysics.dynamics.RigidBody;
+import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
+import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.program.game.world.World;
+import com.lapissea.opengl.program.rendering.Camera;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
-import com.lapissea.opengl.program.rendering.gl.shader.light.LineLight;
-import com.lapissea.opengl.program.util.MotionStateM;
-import com.lapissea.opengl.program.util.RigidBodyEntity;
+import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
+import com.lapissea.opengl.program.util.BlackBody;
+import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
+import com.lapissea.opengl.program.util.math.SimplexNoise;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.assets.IModel;
@@ -72,36 +79,40 @@ public class EntityCrazyCube extends EntityUpd{
 			
 			20,21,23,
 			23,21,22
-	
+			
 	};
 	
 	private static IModel getModel0(){
 		if(MODEL==null){
 			MODEL=ObjModelLoader.loadAndBuild("FancyCube");
+//			MODEL=ObjModelLoader.loadAndBuild("ball");
 		}
 		return MODEL;
 	}
 	
-	public final Vec3f	rotSpeed=new Vec3f();
-	final Transform		transform;
-	public ColorM		lightColor;
-	LineLight			light;
+	public ColorM	lightColor;
+	PointLight		light;
+	
+	public static EntityCrazyCube CAM;
 	
 	public EntityCrazyCube(World world, Vec3f pos){
 		super(world, getModel0(), pos);
-		transform=new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F));
-		
-		scale.set(2, 2, 2);
+		float s=RandUtil.RF()*0.5F+2;
+		scale.set(s, s, s);
 		
 //		model.getMaterial(2).getDiffuse().set(177/256F, 0, 177/256F, 1);
 //		model.getMaterial(1).getDiffuse().set(0x00C7E7);
-		model.getMaterial(1).getAmbient().set(0x00C7E7).a(1);
+//		model.getMaterial(1).getAmbient().set(0x00C7E7).a(1);
 //		model.getMaterial(0).getDiffuse().set(0x0000FF);
 		
 		float massKg=0.5F*scale.x*scale.y*scale.z;
 		
-		physicsBody=new RigidBodyEntity(this, massKg, new MotionStateM(transform), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), null, 0.9F, 0).antiTunnel();
-		physicsBody.setDamping(0.15F, 0.15F);
+		if(CAM==null) CAM=this;
+		
+		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), Vec3f.single(0.9F));
+		getPhysicsObj().body.setDamping(0.15F, 0.15F);
+		getPhysicsObj().hookPos(this.pos);
+		getPhysicsObj().hookRot(rot);
 	}
 	
 	@Override
@@ -111,29 +122,62 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	@Override
 	public void update(){
-		//physicsBody.setDamping(0.5F, 0.5F);
-		
+		if(Float.isNaN(pos.x())) kill();
 		updatePrevs();
-		if(Float.isNaN(pos.x())){
-			kill();
+//		LogUtil.println(model.getMaterial(1));
+//		LogUtil.println(pos);
+//		pos.y-=0.2;
+//		float h=world.getHeightAt(pos.x, pos.z)+scale.y/2;
+//		if(pos.y<h) pos.y=h;
+		
+		if(this==CAM){
+			if(Mouse.isButtonDown(1)){
+				for(EntityUpd c:world.entitysUpd){
+					if(!(c instanceof EntityCrazyCube)) return;
+					//				if(((EntityCrazyCube)c).lightColor==null)return;
+					
+					RigidBody controlBall=c.getPhysicsObj().body;
+					if(controlBall==null) continue;
+					
+					MotionState m=controlBall.getMotionState();
+					Transform ts=m.getWorldTransform(new Transform());
+					Vector3f p=ts.origin;
+					Camera cm=Game.get().renderer.getCamera();
+					Vector3f cmp=new Vector3f(cm.pos.x, cm.pos.y, cm.pos.z);
+					Vector3f force=new Vector3f();
+					
+					force.sub(cmp, p);
+					force.x*=1;
+					force.y*=1;
+					force.z*=1;
+					controlBall.activate();
+					controlBall.applyCentralForce(force);
+				}
+			}
+			if(Mouse.isButtonDown(0)){
+				Camera c=Game.get().renderer.getCamera();
+				Vec3f rot=c.rot;
+				double xCos=Math.cos(-rot.x);
+				double xSin=Math.sin(-rot.x);
+				double yCos=Math.cos(rot.y-Math.PI/2);
+				double ySin=Math.sin(rot.y-Math.PI/2);
+				Vector3f vc=new Vector3f((float)(yCos*xCos*100), (float)xSin*100, (float)(ySin*xCos)*100);
+				PhysicsObjJBullet hit=world.rayTrace(new Vec3f(c.pos.x, c.pos.y, c.pos.z), new Vec3f(c.pos.x+vc.x, c.pos.y+vc.y, c.pos.z+vc.z),null);
+				if(hit!=null){
+					float siz=5F;
+					hit.applyForce(vc.x*siz, vc.y*siz, vc.z*siz);
+				}
+			}
 		}
-		pos.set(transform.origin.x, transform.origin.y, transform.origin.z);
-		transform.getRotation(rot);
 	}
 	
 	@Override
 	public void preRender(){
 		if(lightColor!=null){
-			MODEL.getMaterial(0).setLightTroughput(1F);
-			if(light==null) light=new LineLight(new Vec3f(), new Vec3f(), lightColor, new Vec3f(1F, 0.01F, 0.01F/(scale.max()*scale.max())));
-			PartialTick.calc(light.pos1, prevPos, pos);
-			PartialTick.calc(light.pos2, prevPos, pos);
-			double angle=((world.time()+Game.getPartialTicks())/10D+light.pos2.length()/2)%(Math.PI*2);
-			light.pos2.x+=25*Math.sin(angle);
-			light.pos2.z+=25*Math.cos(angle);
-			light.pos2.y+=5;
-			light.pos1.y+=5;
-			getRenderer().drawLine(light.pos1, light.pos2, light.color);
+			if(light==null) light=new PointLight(new Vec3f(), lightColor, new Vec3f(1F, 0.01F, 0.01F/(scale.max()*scale.max())));
+			BlackBody.fromKelvin(light.color, (float)(prevPos.distanceTo(pos)*2000+1000+50+50*SimplexNoise.noise(hashCode(), (world.time()+Game.getPartialTicks())/5D)));
+			PartialTick.calc(light.pos, prevPos, pos);
+			
 			getRenderer().addLight(light);
 		}
 	}

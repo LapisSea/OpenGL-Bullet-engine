@@ -18,10 +18,11 @@ public class UniformInt1 extends AbstractUniform{
 		if(prev==i) return;
 		prev=i;
 		glUniform1i(id(), i);
-		checkError(this::retyUpload);
+		checkError();
 	}
-	
-	protected void retyUpload(){
+	@Override
+	protected void onErrorSolve(){
+		prev=Integer.MIN_VALUE;
 		upload(prev);
 	}
 	

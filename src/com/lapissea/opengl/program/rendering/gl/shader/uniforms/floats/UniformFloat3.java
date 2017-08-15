@@ -31,10 +31,12 @@ public class UniformFloat3 extends AbstractUniform{
 		prev2=f2;
 		prev3=f3;
 		glUniform3f(id(), f1, f2, f3);
-		checkError(()->{
-			prev1=Float.NaN;
-			upload(f1, f2, f3);
-		});
+		checkError();
+	}
+	@Override
+	protected void onErrorSolve(){
+		prev1=Float.NaN;
+		upload(prev1,prev2,prev3);
 	}
 	
 }

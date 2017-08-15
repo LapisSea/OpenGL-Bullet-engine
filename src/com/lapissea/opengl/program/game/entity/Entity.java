@@ -7,21 +7,21 @@ import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
-import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
+import com.lapissea.opengl.program.util.math.vec.Quat4;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
 
 public abstract class Entity implements Renderable,ModelTransformed{
 	
 	protected static final Vec3f	POS	=new Vec3f(),SCAL=new Vec3f();
-	protected static final Quat4M	ROT	=new Quat4M();
+	protected static final Quat4	ROT	=new Quat4();
 	
 	protected static final Matrix4f TRANS=new Matrix4f();
 	
 	public IModel		model;
 	public final Vec3f	pos,scale;
-	public final Quat4M	rot;
+	public final Quat4	rot;
 	private boolean		dead;
 	public final World	world;
 	
@@ -37,8 +37,8 @@ public abstract class Entity implements Renderable,ModelTransformed{
 		return pos;
 	}
 	
-	protected Quat4M initRot(){
-		return new Quat4M();
+	protected Quat4 initRot(){
+		return new Quat4();
 	}
 	
 	protected Vec3f initScale(){
@@ -54,7 +54,7 @@ public abstract class Entity implements Renderable,ModelTransformed{
 		return dead;
 	}
 	
-	public Quat4M getModelRot(){
+	public Quat4 getModelRot(){
 		ROT.set(rot);
 		return ROT;
 	}

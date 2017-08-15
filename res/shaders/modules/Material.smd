@@ -3,9 +3,9 @@ struct ModelMaterial{
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+	vec3 emission;
 	float jelly;
 	float shineDamper;
-	float reflectivity;
 	float lightTroughput;
 };
 

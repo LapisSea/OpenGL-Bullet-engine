@@ -36,7 +36,7 @@ public class Timer_Ver2 extends GameTimer{
 	
 	@Override
 	public synchronized GameTimer setFps(int fps){
-		this.framesPerSecond=fps;
+		framesPerSecond=fps;
 		nanosecondsPerFrame=SECOND/(double)fps;
 		return this;
 	}
@@ -52,7 +52,7 @@ public class Timer_Ver2 extends GameTimer{
 	
 	@Override
 	public synchronized GameTimer setUps(int ups){
-		this.updatesPerSecond=ups;
+		updatesPerSecond=ups;
 		nanosecondsPerUpdate=SECOND/(double)ups;
 		calcNspu();
 		return null;
@@ -125,7 +125,7 @@ public class Timer_Ver2 extends GameTimer{
 		}
 		if(count>0){
 			lastUpdate=t;
-			while((count--)>0){
+			while(count-->0){
 				update.run();
 			}
 		}

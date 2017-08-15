@@ -3,13 +3,14 @@ package com.lapissea.opengl.program.util.math.vec;
 import org.lwjgl.util.vector.ReadableVector3f;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.lapissea.opengl.program.interfaces.Interpolateble;
-import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.window.api.util.Calculateable;
+import com.lapissea.opengl.window.api.util.IRotation;
 import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.opengl.window.api.util.Interpolateble;
 import com.lapissea.opengl.window.api.util.MathUtil;
+import com.lapissea.opengl.window.api.util.SimpleLoadable;
 
-public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Interpolateble<Vec3f>{
+public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Interpolateble<Vec3f>,IRotation,SimpleLoadable<Vec3f>{
 	
 	private static final long serialVersionUID=8084946802516068121L;
 	
@@ -29,12 +30,16 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		this(x, y, 0);
 	}
 	
-	public Vec3f(javax.vecmath.Vector3f src){
-		this(src.x, src.y, src.z);
-	}
-	
 	public Vec3f(Vec3f src){
 		this(src.x(), src.y(), src.z());
+	}
+	
+	public Vec3f(String string, int start){
+		load(string, start);
+	}
+	
+	public Vec3f(String string){
+		load(string);
 	}
 	
 	public Vec3f(float x, float y, float z){
@@ -87,6 +92,69 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 	@Override
 	public float z(){
 		return z;
+	}
+	
+	@Override
+	public Vec3f load(String string){
+		return load(string, 0);
+	}
+	
+	@Override
+	public Vec3f load(String string, int start){
+		return load(string, start, string.length());
+	}
+	
+	private void load(StringBuilder buff, int rgba){
+		int pos=buff.indexOf("=");
+		if(pos==-1){
+			float num=Float.parseFloat(buff.toString());
+			// @formatter:off
+			switch(rgba){
+			case 0:x(num);break;
+			case 1:y(num);break;
+			case 2:z(num);break;
+			}
+			// @formatter:on
+		}else{
+			float num=Float.parseFloat(buff.substring(pos+1).trim());
+			// @formatter:off
+			switch(buff.charAt(0)){
+			case 'x':x(num);break;
+			case 'y':y(num);break;
+			case 'z':z(num);break;
+			}
+			// @formatter:on
+		}
+	}
+	
+	@Override
+	public Vec3f load(String string, int start, int end){
+		if(end>string.length()) throw new IllegalArgumentException("End "+end+" can not be larger than total length of "+string.length());
+		if(start<0) throw new IllegalArgumentException("Start has to be positive!");
+		if(start>=end) throw new IllegalArgumentException("Start has to be smaller than end!");
+		
+		boolean begin=true,lastSpace=false;
+		StringBuilder buff=new StringBuilder();
+		int rgba=0;
+		for(int i=start;i<end;i++){
+			char c=string.charAt(i);
+			boolean space=c==','||Character.isWhitespace(c);
+			if(begin){
+				if(space) continue;
+				else begin=false;
+			}
+			if(lastSpace&&space) continue;
+			
+			if(lastSpace=space){
+				load(buff, rgba);
+				rgba=(rgba+1)%3;
+				buff.setLength(0);
+			}else buff.append(c);
+			
+		}
+		if(buff.length()>0) load(buff, rgba);
+		
+		return this;
 	}
 	
 	@Override
@@ -214,12 +282,11 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 	}
 	
 	public float max(){
-		if(x>y){
-			if(x>z) return x;
-			else return z;
-		}
-		if(y>z) return y;
-		else return z;
+		return MathUtil.max(x(), y(), z());
+	}
+	
+	public float min(){
+		return MathUtil.min(x(), y(), z());
 	}
 	
 	@Override
@@ -227,13 +294,6 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		x(src.x());
 		y(src.y());
 		z(src.z());
-		return this;
-	}
-	
-	public Vec3f set(javax.vecmath.Vector3f src){
-		x(src.x);
-		y(src.y);
-		z(src.z);
 		return this;
 	}
 	
@@ -267,32 +327,6 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 	
 	public static Vec3f interpolate(Vec3f dest, Vec3f v1, Vec3f v2, float percent){
 		return dest.set(v1).add((v2.x()-v1.x())*percent, (v2.y()-v1.y())*percent, (v2.z()-v1.z())*percent);
-	}
-	
-	public Vec3f set(Quat4M q1){
-		double sqw=q1.w*q1.w;
-		double sqx=q1.x*q1.x;
-		double sqy=q1.y*q1.y;
-		double sqz=q1.z*q1.z;
-		double unit=sqx+sqy+sqz+sqw; // if normalised is one, otherwise is correction factor
-		double test=q1.x*q1.y+q1.z*q1.w;
-		if(test>0.499*unit){ // singularity at north pole
-			y=(float)(2*Math.atan2(q1.x, q1.w));
-			z=(float)Math.PI/2;
-			x=0;
-			return this;
-		}
-		if(test<-0.499*unit){ // singularity at south pole
-			y=-2*(float)Math.atan2(q1.x, q1.w);
-			z=(float)-Math.PI/2;
-			x=0;
-			return this;
-		}
-		y=(float)Math.atan2(2*q1.y*q1.w-2*q1.x*q1.z, sqx-sqy-sqz+sqw);
-		z=(float)Math.asin(2*test/unit);
-		x=(float)Math.atan2(2*q1.x*q1.w-2*q1.y*q1.z, -sqx+sqy-sqz+sqw);
-		
-		return this;
 	}
 	
 	public Vec3f normalize(){
@@ -349,4 +383,54 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		return interpolate(this, first, second, percent);
 	}
 	
+	public double distanceTo(Vec3f vec){
+		double x=x()-vec.x();
+		double y=y()-vec.y();
+		double z=z()-vec.z();
+		return Math.sqrt(x*x+y*y+z*z);
+	}
+	
+	@Override
+	public float w(){
+		return 1;
+	}
+	
+	@Override
+	public <T extends IVec3f> T rotate(T src, T dest){
+		dest.x(src.x());
+		dest.y(src.y());
+		dest.z(src.z());
+		return src;
+	}
+	
+	public static Vec3f single(float f){
+		return new Vec3f(f, f, f);
+	}
+	
+	@Override
+	public int getValueCount(){
+		return 3;
+	}
+	
+	@Override
+	public void loadValue(int id, float value){
+		// @formatter:off
+		switch(id){
+		case 0:x(value);break;
+		case 1:y(value);break;
+		case 2:z(value);break;
+		}
+		// @formatter:on
+	}
+	
+	@Override
+	public void loadValue(char c, float value){
+		// @formatter:off
+		switch(c){
+		case 'x':x(value);break;
+		case 'y':y(value);break;
+		case 'z':z(value);break;
+		}
+		// @formatter:on
+	}
 }

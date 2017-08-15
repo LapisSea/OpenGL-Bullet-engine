@@ -147,12 +147,16 @@ public abstract class ShaderRenderer<RenderType extends ModelTransformed>extends
 		model.bindVao();
 		model.enableAttributes();
 		GLUtil.CULL_FACE.set(model.culface());
-		modulesModelUniforms.forEach(module->module.uploadUniformsModel(model));
+		for(ShaderModule.ModelMdl module:modulesModelUniforms){
+			module.uploadUniformsModel(model);
+		}
 	}
 	
 	protected void prepareInstance(RenderType renderable){
 		uploadTransformMat(renderable.getTransform());
-		modulesInstance.forEach(md->md.uploadUniformsInstance(renderable));
+		for(ShaderModule.Instance module:modulesInstance){
+			module.uploadUniformsInstance(renderable);
+		}
 	}
 	
 	protected void unbindModel(IModel model){

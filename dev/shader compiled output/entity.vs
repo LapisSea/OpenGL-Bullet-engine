@@ -22,9 +22,9 @@ struct ModelMaterial{
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+	vec3 emission;
 	float jelly;
 	float shineDamper;
-	float reflectivity;
 	float lightTroughput;
 };
 
@@ -66,45 +66,6 @@ void applyFog(vec3 worldViewPos, float fogDensity, float fogGradient){
 uniform float worldTime;
 uniform float systemTime;
 /*MODULE_END: Time.smd*/
-
-
-/*MODULE_START: TextureBinary.smd*/
-struct BinTextureReader{
-	
-	int pos;
-	int width;
-	int height;
-	int channelCount;
-	sampler2D data;
-	
-	float readFloat(){
-		return readByte(data, pos++, width, height, channelCount);
-	}
-	vec2 readVec2(){
-		return vec2(readFloat(),readFloat());
-	}
-	vec3 readVec3(){
-		return vec3(readVec2(),readFloat());
-	}
-	vec4 readVec4(){
-		return vec4(readVec3(),readFloat());
-	}
-	
-};
-
-float readByte(sampler2D data, int pos, int width, int height, int channelCount){
-	
-	int pixelId=pos/channelCount;
-	if(pixelId>width*height)return -1;
-	
-	int whatInPixel=pos%channelCount;
-	
-	float x=pixelId%width;
-	float y=pixelId/width;
-	
-	return texture(data, vec2(x/width,y/height))[whatInPixel];
-}
-/*MODULE_END: TextureBinary.smd*/
 
 
 

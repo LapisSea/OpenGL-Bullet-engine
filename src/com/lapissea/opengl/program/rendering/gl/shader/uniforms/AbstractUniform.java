@@ -28,10 +28,7 @@ public abstract class AbstractUniform{
 		return id;
 	}
 	
-	//	protected void checkError(){
-	//		checkError(()->{});
-	//	}
-	protected void checkError(Runnable onSolve){
+	protected void checkError(){
 		try{
 			GLUtil.checkError();
 		}catch(Throwable e){
@@ -43,9 +40,11 @@ public abstract class AbstractUniform{
 				LogUtil.printlnEr("correct name:", realName, "false name:", name);
 				throw e;
 			}
-			onSolve.run();
+			onErrorSolve();
 		}
 	}
+	
+	protected void onErrorSolve(){}
 	
 	@Override
 	public String toString(){

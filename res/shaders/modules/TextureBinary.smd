@@ -4,23 +4,32 @@ struct BinTextureReader{
 	ivec2 size;
 	int channelCount;
 	
-	sampler1D data;
+	isampler1D data;
 	
-	float readFloat(int &pos){
+	float readInt(int &pos){
 		return readValue(data, pos++, size.x, size.h, channelCount);
 	}
 	vec2 readVec2(int &pos){
-		return vec2(readFloat(pos),readFloat(pos));
+		return vec2(readInt(pos),readInt(pos));
 	}
 	vec3 readVec3(int &pos){
-		return vec3(readVec2(pos),readFloat(pos));
+		return vec3(readVec2(pos),readInt(pos));
 	}
 	vec4 readVec4(int &pos){
-		return vec4(readVec3(pos),readFloat(pos));
+		return vec4(readVec3(pos),readInt(pos));
 	}
 	
 };
 
+int readValue(isampler2D data, int pos, int dataSize, int channelCount){
+	
+	int pixelId=pos/channelCount;
+	if(pixelId>width*height)return -1;
+	
+	int whatInPixel=pos%channelCount;
+	
+	return texture(data, pixelId/dataSize)[whatInPixel];
+}
 float readValue(sampler2D data, int pos, int dataSize, int channelCount){
 	
 	int pixelId=pos/channelCount;

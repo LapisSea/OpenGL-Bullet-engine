@@ -8,18 +8,15 @@ import javax.vecmath.Vector3f;
 import org.lwjgl.util.vector.Matrix4f;
 
 import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
-import com.bulletphysics.dynamics.RigidBody;
-import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
-import com.bulletphysics.linearmath.DefaultMotionState;
-import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
+import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
-import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.program.util.math.vec.Quat4;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.impl.assets.Material;
@@ -29,7 +26,7 @@ import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public class Chunk implements ModelTransformed{
+public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	
 	protected static final Matrix4f	TRANSFORM	=new Matrix4f();
 	protected static final Vec3f	POS			=new Vec3f();
@@ -41,7 +38,6 @@ public class Chunk implements ModelTransformed{
 	
 	public final int	x,z;
 	public IModel		model	=ModelLoader.EMPTY_MODEL;
-	public RigidBody	chunkBody;
 	
 	protected final Matrix4f mat=new Matrix4f();
 	
@@ -91,14 +87,11 @@ public class Chunk implements ModelTransformed{
 				indices.add(p3);
 			}
 		}
-		BvhTriangleMeshShape trimeshshape=new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(this.hMap=vertices.toFloatArray(), indices.toIntArray()), true);
-		MotionState ballMotionState=new DefaultMotionState(new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x*SIZE, 0, z*SIZE), 1)));
-		RigidBodyConstructionInfo ballConstructionInfo=new RigidBodyConstructionInfo(0, ballMotionState, trimeshshape, new Vector3f());
-		ballConstructionInfo.restitution=0F;
-		chunkBody=new RigidBody(ballConstructionInfo);
-		chunkBody.setUserPointer(this);
+		this.hMap=vertices.toFloatArray();
 		
-		Quat4M q=new Quat4M();
+		init(0, new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x*SIZE, 0, z*SIZE), 1)), new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(this.hMap, indices.toIntArray()), true), new Vec3f());
+		
+		Quat4 q=new Quat4();
 		Vec3f rot=new Vec3f(),vRot=new Vec3f();
 		for(int i=0, j=GRASS_MIN+RandUtil.RI(GRASS_RAND);i<j;i++){
 			float xOnChunk=RandUtil.RF(SIZE);
@@ -126,7 +119,6 @@ public class Chunk implements ModelTransformed{
 		
 		model.getMaterial("ground")
 		.setShineDamper(50)
-		.setReflectivity(1)
 		.setDiffuse(0.2F, 1, 0.25F, 1)
 		.setSpecular(1, 1, 1, 1);
 	}

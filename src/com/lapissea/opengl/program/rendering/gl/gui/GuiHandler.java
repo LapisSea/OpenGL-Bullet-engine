@@ -26,17 +26,15 @@ public class GuiHandler{
 	
 	private Stack<Gui>					guiStack	=new Stack<>();
 	private LinkedList<IngameDisplay>	displays	=new LinkedList<>();
-	private FboRboTextured				drawFbo		=new FboRboTextured();
-	private Fbo							lastZLayer	=new Fbo();
+	private FboRboTextured				drawFbo		=new FboRboTextured(Fbo.TEXTURE);
+	private Fbo							lastZLayer	=new Fbo(Fbo.TEXTURE);
 	private boolean						first		=true;
 	
 	public GuiHandler(){
-		lastZLayer.setDepth(false);
 		Game.glCtx(()->displays.add(new DebugDisplay()));
 	}
 	
 	public void openGui(Gui gui){
-		drawFbo.setDepth(false);
 		
 		if(guiStack.contains(gui)) throw new IllegalStateException();
 		guiStack.add(gui);

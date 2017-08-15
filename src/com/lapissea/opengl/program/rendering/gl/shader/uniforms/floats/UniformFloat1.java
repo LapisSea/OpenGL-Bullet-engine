@@ -18,7 +18,13 @@ public class UniformFloat1 extends AbstractUniform{
 		if(prev==f) return;
 		prev=f;
 		glUniform1f(id(), f);
-		checkError(()->upload(f));
+		checkError();
+	}
+	
+	@Override
+	protected void onErrorSolve(){
+		prev=Float.NaN;
+		upload(prev);
 	}
 	
 }

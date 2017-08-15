@@ -16,7 +16,6 @@ import com.lapissea.opengl.program.rendering.gl.shader.light.LineLight;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat3;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat4;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints.UniformInt1;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
@@ -41,25 +40,26 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 	}
 	
 	UniformFloat3[]	pointLightPos;
-	UniformFloat4[]	pointLightColor;
+	UniformFloat3[]	pointLightColor;
 	UniformFloat3[]	pointLightAttenuation;
 	UniformInt1		numberOfPointLights;
 	
 	UniformFloat3[]	lineLightPos1;
 	UniformFloat3[]	lineLightPos2;
-	UniformFloat4[]	lineLightColor;
+	UniformFloat3[]	lineLightColor;
 	UniformFloat3[]	lineLightAttenuation;
 	UniformInt1		numberOfLineLights;
 	
 	UniformFloat3[]	dirLightDirection;
-	UniformFloat4[]	dirLightColor;
+	UniformFloat3[]	dirLightColor;
+	UniformFloat3[]	dirLightAmbientColor;
 	UniformInt1		numberOfDirLights;
 	
 	protected UniformFloat1 minBrightness;
 	
 	protected static final Vec3f UNIT_VEC=new Vec3f();
 	
-	public static int	MAX_POINT_LIGHT	=2;
+	public static int	MAX_POINT_LIGHT	=6;
 	public static int	MAX_LINE_LIGHT	=2;
 	public static int	MAX_DIR_LIGHT	=2;
 	
@@ -87,6 +87,7 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 		
 		dirLightColor=getUniformArray(arrayList("dirLights", "color"));
 		dirLightDirection=getUniformArray(arrayList("dirLights", "direction"));
+		dirLightAmbientColor=getUniformArray(arrayList("dirLights", "ambient"));
 		numberOfDirLights=getUniform(arrayListSize("dirLights"));
 		
 		minBrightness=getUniform("minBrightness");
@@ -140,6 +141,7 @@ public class ShaderModuleLight extends ShaderModule implements ShaderModule.Glob
 		for(int i=0;i<DIRS.size();i++){
 			DirLight light=DIRS.get(i);
 			dirLightColor[i].upload(light.color);
+			dirLightAmbientColor[i].upload(light.ambient);
 			light.dir.normalise(UNIT_VEC);
 			dirLightDirection[i].upload(UNIT_VEC);
 		}

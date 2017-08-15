@@ -1,6 +1,7 @@
 package com.lapissea.opengl.program.rendering.gl.shader.light;
 
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 
 public class LineLight extends LightSource{
@@ -14,7 +15,7 @@ public class LineLight extends LightSource{
 		this.pos1=pos1;
 		this.pos2=pos2;
 		this.attenuation=attenuation;
-		this.color=color;
+		this.color=ColorM.toColorM(color);
 	}
 	
 }

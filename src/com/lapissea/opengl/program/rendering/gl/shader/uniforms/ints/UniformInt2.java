@@ -19,7 +19,12 @@ public class UniformInt2 extends AbstractUniform{
 		prev1=i1;
 		prev2=i2;
 		glUniform2i(id(), i1, i2);
-		checkError(()->upload(i1, i2));
+		checkError();
+	}
+	@Override
+	protected void onErrorSolve(){
+		prev1=Integer.MIN_VALUE;
+		upload(prev1,prev2);
 	}
 	
 }

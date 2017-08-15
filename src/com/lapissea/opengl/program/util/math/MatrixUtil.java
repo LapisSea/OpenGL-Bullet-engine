@@ -2,7 +2,7 @@ package com.lapissea.opengl.program.util.math;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.util.Quat4M;
+import com.lapissea.opengl.program.util.math.vec.Quat4;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 
 public class MatrixUtil{
@@ -10,7 +10,7 @@ public class MatrixUtil{
 	private static final Vec3f		X_AXIS	=new Vec3f(1, 0, 0),Y_AXIS=new Vec3f(0, 1, 0),Z_AXIS=new Vec3f(0, 0, 1);
 	private static final Matrix4f	ROT_MAT	=new Matrix4f();
 	
-	public static Matrix4f createTransformMat(Vec3f translation, Quat4M rotation, Vec3f scale){
+	public static Matrix4f createTransformMat(Vec3f translation, Quat4 rotation, Vec3f scale){
 		return createTransformMat(new Matrix4f(), translation, rotation, scale);
 	}
 	
@@ -26,11 +26,11 @@ public class MatrixUtil{
 		return rotate(src.translate(translation), rotation).scale(scale);
 	}
 	
-	public static Matrix4f createTransformMat(Matrix4f src, Vec3f translation, Quat4M rotation, Vec3f scale){
+	public static Matrix4f createTransformMat(Matrix4f src, Vec3f translation, Quat4 rotation, Vec3f scale){
 		return rotate(src.translate(translation), rotation).scale(scale);
 	}
 	
-	public static synchronized Matrix4f rotate(Matrix4f mat, Quat4M rot){
+	public static synchronized Matrix4f rotate(Matrix4f mat, Quat4 rot){
 		rot.quatToMatrix4f(ROT_MAT);
 		return Matrix4f.mul(mat, ROT_MAT, mat);
 		//return rotateXYZ(mat, new Vec3f().set(rot));

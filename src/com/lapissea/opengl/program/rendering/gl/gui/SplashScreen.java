@@ -15,8 +15,8 @@ import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.util.PairM;
-import com.lapissea.opengl.program.util.Quat4M;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
+import com.lapissea.opengl.program.util.math.vec.Quat4;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
@@ -114,10 +114,10 @@ public class SplashScreen{
 	}
 	
 	public void update(){
-		Game.win().updateInput();
 	}
 	
 	public void render(){
+		Game.win().updateInput();
 		if(Game.win().isClosed()){
 			System.exit(0);
 			return;
@@ -143,7 +143,7 @@ public class SplashScreen{
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		double tim=System.currentTimeMillis();
-		shader.renderSingle(MatrixUtil.createTransformMat(new Vec3f(0, 0, -1F), new Quat4M(
+		shader.renderSingle(MatrixUtil.createTransformMat(new Vec3f(0, 0, -1F), new Quat4(
 				(float)Math.sin(tim/500%(Math.PI*2))*0.1F,
 				(float)Math.sin(tim/1500%(Math.PI*2))*0.1F,
 				(float)Math.sin(tim/2000%(Math.PI*2))*0.1F, 1), new Vec3f(scale, scale, scale)), model);

@@ -2,11 +2,14 @@ package com.lapissea.opengl.program.rendering.gl.model;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 
+import com.lapissea.opengl.program.util.Objholder;
+import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
@@ -78,84 +81,27 @@ public class ObjModelLoader{
 		
 	}
 	
-	private static String[] getFileLines(String path){
-		//		LogUtil.println(path);
-		String srcAll=UtilM.getTxtResource(path);
-		if(srcAll==null) return null;
-		String[] src=srcAll.replaceAll(" +", " ").split("\n");
-		return src;
-	}
-	
 	public static ModelData load(String name){
 		name=name.replace('\\', '/');
 		LogUtil.println("Loading model:", name);
 		
-		if(name.contains("\\")) name=name.replace('\\', '/');
-		name=name.replaceAll("/+", "/");
+//		name=name.replaceAll("/+", "/");
 		if(name.startsWith("/")) name=name.substring(1, name.length());
 		
-		String[] src=getFileLines("models/"+name+(name.endsWith(".obj")?"":".obj"));
-		if(src==null){
-			LogUtil.println("Model", name, "does not exist!");
-			return null;
-		}
-		
-		String mtllib=null;
-		Map<String,IMaterial> materials=null;
-		
-		//find mtl file pointer
-		for(int i=0;i<src.length;i++){
-			String line=src[i];
-			if(line.isEmpty()||line.charAt(0)=='#') continue;
-			if(line.startsWith("mtllib ")){
-				int pos=name.lastIndexOf('/');
-				String s=pos!=-1?name.substring(0, pos+1):"";
-				mtllib=s+line.substring("mtllib ".length());
-				break;
-			}
-		}
-		//read materials
-		if(mtllib!=null){
-			materials=new HashMap<>();
-			String path="models/"+mtllib;
-			String[] mtlSrc=getFileLines(path);
+		try(InputStream modelStream=UtilM.getResource("models/"+name+(name.endsWith(".obj")?"":".obj"))){
 			
-			if(mtlSrc==null){
-				LogUtil.println("Model mtl file", path, "does not exist!");
+			if(modelStream==null){
+				LogUtil.println("Model", name, "does not exist!");
 				return null;
 			}
-			Material material=null;
-			int matId=0;
-			
-			for(int i=0;i<mtlSrc.length;i++){
-				String line=mtlSrc[i];
-				if(line.isEmpty()||line.charAt(0)=='#') continue;
-				
-				if(line.startsWith("newmtl ")){
-					material=new Material(matId++, line.substring("newmtl ".length()));
-					
-					materials.put(material.getName(), material);
-					continue;
-				}
-				if(material!=null){
-					String[] segments=line.split(" ");
-					float[] numbers=new float[segments.length-1];
-					for(int j=1;j<numbers.length;j++){
-						numbers[j-1]=Float.parseFloat(segments[j]);
-					}
-					
-					if(line.startsWith("Ns ")) material.setShineDamper(Float.parseFloat(line.split(" ")[1]));
-					else if(line.startsWith("Ka ")) material.getAmbient().load(numbers);
-					else if(line.startsWith("Kd ")) material.getDiffuse().load(numbers);
-					else if(line.startsWith("Ks ")) material.getSpecular().load(numbers);
-					else if(line.startsWith("illum ")) material.setIllum(MathUtil.snap(2-numbers[0], 0, 1));
-					else if(line.startsWith("jelly ")) material.setJelly(MathUtil.snap(numbers[0], 0, 1));
-					
-				}
-				
-			}
-			
+			return load(name, modelStream);
+		}catch(IOException e){
+			throw new IllegalStateException(e);
 		}
+	}
+	
+	public static ModelData load(String name, InputStream modelStream) throws IOException{
+		
 		ModelData model=new ModelData();
 		
 		List<Vec3f> vertecies=new ArrayList<>();
@@ -165,25 +111,34 @@ public class ObjModelLoader{
 		List<int[]> idsVert=new ArrayList<>(),idsUv=new ArrayList<>(),idsNorm=new ArrayList<>();
 		IntList idsMater=new IntArrayList();
 		
-		IMaterial material=null;
+		Objholder<IMaterial> material=new Objholder<>();
 		
-		//read raw data
-		for(int i=0;i<src.length;i++){
-			String line=src[i];
-			if(line.isEmpty()||line.charAt(0)=='#') continue;
+		//find mtl file pointer
+		lines(modelStream, line->{
 			
-			if(line.startsWith("v ")){
-				String[] parts=line.split(" ");
-				vertecies.add(new Vec3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
-			}else if(line.startsWith("vn ")){
-				String[] parts=line.split(" ");
-				normals.add(new Vec3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
-			}else if(line.startsWith("vt ")){
-				String[] parts=line.split(" ");
-				uvs.add(new Vec2f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2])));
-			}else if(line.startsWith("usemtl ")){
-				material=materials.get(line.substring("usemtl ".length()));
-			}else if(line.startsWith("f ")){
+			if(line.isEmpty()||line.charAt(0)=='#') return;
+			if(line.startsWith("mtllib ")){
+				try{
+					loadMlt(model.materials::add, line, name);
+				}catch(IOException e){
+					e.printStackTrace();
+				}
+				return;
+			}
+			switch(line.charAt(0)){
+			case 'v':
+				char secondChar=line.charAt(1);
+				if(secondChar==' '){
+					vertecies.add(new Vec3f(line, 2));
+					break;
+				}else if(secondChar=='n'){
+					normals.add(new Vec3f(line, 3));
+					break;
+				}else if(secondChar=='t'){
+					uvs.add(new Vec2f(line, 3));
+					break;
+				}
+			case 'f':{
 				
 				String[] parts=line.substring(2).split(" ");
 				
@@ -206,12 +161,21 @@ public class ObjModelLoader{
 						hasNorm=true;
 					}
 				}
-				idsMater.add(material!=null?material.getId():0);
+				idsMater.add(material.obj!=null?material.obj.getId():0);
 				idsVert.add(faceVert);
 				idsUv.add(hasUv?faceUv:null);
 				idsNorm.add(hasNorm?faceNorm:null);
 			}
-		}
+			break;
+			default:{
+				if(line.startsWith("usemtl ")){
+					String nm=line.substring(7);
+					material.obj=model.materials.stream().filter(m->m.getName().equals(nm)).findAny().orElse(null);
+				}
+			}
+			break;
+			}
+		});
 		
 		boolean hasQuad=idsVert.stream().anyMatch(face->face.length==4),hasTriang=idsVert.stream().anyMatch(face->face.length==3);
 		
@@ -220,13 +184,13 @@ public class ObjModelLoader{
 			
 			hasQuad=false;
 			
-			List<int[]> idsVert0=idsVert,idsUv0=idsUv,idsNorm0=idsNorm;
-			IntList idsMater0=idsMater;
+			List<int[]> idsVert0=new ArrayList<>(idsVert),idsUv0=new ArrayList<>(idsUv),idsNorm0=new ArrayList<>(idsNorm);
+			IntList idsMater0=new IntArrayList(idsMater);
 			
-			idsMater=new IntArrayList();
-			idsVert=new ArrayList<>();
-			idsUv=new ArrayList<>();
-			idsNorm=new ArrayList<>();
+			idsMater.clear();
+			idsVert.clear();
+			idsUv.clear();
+			idsNorm.clear();
 			
 			for(int i=0;i<idsVert0.size();i++){
 				
@@ -309,8 +273,7 @@ public class ObjModelLoader{
 		}
 		model.format=hasQuad?GL_QUADS:GL_TRIANGLES;
 		
-		if(!model.hasMaterials) model.materialIds=null;
-		else materials.values().forEach(model.materials::add);
+		if(!model.hasMaterials)model.materialIds=null;
 		
 		if(!model.hasNormals) model.normals=null;
 		if(!model.hasUvs) model.uvs=null;
@@ -318,6 +281,88 @@ public class ObjModelLoader{
 		model.name=name;
 		
 		return model;
+	}
+	
+	private static void lines(InputStream steam, Consumer<String> cons) throws IOException{
+		StringBuilder lineBuild=new StringBuilder();
+		int ch;
+		
+		while(true){
+			String line;
+			while(true){
+				ch=steam.read();
+				if(ch==-1){
+					line=lineBuild.toString();
+					lineBuild.setLength(0);
+					break;
+				}
+				if(ch=='\n'){
+					ch=steam.read();
+					line=lineBuild.toString();
+					lineBuild.setLength(0);
+					if(ch!='\r'&&ch!='\n') lineBuild.append((char)ch);
+					break;
+				}
+				lineBuild.append((char)ch);
+			}
+			cons.accept(line);
+			
+			if(ch==-1) return;
+		}
+	}
+	
+	private static void loadMlt(Consumer<Material> newMat, String lin, String name) throws IOException{
+		String mtllib=lin.substring("mtllib".length()).trim();
+		
+		String path;
+		int pos=name.lastIndexOf('/');
+		if(pos==-1) path="models/"+mtllib;
+		else path="models/"+name.substring(0, pos+1)+mtllib;
+		
+		try(InputStream mtlSrc=UtilM.getResource(path)){
+			
+			if(mtlSrc==null){
+				LogUtil.printlnEr("Model mtl file", path, "does not exist!");
+				return;
+			}
+			
+			PairM<Material,Integer> mat=new PairM<>(null, 0);
+			
+			lines(mtlSrc, line->{
+				if(line.isEmpty()) return;
+				
+				char firstChar=line.charAt(0);
+				if(firstChar=='#') return;
+				
+				if(line.startsWith("newmtl ")){
+					newMat.accept(mat.obj1=new Material(mat.obj2++, line.substring("newmtl ".length())));
+					return;
+				}
+				Material mater=mat.obj1;
+				
+				if(mater!=null){
+					
+					if(firstChar=='K') loadLighting(mater, line);
+					else if(firstChar=='d') mater.getDiffuse().a(Float.parseFloat(line.substring(2)));
+					else if(firstChar=='N'){
+						if(line.charAt(1)=='s') mater.setShineDamper(Float.parseFloat(line.substring(2)));
+					}else if(line.startsWith("jelly ")) mater.setJelly(MathUtil.snap(Float.parseFloat(line.substring("jelly ".length())), 0, 1));
+					
+				}
+			});
+			
+		}
+	}
+	
+	private static void loadLighting(Material material, String line){
+		// @formatter:off
+		switch(line.charAt(1)){
+		case 'a':material.getAmbient(). load(line, 3);break;
+		case 'd':material.getDiffuse(). load(line, 3);break;
+		case 's':material.getSpecular().load(line, 3);break;
+		case 'e':material.getEmission().load(line, 3);break;
+		}
+		// @formatter:on
 	}
 	
 	public static ModelData[] loadArr(String name){

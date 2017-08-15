@@ -1,20 +1,19 @@
 package com.lapissea.opengl.program.game.entity;
 
-import com.bulletphysics.dynamics.RigidBody;
 import com.lapissea.opengl.program.game.events.Updateable;
+import com.lapissea.opengl.program.game.physics.IPhysicsObjPointer;
+import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.util.Quat4M;
-import com.lapissea.opengl.program.util.RigidBodyEntity;
 import com.lapissea.opengl.program.util.math.PartialTick;
+import com.lapissea.opengl.program.util.math.vec.Quat4;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
 
-public abstract class EntityUpd extends Entity implements Updateable{
+public abstract class EntityUpd extends Entity implements Updateable,IPhysicsObjPointer<PhysicsObjJBullet>{
 	
-	public final Vec3f	prevPos	=new Vec3f(),prevScale=new Vec3f(1, 1, 1);
-	public final Quat4M	prevRot	=new Quat4M();
-	
-	protected RigidBodyEntity physicsBody;
+	public final Vec3f				prevPos		=new Vec3f(),prevScale=new Vec3f(1, 1, 1);
+	public final Quat4				prevRot		=new Quat4();
+	private final PhysicsObjJBullet	physicsObj	=new PhysicsObjJBullet();
 	
 	public EntityUpd(World world, IModel model, Vec3f pos){
 		super(world, model, pos);
@@ -27,7 +26,7 @@ public abstract class EntityUpd extends Entity implements Updateable{
 	}
 	
 	@Override
-	public Quat4M getModelRot(){
+	public Quat4 getModelRot(){
 		return PartialTick.calc(ROT, prevRot, rot);
 	}
 	
@@ -41,7 +40,8 @@ public abstract class EntityUpd extends Entity implements Updateable{
 		return PartialTick.calc(SCAL, prevScale, scale);
 	}
 	
-	public RigidBody getPhysicsBody(){
-		return physicsBody;
+	@Override
+	public PhysicsObjJBullet getPhysicsObj(){
+		return physicsObj;
 	}
 }

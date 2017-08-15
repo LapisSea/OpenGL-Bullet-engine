@@ -20,7 +20,12 @@ public class UniformInt3 extends AbstractUniform{
 		prev2=i2;
 		prev3=i3;
 		glUniform3i(id(), i1, i2, i3);
-		checkError(()->upload(i1, i2, i3));
+		checkError();
+	}
+	@Override
+	protected void onErrorSolve(){
+		prev1=Integer.MIN_VALUE;
+		upload(prev1,prev2,prev3);
 	}
 	
 }
