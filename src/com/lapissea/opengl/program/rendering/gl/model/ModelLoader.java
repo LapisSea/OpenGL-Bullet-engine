@@ -13,13 +13,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumBool;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
-import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
+import com.lapissea.opengl.program.rendering.gl.model.parsers.WavefrontParser;
 import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
+import com.lapissea.opengl.program.util.Predicates;
+import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
 import com.lapissea.opengl.window.api.util.BufferUtil;
@@ -31,11 +35,24 @@ import com.lapissea.opengl.window.assets.Vbo;
 import com.lapissea.opengl.window.impl.assets.Model;
 import com.lapissea.util.LogUtil;
 import com.lapissea.util.UtilL;
+import com.lapissea.util.UtilL.InputStreamSilent;
 
 public class ModelLoader{
 	
+	private static final Vec3f V0=new Vec3f(),V1=new Vec3f(),V2=new Vec3f(),V01=new Vec3f(),V12=new Vec3f(),NORMAL=new Vec3f();
+	
 	private static final List<IModel>			MODELS			=new ArrayList<>();
 	private static final HashMap<String,Object>	MODEL_BUILD_DATA=new HashMap<>();
+	private static final List<ModelParser>		MODEL_PARSERS	=new ArrayList<>();
+	
+	private static final Predicate<String> ANY_SUPPORTED=s->{
+		int pos=s.lastIndexOf('.');
+		return pos!=-1&&getLoaderByExtension(s.substring(pos+1))!=null;
+	};
+	
+	static{
+		registerModelParser(new WavefrontParser());
+	}
 	
 	public static final IModel EMPTY_MODEL=new Model("EMPTY_MODEL"){
 		
@@ -88,10 +105,90 @@ public class ModelLoader{
 		public IMaterial createMaterial(String name){
 			throw new UnsupportedOperationException();
 		}
-		
 	};
 	
-	private static final Vec3f V0=new Vec3f(),V1=new Vec3f(),V2=new Vec3f(),V01=new Vec3f(),V12=new Vec3f(),NORMAL=new Vec3f();
+	public static void registerModelParser(ModelParser parser){
+		if(MODEL_PARSERS.contains(parser)) throw new IllegalArgumentException(parser+" parser already exists!");
+		MODEL_PARSERS.add(parser);
+	}
+	
+	public static IModel loadAndBuild(String location){
+		return loadAndBuild(Model.class, location);
+	}
+	
+	public static <T extends IModel> T loadAndBuild(Class<T> type, String location){
+		ModelData data=load(location);
+		return buildModel(type, data);
+	}
+	
+	public static IModel[] loadFolderAndBuild(String location){
+		return loadFolderAndBuild(Model.class, location);
+	}
+	
+	public static <T extends IModel> T[] loadFolderAndBuild(Class<T> type, String location){
+		ModelData[] data=loadFolder(location);
+		return buildModels(type, data);
+	}
+	
+	public static ModelData load(String location){
+		int pos=location.lastIndexOf('.');
+		if(pos==-1){
+			//assume extension
+			
+			String name,path;
+			int pos0=location.lastIndexOf('/');
+			if(pos0==-1){
+				name=location;
+				path="";
+			}else{
+				name=location.substring(pos0+1);
+				path=location.substring(0, pos0);
+			}
+			
+			IllegalArgumentException lastE=null;
+			for(String nam:UtilM.getResourceFolderContentList("models/"+path, nam->{
+				int p=nam.lastIndexOf('.');
+				return p!=-1&&nam.substring(0, p).equals(name);
+			})){
+				try{
+					return load(path+nam);
+				}catch(IllegalArgumentException e){
+					lastE=e;
+				}
+			}
+			throw lastE!=null?lastE:new IllegalArgumentException("Model \""+location+"\" does not exist!");
+		}
+		
+		String extension=location.substring(pos+1);
+		ModelParser parser=getLoaderByExtension(extension);
+		if(parser==null) throw new IllegalArgumentException("Model \""+location+"\" has extension \""+extension+"\" that is not supported!");
+		
+		LogUtil.println("Loading model:", location);
+		try(InputStreamSilent modelData=UtilL.silentClose(UtilM.getResource("models/"+location))){
+			if(modelData==null) throw new IllegalArgumentException("Model \""+location+"\" does not exist!");
+			return parser.load(location, modelData);
+		}
+		
+	}
+	
+	public static ModelParser getLoaderByExtension(String extension){
+		
+		for(ModelParser parser:MODEL_PARSERS){
+			if(parser.extensionSupported(extension)) return parser;
+		}
+		
+		return null;
+	}
+	
+	public static ModelData[] loadFolder(String location){
+		return loadFolder(location, Predicates.TRUE());
+	}
+	
+	public static ModelData[] loadFolder(String location, Predicate<String> fileFilter){
+		List<ModelData> models=new ArrayList<>();
+		if(UtilM.getResourceFolderContent("models/"+location, fileFilter.and(ANY_SUPPORTED), (Consumer<String>)name->models.add(load(location+"/"+name)))==-1) throw new IllegalArgumentException("Folder "+location+" does not exist!");
+		return UtilL.array(models);
+	}
 	
 	public static IModel[] buildModels(ModelData...modelsData){
 		IModel[] models=new IModel[modelsData.length];
@@ -106,6 +203,7 @@ public class ModelLoader{
 		for(int i=0;i<modelsData.length;i++){
 			models[i]=buildModel(type, modelsData[0]);
 		}
+		
 		return models;
 	}
 	
@@ -114,7 +212,7 @@ public class ModelLoader{
 	}
 	
 	public static <T extends IModel> T buildModel(Class<T> type, ModelData modelData){
-		return buildModel(type, modelData.name, modelData.format, "vertices", modelData.getVert(), "uvs", modelData.getUv(), "normals", modelData.getNorm(), "materialIds", modelData.getMat(), "materials", modelData.materials);
+		return buildModel(type, modelData.name, modelData.format, "vertices", modelData.vertecies, "uvs", modelData.uvs, "normals", modelData.normals, "materialIds", modelData.materialIds, "materials", modelData.materials);
 	}
 	
 	/**

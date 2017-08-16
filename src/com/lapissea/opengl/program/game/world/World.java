@@ -69,12 +69,6 @@ public class World extends PhysicsWorldJbullet{
 		
 		LogUtil.println("Done!");
 		
-		int worldSize=(int)(CHUNK_GRID_SIZE*Chunk.SIZE);
-		
-		//		for(int i=0;i<100;i++){
-		//			spawn(new EntityGrass(this, new Vec3f(RandUtil.CRF(worldSize), 0, RandUtil.CRF(worldSize))));
-		//		}
-		
 		for(int i=0;i<PHYSICS_CUBE_AMMOUNT;i++){
 			EntityCrazyCube c;
 			spawn(c=new EntityCrazyCube(this, new Vec3f(RandUtil.CRF(300), RandUtil.RF(20)+100, RandUtil.CRF(300))));
@@ -99,7 +93,7 @@ public class World extends PhysicsWorldJbullet{
 		addRigidBody(chunk);
 	}
 	
-	private void removeChunk(Chunk chunk){
+	public void removeChunk(Chunk chunk){
 		OffsetArray<Chunk> zLine=chunks.get(chunk.x);
 		if(zLine==null) return;
 		Chunk chunk0=zLine.remove(chunk.z);

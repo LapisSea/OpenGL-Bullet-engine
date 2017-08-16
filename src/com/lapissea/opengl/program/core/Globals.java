@@ -16,7 +16,6 @@ public class Globals{
 	
 	static{
 		String path=GameStart.class.getResource(GameStart.class.getSimpleName()+".class").getFile();
-		LogUtil.println(path);
 		if(path.startsWith("file:/")){
 			try{
 				path=URLDecoder.decode(path.substring(path.startsWith("file:")?6:0, path.lastIndexOf('!')), "UTF-8");

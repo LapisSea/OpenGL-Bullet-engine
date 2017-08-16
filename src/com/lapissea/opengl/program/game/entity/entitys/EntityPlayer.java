@@ -6,7 +6,7 @@ import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
-import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
+import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.vec.Quat4;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
@@ -18,7 +18,7 @@ public class EntityPlayer extends EntityUpd{
 	
 	private static IModel getModel0(){
 		if(MODEL==null){
-			MODEL=ObjModelLoader.loadAndBuild("fox");
+			MODEL=ModelLoader.loadAndBuild("fox");
 		}
 		return MODEL;
 	}

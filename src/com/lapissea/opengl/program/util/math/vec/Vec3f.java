@@ -433,4 +433,9 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		}
 		// @formatter:on
 	}
+	
+	@Override
+	public Vec3f load(int offset, float[] data){
+		return setThis(data[offset], data[offset+1], data[offset+2]);
+	}
 }

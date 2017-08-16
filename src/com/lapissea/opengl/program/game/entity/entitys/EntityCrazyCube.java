@@ -15,7 +15,7 @@ import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.Camera;
-import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
+import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
 import com.lapissea.opengl.program.util.BlackBody;
 import com.lapissea.opengl.program.util.RandUtil;
@@ -84,8 +84,8 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	private static IModel getModel0(){
 		if(MODEL==null){
-			MODEL=ObjModelLoader.loadAndBuild("FancyCube");
-//			MODEL=ObjModelLoader.loadAndBuild("ball");
+//			MODEL=ModelLoader.loadAndBuild("FancyCube");
+			MODEL=ModelLoader.loadAndBuild("ball");
 		}
 		return MODEL;
 	}

@@ -26,7 +26,6 @@ import com.lapissea.opengl.program.rendering.gl.gui.GuiHandler;
 import com.lapissea.opengl.program.rendering.gl.gui.guis.GuiPause;
 import com.lapissea.opengl.program.rendering.gl.model.DynamicModel;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
-import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
 import com.lapissea.opengl.program.rendering.gl.shader.light.DirLight;
@@ -83,7 +82,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	private NanoTimer renderBuildBechmark=new NanoTimer(),renderBechmark=new NanoTimer();
 	
 	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
-	private IModel			moon		=ObjModelLoader.loadAndBuild("moon");
+	private IModel			moon		=ModelLoader.loadAndBuild("moon");
 	public FboRboTextured	worldFbo	=new FboRboTextured();
 	public Fbo				skyFbo		=new Fbo(Fbo.TEXTURE);
 	public GuiHandler		guiHandler	=new GuiHandler();

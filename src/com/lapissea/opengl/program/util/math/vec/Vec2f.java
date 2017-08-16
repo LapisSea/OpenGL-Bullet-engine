@@ -36,6 +36,7 @@ public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 	public Vec2f(String string){
 		load(string);
 	}
+	
 	public Vec2f(String string, int start){
 		load(string, start);
 	}
@@ -183,5 +184,11 @@ public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 		case 'y':y(value);break;
 		}
 		// @formatter:on
+	}
+	
+	@Override
+	public Vec2f load(int offset, float[] data){
+		set(data[offset], data[offset+1]);
+		return this;
 	}
 }

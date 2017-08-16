@@ -11,9 +11,10 @@ import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
 import com.bulletphysics.linearmath.Transform;
 import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
+import com.lapissea.opengl.program.rendering.gl.model.ModelData;
 import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
-import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
-import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader.ModelData;
+import com.lapissea.opengl.program.rendering.gl.model.ModelUtil;
+import com.lapissea.opengl.program.util.Predicates;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Quat4;
@@ -31,7 +32,7 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	protected static final Matrix4f	TRANSFORM	=new Matrix4f();
 	protected static final Vec3f	POS			=new Vec3f();
 	
-	public static ModelData[] grass=ObjModelLoader.loadArr("Grass");
+	public static ModelData[] grass=ModelLoader.loadFolder("Grass", Predicates.FIRST_NUMERIC);
 	
 	public static final float	SIZE		=50;
 	public static int			RESOLUTION	=9,GRASS_MIN=20,GRASS_RAND=30;
@@ -92,7 +93,7 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 		init(0, new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(x*SIZE, 0, z*SIZE), 1)), new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(this.hMap, indices.toIntArray()), true), new Vec3f());
 		
 		Quat4 q=new Quat4();
-		Vec3f rot=new Vec3f(),vRot=new Vec3f();
+		Vec3f rot=new Vec3f(),vRot=new Vec3f(),iterator=new Vec3f();
 		for(int i=0, j=GRASS_MIN+RandUtil.RI(GRASS_RAND);i<j;i++){
 			float xOnChunk=RandUtil.RF(SIZE);
 			float zOnChunk=RandUtil.RF(SIZE);
@@ -101,14 +102,14 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 			q.set(rot.setThis(0, RandUtil.RF(Math.PI*2), RandUtil.CRF(0.2)));
 			
 			float scale=0.7F+RandUtil.RF(0.3);
-			for(Vec3f v:grass[RandUtil.RI(grass.length)].vertecies){
+			ModelUtil.iterate(grass[RandUtil.RI(grass.length)].vertecies, iterator, v->{
 				q.rotate(vRot.set(v));
 				indices.add(vertices.size()/3);
 				vertices.add(vRot.x()*scale+xOnChunk);
 				vertices.add(vRot.y()*scale+y);
 				vertices.add(vRot.z()*scale+zOnChunk);
 				mats.add(1);
-			}
+			});
 		}
 		model=ModelLoader.buildModel("Gen_Chunk-"+gridX+"_"+gridZ, GL_TRIANGLES, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toIntArray(), "genNormals", true, "materials", new Material(0, "ground")).culface(false);
 		

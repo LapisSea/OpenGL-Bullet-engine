@@ -125,6 +125,7 @@ public class Config{
 		return get(path, onNull, Object.class);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T> T get(String path, T onNull, Class<T> type){
 		Node node=getN(path);
 		if(node==null) return onNull;
@@ -154,7 +155,7 @@ public class Config{
 					String part=parts[i];
 					LogUtil.println(part);
 					if(target.has(part)){
-					
+						
 					}
 				}
 				obj.put(k, v.obj);

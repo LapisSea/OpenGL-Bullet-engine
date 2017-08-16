@@ -7,13 +7,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.jar.JarFile;
 
@@ -94,47 +94,80 @@ public class UtilM extends UtilL{
 	}
 	
 	public static InputStream getResource(String name){
-		if(Globals.DEV_ENV) name="res/"+name;
+		if(Globals.DEV_ENV) {
+			name="res/"+name;
+			try{
+				return Files.newInputStream(new File(name).toPath());
+			}catch(IOException e){
+				return null;
+			}
+		}
 		
-		InputStream src=UtilL.class.getResourceAsStream("/"+name);
-		if(src==null) try{
-			src=Files.newInputStream(new File(name).toPath());
-		}catch(IOException e){}
-		return src;
+		return UtilL.class.getResourceAsStream("/"+name);
 	}
 	
 	private static final Map<String,String[]>	FOLDER_CASH	=new HashMap<>();
-	private static final List<String>			FOLDER_NULL	=new ArrayList<>();
+	private static final Set<String>			FOLDER_NULL	=new HashSet<>();
 	
-	public static String[] getResourceFolderContent(String name, Predicate<String> filter){
-		String[] result=getResourceFolderContent(name);
-		if(result==null) return null;
-		return Arrays.stream(result).filter(filter).toArray(String[]::new);
+	public static List<String> getResourceFolderContentList(String name){
+		List<String> names=new ArrayList<>();
+		if(getResourceFolderContent(name, (Consumer<String>)names::add)==-1) return null;
+		return names;
 	}
 	
-	public static String[] getResourceFolderContent(String name){
-		String name0=name.replaceAll("[\\\\/ ]*$|[\\\\/]+", "/");
-		Optional<Entry<String,String[]>> a=FOLDER_CASH.entrySet().stream().filter(e->e.getKey().equals(name0)).findFirst();
-		if(a.isPresent()) return a.get().getValue();
-		if(FOLDER_NULL.contains(name0)) return null;
+	public static List<String> getResourceFolderContentList(String name, Predicate<String> filter){
+		List<String> names=new ArrayList<>();
+		if(getResourceFolderContent(name, filter, names::add)==-1) return null;
+		return names;
+	}
+	
+	public static int getResourceFolderContent(String name, Consumer<String> consumer){
+		return getResourceFolderContent(name, Predicates.TRUE(), consumer);
+	}
+	
+	public static int getResourceFolderContent(String name, Predicate<String> filter, Consumer<String> consumer){
+		String name0=(name+"/").replaceAll("[\\\\/ ]+$|[\\\\/]+", "/"),
+				namesCash[]=FOLDER_CASH.get(name0);
+		int count=0;
 		
-		if(Globals.DEV_ENV) return new File("res/"+name0).list();
-		
-		JarFile jar=Globals.getJarFile();
-		List<String> list=new ArrayList<>();
-		stream(jar.entries())
-		.filter(e->e.getName().length()>name0.length()&&e.getName().startsWith(name0))
-		.forEach(e->list.add(e.getName().substring(name0.length())));
-		closeSilenty(jar);
-		
-		if(list.isEmpty()){
-			FOLDER_NULL.add(name0);
-			return null;
+		if(namesCash!=null){
+			for(String nam:namesCash){
+				if(filter.test(nam)){
+					consumer.accept(nam);
+					count++;
+				}
+			}
+			return count;
 		}
-		String[] result=array(list);
-		FOLDER_CASH.put(name0, result);
+		if(FOLDER_NULL.contains(name0)) return -1;
 		
-		return result;
+		String[] names;
+		
+		if(Globals.DEV_ENV){
+			names=new File("res/"+name0).list();
+			if(names==null){
+				FOLDER_NULL.add(name0);
+				return -1;
+			}
+		}else{
+			JarFile jar=Globals.getJarFile();
+			names=stream(jar.entries()).filter(e->e.getName().startsWith(name0)&&filter.test(e.getName())).toArray(String[]::new);
+			if(names.length==0){
+				FOLDER_NULL.add(name0);
+				return -1;
+			}
+			closeSilenty(jar);
+		}
+		
+		for(int i=0;i<names.length;i++){
+			if(filter.test(names[i])){
+				consumer.accept(names[i]);
+				count++;
+			}
+		}
+		FOLDER_CASH.put(name0, names);
+		
+		return count;
 	}
 	
 	private static final List<Class<?>> WRAPPER_TYPES=new ArrayList<>();

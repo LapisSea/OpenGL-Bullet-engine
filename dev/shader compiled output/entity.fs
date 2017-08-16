@@ -141,7 +141,7 @@ vec3 calculateLineLineIntersection(vec3 line1Point1, vec3 line1Point2, vec3 line
 	return resultSegmentPoint;
 }
 
-void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, ModelMaterial material, vec3 wPos, float howFacingToCam, bool hasSpecular){
+void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, ModelMaterial material, vec3 wPos, float fresnel, bool hasSpecular){
 	vec3 toLight=light.pos-wPos;
 	float dist=length(toLight);
 	float attFact= 1/(
@@ -174,10 +174,10 @@ void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, M
 		
 		float dampedSpecular=pow(max(0,rawSpecular),material.shineDamper);
 		
-		light_specularTotal+=dampedSpecular*brightness*(1+howFacingToCam*2)*col;
+		light_specularTotal+=dampedSpecular*brightness*col*fresnel;
 	}
 }
-void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, ModelMaterial material, vec3 wPos, float howFacingToCam, bool hasSpecular){
+void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, ModelMaterial material, vec3 wPos, float fresnel, bool hasSpecular){
 	vec3 toLight=getClosetPoint(light.pos1,light.pos2, wPos)-wPos;
 	
 	float dist=length(toLight);
@@ -225,11 +225,11 @@ void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, Mod
 		
 		float dampedSpecular=pow(max(0,rawSpecular),material.shineDamper);
 		
-		light_specularTotal+=dampedSpecular*brightness*(1+howFacingToCam)*col;
+		light_specularTotal+=dampedSpecular*brightness*col*fresnel;
 	}
 }
 
-void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, ModelMaterial material, float howFacingToCam, bool hasSpecular){
+void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, ModelMaterial material, float fresnel, bool hasSpecular){
 	
 	vec3 unitToLight=light.direction;
 	float brightness=1;
@@ -256,7 +256,7 @@ void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight ligh
 		
 		float dampedSpecular=pow(max(0,rawSpecular),material.shineDamper);
 		
-		light_specularTotal+=dampedSpecular*brightness*(1+howFacingToCam*2)*col;
+		light_specularTotal+=dampedSpecular*brightness*col*fresnel;
 	}
 }
 
@@ -300,18 +300,20 @@ void calculateLighting(ModelMaterial material, ListPointLight pointLights, ListL
 	
 	if(!gl_FrontFacing)unitNormal*=-1;
 	
-	//fresnel effect
-	float howFacingToCam=1-max(0,dot(unitToCamera,unitNormal));
+	//fresnel effect with invidias Empricial Approximation
+	// old homemade 1-max(0,dot(unitToCamera,unitNormal));
+	float fresnel=1+max(2*pow(1+dot(-unitToCamera, unitNormal), 2), 0);
+	
 	bool hasSpecular=material.specular!=0||material.specular.y!=0||material.specular.z!=0;
 	
 	for(int i=0;i<pointLights.size;i++){
-		calcPointLightColor(unitToCamera, unitNormal, pointLights.get(i), material, wPos, howFacingToCam, hasSpecular);
+		calcPointLightColor(unitToCamera, unitNormal, pointLights.get(i), material, wPos, fresnel, hasSpecular);
 	}
 	for(int i=0;i<lineLights.size;i++){
-		calcLineLightColor(unitToCamera,unitNormal,lineLights.get(i),material, wPos, howFacingToCam, hasSpecular);
+		calcLineLightColor(unitToCamera,unitNormal,lineLights.get(i),material, wPos, fresnel, hasSpecular);
 	}
 	for(int i=0;i<dirLights.size;i++){
-		calcDirLightColor(unitToCamera,unitNormal,dirLights.get(i), material, howFacingToCam, hasSpecular);
+		calcDirLightColor(unitToCamera,unitNormal,dirLights.get(i), material, fresnel, hasSpecular);
 	}
 }
 

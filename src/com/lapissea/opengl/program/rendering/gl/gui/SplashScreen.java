@@ -9,7 +9,7 @@ import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.Fbo;
 import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.model.ObjModelLoader;
+import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
@@ -103,7 +103,7 @@ public class SplashScreen{
 	private static final long START=System.currentTimeMillis();
 	
 	private UniformFloat1		tim;
-	private IModel				model	=ObjModelLoader.loadAndBuild("loading");
+	private IModel				model	=ModelLoader.loadAndBuild("loading");
 	private SplashScreenShader	shader	=new SplashScreenShader();
 	
 	private long	endBegin=-1;
