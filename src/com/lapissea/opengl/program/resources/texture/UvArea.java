@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.texture;
+package com.lapissea.opengl.program.resources.texture;
 
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 

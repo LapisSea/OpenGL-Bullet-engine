@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import org.lwjgl.BufferUtils;
 
+import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
 import com.lapissea.opengl.window.api.util.BufferUtil;
 import com.lapissea.opengl.window.api.util.IVec3f;

@@ -14,8 +14,8 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.GLUtil;
-import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
 import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
+import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.window.api.util.IVec2i;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ITexture;

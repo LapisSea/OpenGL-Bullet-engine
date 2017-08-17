@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
+import com.lapissea.opengl.program.resources.texture.TextureLoader;
 import com.lapissea.opengl.program.util.OperatingSystem;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.config.Config;

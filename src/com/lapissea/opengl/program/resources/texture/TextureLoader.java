@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.texture;
+package com.lapissea.opengl.program.resources.texture;
 
 import static java.awt.image.BufferedImage.*;
 import static org.lwjgl.opengl.EXTTextureFilterAnisotropic.*;

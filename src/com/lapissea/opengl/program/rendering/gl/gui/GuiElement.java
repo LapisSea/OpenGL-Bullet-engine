@@ -13,7 +13,7 @@ import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.rendering.gl.gui.GuiFlow.ISizeCalc;
 import com.lapissea.opengl.program.rendering.gl.gui.GuiFlow.SizeCalcStatic;
-import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
+import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;

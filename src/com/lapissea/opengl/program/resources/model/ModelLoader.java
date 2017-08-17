@@ -1,6 +1,7 @@
-package com.lapissea.opengl.program.rendering.gl.model;
+package com.lapissea.opengl.program.resources.model;
 
 import static com.lapissea.opengl.window.assets.ModelAttribute.*;
+import static com.lapissea.util.UtilL.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -20,8 +21,9 @@ import java.util.stream.Collectors;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumBool;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
-import com.lapissea.opengl.program.rendering.gl.model.parsers.WavefrontParser;
-import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
+import com.lapissea.opengl.program.resources.model.parsers.WavefrontParser;
+import com.lapissea.opengl.program.resources.texture.TextureLoader;
+import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.Predicates;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
@@ -130,7 +132,16 @@ public class ModelLoader{
 		return buildModels(type, data);
 	}
 	
+	private static ModelData load(String location, ModelParser parser){
+		LogUtil.println("Loading model:", location);
+		try(InputStreamSilent modelData=UtilL.silentClose(UtilM.getResource("models/"+location))){
+			if(modelData==null) throw new IllegalArgumentException("Model \""+location+"\" does not exist!");
+			return parser.load(location, modelData);
+		}
+	}
+	
 	public static ModelData load(String location){
+		
 		int pos=location.lastIndexOf('.');
 		if(pos==-1){
 			//assume extension
@@ -145,30 +156,21 @@ public class ModelLoader{
 				path=location.substring(0, pos0);
 			}
 			
-			IllegalArgumentException lastE=null;
-			for(String nam:UtilM.getResourceFolderContentList("models/"+path, nam->{
-				int p=nam.lastIndexOf('.');
-				return p!=-1&&nam.substring(0, p).equals(name);
-			})){
-				try{
-					return load(path+nam);
-				}catch(IllegalArgumentException e){
-					lastE=e;
-				}
-			}
-			throw lastE!=null?lastE:new IllegalArgumentException("Model \""+location+"\" does not exist!");
+			return UtilM.getResourceFolderContentList("models/"+path).stream()
+					.filter(fileName->name.equals(before(fileName, '.')))
+					.map(fileName->new PairM<>(fileName, getLoaderByExtension(after(fileName, '.'))))
+					.filter(pair->pair.obj2!=null)
+					.findAny()
+					.map(pair->load(pair.obj1, pair.obj2))
+					.orElseThrow(()->new IllegalArgumentException("Model \""+location+"\" does not exist!"));
+			
 		}
 		
 		String extension=location.substring(pos+1);
 		ModelParser parser=getLoaderByExtension(extension);
 		if(parser==null) throw new IllegalArgumentException("Model \""+location+"\" has extension \""+extension+"\" that is not supported!");
 		
-		LogUtil.println("Loading model:", location);
-		try(InputStreamSilent modelData=UtilL.silentClose(UtilM.getResource("models/"+location))){
-			if(modelData==null) throw new IllegalArgumentException("Model \""+location+"\" does not exist!");
-			return parser.load(location, modelData);
-		}
-		
+		return load(location, parser);
 	}
 	
 	public static ModelParser getLoaderByExtension(String extension){

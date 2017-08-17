@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.model;
+package com.lapissea.opengl.program.resources.model;
 
 import com.lapissea.opengl.window.assets.IMaterial;
 

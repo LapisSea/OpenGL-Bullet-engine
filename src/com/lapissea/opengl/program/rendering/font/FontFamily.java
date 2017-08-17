@@ -18,9 +18,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.gl.model.ModelLoader;
-import com.lapissea.opengl.program.rendering.gl.texture.TextureLoader;
-import com.lapissea.opengl.program.rendering.gl.texture.UvArea;
+import com.lapissea.opengl.program.resources.model.ModelLoader;
+import com.lapissea.opengl.program.resources.texture.TextureLoader;
+import com.lapissea.opengl.program.resources.texture.UvArea;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.TextureTiled;
 import com.lapissea.opengl.program.util.UtilM;

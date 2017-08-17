@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.gl.model.parsers;
+package com.lapissea.opengl.program.resources.model.parsers;
 
 import static com.lapissea.opengl.program.util.UtilM.*;
 import static com.lapissea.util.UtilL.*;
@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.lapissea.opengl.program.rendering.gl.model.ModelData;
-import com.lapissea.opengl.program.rendering.gl.model.ModelDataBuilder;
-import com.lapissea.opengl.program.rendering.gl.model.ModelParser;
-import com.lapissea.opengl.program.rendering.gl.model.ModelUtil;
+import com.lapissea.opengl.program.resources.model.ModelData;
+import com.lapissea.opengl.program.resources.model.ModelDataBuilder;
+import com.lapissea.opengl.program.resources.model.ModelParser;
+import com.lapissea.opengl.program.resources.model.ModelUtil;
 import com.lapissea.opengl.program.util.Objholder;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
