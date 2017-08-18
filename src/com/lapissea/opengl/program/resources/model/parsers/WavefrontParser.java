@@ -23,8 +23,13 @@ import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.impl.assets.Material;
 import com.lapissea.util.LogUtil;
+import com.lapissea.util.UtilL;
 
+import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
+import it.unimi.dsi.fastutil.booleans.BooleanList;
 import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 public class WavefrontParser extends ModelParser{
 	
@@ -37,13 +42,14 @@ public class WavefrontParser extends ModelParser{
 		
 		ModelDataBuilder model=new ModelDataBuilder(name);
 		Objholder<IMaterial> activeMaterial=new Objholder<>();
+		Objholder<Boolean> activeSmooth=new Objholder<>(false);
 		Vec3f vec3=new Vec3f();
 		Vec2f vec2=new Vec2f();
 		
 		List<int[]> idsVert=new ArrayList<>();
 		List<int[]> idsUv=new ArrayList<>();
 		List<int[]> idsNorm=new ArrayList<>();
-		
+		BooleanList smoothFace=new BooleanArrayList();
 		//find mtl file pointer
 		try{
 			fileLines(modelStream, line->{
@@ -64,8 +70,12 @@ public class WavefrontParser extends ModelParser{
 						return;
 					}
 				case 'f':
+					smoothFace.add(activeSmooth.obj.booleanValue());
 					addIndex(model, line, activeMaterial.obj, idsVert, idsUv, idsNorm);
 					return;
+				case 's':
+					String val=after(line, ' ');
+					activeSmooth.obj=val.equals("on")||val.equals("true")||val.equals("1");
 				}
 				
 				if(line.startsWith("mtllib ")){
@@ -78,23 +88,42 @@ public class WavefrontParser extends ModelParser{
 					activeMaterial.obj=model.materialDefs.stream().filter(m->m.getName().equals(nm)).findAny().orElse(null);
 				}
 			});
-		}catch(IOException e2){
-			throw new RuntimeException(e2);
+		}catch(IOException e){
+			throw UtilL.uncheckedThrow(e);
 		}
 		
 		Map<Integer,Long> faceTypes=idsVert.stream().collect(Collectors.groupingBy(p->p.length, Collectors.counting()));
-		if(faceTypes.size()>1){//mixed quads and triangles not allowed!
+		LogUtil.printlnEr(name,faceTypes);
+		if(faceTypes.keySet().stream().max(Integer::max).orElse(-1)==4){//mixed quads and triangles not allowed!
+//		if(faceTypes.size()>1){
+			
+			IntList materialsNew=new IntArrayList(model.materials.size());
+			int count=0;
+			for(int[] face:idsVert){
+				
+				materialsNew.add(model.materials.getInt(count));
+				materialsNew.add(model.materials.getInt(count+1));
+				materialsNew.add(model.materials.getInt(count+2));
+				if(face.length>3){
+					materialsNew.add(model.materials.getInt(count));
+					materialsNew.add(model.materials.getInt(count+2));
+					materialsNew.add(model.materials.getInt(count+3));
+				}
+				count+=face.length;
+			};
+			model.materials.clear();
+			model.materials.addAll(materialsNew);
+			
 			ModelUtil.triangulate(idsVert);
 			ModelUtil.triangulate(idsUv);
 			ModelUtil.triangulate(idsNorm);
 		}
 		
-		model.format=faceTypes.keySet().stream().max(Integer::max).orElse(-1)==4?GL_QUADS:GL_TRIANGLES;
+		model.format=GL_TRIANGLES;
 		
 		uncompress(idsVert, model.vertecies, 3);
 		uncompress(idsUv, model.uvs, 2);
 		uncompress(idsNorm, model.normals, 3);
-		
 		return model.compile();
 	}
 	
@@ -174,7 +203,7 @@ public class WavefrontParser extends ModelParser{
 		try(InputStream mtlSrc=getResource(path)){
 			
 			if(mtlSrc==null){
-				LogUtil.printlnEr("Model mtl file", path, "does not exist!");
+				//LogUtil.printlnEr("Model mtl file", path, "does not exist!");
 				return;
 			}
 			

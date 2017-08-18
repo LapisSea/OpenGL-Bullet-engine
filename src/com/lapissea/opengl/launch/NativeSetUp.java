@@ -1,18 +1,22 @@
 package com.lapissea.opengl.launch;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipException;
 
 import javax.swing.UIManager;
 
-import com.lapissea.opengl.program.rendering.swing.ConsoleWindow;
+import com.lapissea.opengl.launch.swing.ConsoleWindow;
 import com.lapissea.opengl.program.util.OperatingSystem;
 
 class NativeSetUp{
@@ -54,7 +58,7 @@ class NativeSetUp{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}catch(Exception e1){}
 		
-		cons=new ConsoleWindow("Native setting up", "nativ_win", true, t->flag=true);
+		cons=new ConsoleWindow("Native setting up", "nativ_win", true);
 		if(flag) cons.setLocationRelativeTo(null);
 		cons.out("====GPU NATIVES SET UP====\n");
 	}
@@ -67,6 +71,22 @@ class NativeSetUp{
 			}catch(InterruptedException e){}
 			cons.setVisible(false);
 			cons.dispose();
+		}
+	}
+	
+	private static void closeErr(){
+		if(cons!=null){
+			err("\nClick to close...");
+			cons.text.addMouseListener(new MouseAdapter(){
+				
+				@Override
+				public void mouseClicked(MouseEvent e){
+					System.exit(-1);
+				}
+			});
+			try{
+				Thread.sleep(Integer.MAX_VALUE);
+			}catch(InterruptedException e1){}
 		}
 	}
 	
@@ -91,8 +111,11 @@ class NativeSetUp{
 					out("Done!");
 				}catch(Exception e){
 					err("UNABLE TO DOWNLOAD NATIVES!");
+					if(e instanceof UnknownHostException)err("Error:\nProblem connectiong to server: "+e.getMessage()+"\nPlease check your internet connection!");
+					else err("Error:\nUnkown errer: "+e.getMessage());
+					tempSave.delete();
 					e.printStackTrace();
-					System.exit(-1);
+					closeErr();
 				}
 			}
 			
@@ -115,15 +138,20 @@ class NativeSetUp{
 						}
 					}
 				}
+			}catch(ZipException e){
+				tempSave.delete();
+				err("UNABLE TO EXTRACT NATIVES!");
+				e.printStackTrace();
+				closeErr();
 			}catch(Exception e){
 				err("UNABLE TO EXTRACT NATIVES!");
 				e.printStackTrace();
-				System.exit(-1);
+				closeErr();
 			}
 		}catch(Exception e){
 			err("UNABLE TO SET UP NATIVES!");
 			e.printStackTrace();
-			System.exit(-1);
+			closeErr();
 		}
 		close();
 	}

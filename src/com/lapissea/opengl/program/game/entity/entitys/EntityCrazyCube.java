@@ -6,7 +6,7 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Mouse;
 
-import com.bulletphysics.collision.shapes.BoxShape;
+import com.bulletphysics.collision.shapes.SphereShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
@@ -15,7 +15,7 @@ import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.Camera;
-import com.lapissea.opengl.program.rendering.gl.shader.light.PointLight;
+import com.lapissea.opengl.program.rendering.shader.light.PointLight;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.util.BlackBody;
 import com.lapissea.opengl.program.util.RandUtil;
@@ -28,64 +28,11 @@ import com.lapissea.opengl.window.assets.IModel;
 public class EntityCrazyCube extends EntityUpd{
 	
 	public static IModel MODEL;
-	//	private static float[] VERT={
-	//			-0.5f,0.5f,-0.5f,
-	//			-0.5f,-0.5f,-0.5f,
-	//			0.5f,-0.5f,-0.5f,
-	//			0.5f,0.5f,-0.5f,
-	//
-	//			-0.5f,0.5f,0.5f,
-	//			-0.5f,-0.5f,0.5f,
-	//			0.5f,-0.5f,0.5f,
-	//			0.5f,0.5f,0.5f,
-	//
-	//			0.5f,0.5f,-0.5f,
-	//			0.5f,-0.5f,-0.5f,
-	//			0.5f,-0.5f,0.5f,
-	//			0.5f,0.5f,0.5f,
-	//
-	//			-0.5f,0.5f,-0.5f,
-	//			-0.5f,-0.5f,-0.5f,
-	//			-0.5f,-0.5f,0.5f,
-	//			-0.5f,0.5f,0.5f,
-	//
-	//			-0.5f,0.5f,0.5f,
-	//			-0.5f,0.5f,-0.5f,
-	//			0.5f,0.5f,-0.5f,
-	//			0.5f,0.5f,0.5f,
-	//
-	//			-0.5f,-0.5f,0.5f,
-	//			-0.5f,-0.5f,-0.5f,
-	//			0.5f,-0.5f,-0.5f,
-	//			0.5f,-0.5f,0.5f
-	//
-	//	};
-	
-	static int[] indices={
-			3,1,0,
-			2,1,3,
-			
-			4,5,7,
-			7,5,6,
-			
-			11,9,8,
-			10,9,11,
-			
-			12,13,15,
-			15,13,14,
-			
-			19,17,16,
-			18,17,19,
-			
-			20,21,23,
-			23,21,22
-			
-	};
 	
 	private static IModel getModel0(){
 		if(MODEL==null){
 //			MODEL=ModelLoader.loadAndBuild("FancyCube");
-			MODEL=ModelLoader.loadAndBuild("ball");
+			MODEL=ModelLoader.loadAndBuild("nothing");
 		}
 		return MODEL;
 	}
@@ -109,7 +56,8 @@ public class EntityCrazyCube extends EntityUpd{
 		
 		if(CAM==null) CAM=this;
 		
-		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), Vec3f.single(0.9F));
+		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new SphereShape(scale.x), Vec3f.single(0.9F));
+//		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), Vec3f.single(0.9F));
 		getPhysicsObj().body.setDamping(0.15F, 0.15F);
 		getPhysicsObj().hookPos(this.pos);
 		getPhysicsObj().hookRot(rot);

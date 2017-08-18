@@ -4,11 +4,15 @@ import com.lapissea.opengl.window.assets.IMaterial;
 
 public class ModelData{
 	
-	public String name;
+	public float[]	vertecies;
+	public float[]	uvs;
+	public float[]	normals;
+	public int[]	materialIds;
 	
-	public float[]		vertecies,uvs,normals;
-	public int[]		materialIds;
+	public int[] indices;
+	
 	public IMaterial[]	materials;
+	public String		name;
 	
 	public int format;
 	

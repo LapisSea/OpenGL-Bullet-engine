@@ -18,6 +18,7 @@ import com.lapissea.opengl.program.util.Predicates;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.math.vec.Quat4;
+import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.impl.assets.Material;
@@ -34,8 +35,8 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	
 	public static ModelData[] grass=ModelLoader.loadFolder("Grass", Predicates.FIRST_NUMERIC);
 	
-	public static final float	SIZE		=50;
-	public static int			RESOLUTION	=9,GRASS_MIN=20,GRASS_RAND=30;
+	public static final float	SIZE		=178;
+	public static int			RESOLUTION	=32,GRASS_MIN=20,GRASS_RAND=30;
 	
 	public final int	x,z;
 	public IModel		model	=ModelLoader.EMPTY_MODEL;
@@ -45,6 +46,9 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	public final double	seed=Math.random();
 	private float[]		hMap;
 	
+	public Chunk(Vec2i pos, IHeightMapProvider hMap){
+		this(pos.x(),pos.y(),hMap);
+	}
 	public Chunk(int gridX, int gridZ, IHeightMapProvider hMap){
 		
 		x=gridX;

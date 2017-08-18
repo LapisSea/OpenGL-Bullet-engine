@@ -5,6 +5,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import javax.imageio.ImageIO;
 
@@ -17,14 +21,17 @@ import com.lapissea.opengl.program.game.events.Updateable;
 import com.lapissea.opengl.program.game.physics.jbullet.PhysicsWorldJbullet;
 import com.lapissea.opengl.program.game.terrain.Chunk;
 import com.lapissea.opengl.program.game.terrain.IHeightMapProvider;
-import com.lapissea.opengl.program.rendering.gl.Fog;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
+import com.lapissea.opengl.program.rendering.Fog;
+import com.lapissea.opengl.program.rendering.shader.modules.ShaderModuleLight;
 import com.lapissea.opengl.program.util.BlackBody;
 import com.lapissea.opengl.program.util.RandUtil;
+import com.lapissea.opengl.program.util.SegmentedIterator;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.data.OffsetArray;
+import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.util.LogUtil;
+import com.lapissea.util.UtilL;
 
 public class World extends PhysicsWorldJbullet{
 	
@@ -42,13 +49,12 @@ public class World extends PhysicsWorldJbullet{
 		setUpWorld();
 	}
 	
-	
 	private void setUpWorld(){
 		BufferedImage img;
 		try{
 			img=ImageIO.read(UtilM.getResource("textures/h-maps/hm.png"));
 		}catch(IOException e){
-			throw new RuntimeException(e);
+			throw UtilL.uncheckedThrow(e);
 		}
 		IHeightMapProvider hMap=(x, y)->{
 			x/=4;
@@ -61,11 +67,33 @@ public class World extends PhysicsWorldJbullet{
 			y*=img.getHeight();
 			return new Color(img.getRGB((int)Math.abs(x)%img.getWidth(), (int)Math.abs(y)%img.getHeight())).getRed()/4F;
 		};
-		for(int x=0;x<CHUNK_GRID_SIZE;x++){
-			for(int z=0;z<CHUNK_GRID_SIZE;z++){
-				addChunk(new Chunk(x-CHUNK_GRID_SIZE/2, z-CHUNK_GRID_SIZE/2, hMap));
+		new Thread(()->{
+			Vec2i[] pos=new Vec2i[CHUNK_GRID_SIZE*CHUNK_GRID_SIZE];
+			for(int x=0;x<CHUNK_GRID_SIZE;x++){
+				for(int z=0;z<CHUNK_GRID_SIZE;z++){
+					pos[x+z*CHUNK_GRID_SIZE]=new Vec2i(x-CHUNK_GRID_SIZE/2, z-CHUNK_GRID_SIZE/2);
+				}
 			}
-		}
+			
+			UtilL.sleep(5000);
+			
+			Vec3f cam=Game.get().renderer.getCamera().pos.clone().div(Chunk.SIZE);
+			int threadCount=4;
+			IntStream.range(0, threadCount).parallel().forEach(threadId->{
+				Vec3f v=new Vec3f();
+				StreamSupport.stream(Spliterators.spliteratorUnknownSize(new SegmentedIterator<>(pos, threadId, threadCount), Spliterator.NONNULL), false)
+				.sorted((i, j)->{
+					v.set(i.x(), 0, i.y());
+					double di=v.distanceTo(cam);
+					v.set(j.x(), 0, j.y());
+					double dj=v.distanceTo(cam);
+					return Double.compare(di, dj);
+				})
+				.forEach(close->addChunk(new Chunk(close, hMap)));
+			});
+			
+			
+		}, "World builder").start();
 		
 		LogUtil.println("Done!");
 		
@@ -87,17 +115,20 @@ public class World extends PhysicsWorldJbullet{
 	
 	private void addChunk(Chunk chunk){
 		
-		OffsetArray<Chunk> zLine=chunks.get(chunk.x);
-		if(zLine==null) chunks.set(chunk.x, zLine=new OffsetArray<>());
-		zLine.set(chunk.z, chunk);
-		addRigidBody(chunk);
+		synchronized(Game.get()){
+			OffsetArray<Chunk> zLine=chunks.get(chunk.x);
+			if(zLine==null) chunks.set(chunk.x, zLine=new OffsetArray<>());
+			zLine.set(chunk.z, chunk);
+			
+			addRigidBody(chunk);
+		}
 	}
 	
 	public void removeChunk(Chunk chunk){
 		OffsetArray<Chunk> zLine=chunks.get(chunk.x);
 		if(zLine==null) return;
 		Chunk chunk0=zLine.remove(chunk.z);
-		if(chunk0!=null)removeRigidBody(chunk0);
+		if(chunk0!=null) removeRigidBody(chunk0);
 	}
 	
 	public void spawn(Entity e){
@@ -124,8 +155,9 @@ public class World extends PhysicsWorldJbullet{
 		Game.get().renderer.lines.clearIfEmpty();
 		
 		entitysUpd.forEach(Updateable::update);
-		
-		updatePhysics(1F/Game.get().timer.getUps());
+		synchronized(Game.get()){
+			updatePhysics(1F/Game.get().timer.getUps());
+		}
 	}
 	
 	public List<Entity> getAll(){

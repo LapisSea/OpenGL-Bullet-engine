@@ -210,6 +210,12 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		return this;
 	}
 	
+	public Vec3f div(float f){
+		x(x()/f);
+		y(y()/f);
+		z(z()/f);
+		return this;
+	}
 	public Vec3f div(float x, float y, float z){
 		x(x()/x);
 		y(y()/y);

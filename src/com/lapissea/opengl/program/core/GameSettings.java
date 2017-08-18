@@ -2,11 +2,10 @@ package com.lapissea.opengl.program.core;
 
 import com.lapissea.opengl.program.game.terrain.Chunk;
 import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModuleLight;
-import com.lapissea.opengl.program.util.config.Config;
+import com.lapissea.opengl.program.rendering.Renderer;
+import com.lapissea.opengl.program.rendering.shader.modules.ShaderModuleLight;
 
-public class GameSettings extends Config{
+public class GameSettings{
 	
 	public int	maxPointLight		=5;
 	public int	maxDirLight			=2;

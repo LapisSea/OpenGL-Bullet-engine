@@ -1,25 +1,26 @@
 package com.lapissea.opengl.program.core;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.lwjgl.opengl.OpenGLException;
 
 import com.lapissea.opengl.launch.GameStart;
 import com.lapissea.opengl.program.game.world.World;
+import com.lapissea.opengl.program.gui.Gui;
+import com.lapissea.opengl.program.gui.SplashScreen;
 import com.lapissea.opengl.program.rendering.GLUtil;
-import com.lapissea.opengl.program.rendering.gl.Renderer;
-import com.lapissea.opengl.program.rendering.gl.gui.Gui;
-import com.lapissea.opengl.program.rendering.gl.gui.SplashScreen;
-import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule;
+import com.lapissea.opengl.program.rendering.Renderer;
+import com.lapissea.opengl.program.rendering.shader.Shaders;
+import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.config.Config;
+import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.timer.GameTimer;
 import com.lapissea.opengl.program.util.timer.Timer_Ver2;
 import com.lapissea.opengl.window.api.IGLWindow;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
+import com.lapissea.opengl.window.api.events.ResizeEvent.IResizeEventListener;
 import com.lapissea.splashscreen.SplashScreenHost;
 import com.lapissea.util.LogUtil;
 import com.lapissea.util.UtilL;
@@ -43,7 +44,7 @@ public class Game{
 	public World			world;
 	public final ILWJGLCtx	glCtx;
 	
-	private final List<PairM<Runnable,Exception>> openglLoadQueue=Collections.synchronizedList(new ArrayList<>());
+	private final List<PairM<Runnable,Exception>> openglLoadQueue=new ArrayList<>();
 	
 	private boolean first=true;
 	
@@ -81,7 +82,6 @@ public class Game{
 			timer.setRender(this::render);
 		}, "Loading thread").start();
 		
-		
 		UtilL.runWhileThread("Updating thread", timer::isRunning, timer::runUpdate);
 		UtilL.runWhile(timer::isRunning, timer::runRender);
 	}
@@ -112,8 +112,13 @@ public class Game{
 		if(first){
 			first=false;
 			LogUtil.printWrapped("LOADED IN: "+(System.nanoTime()-GameStart.START_TIME)/1000_000_000D);
-			win().setPos(Config.getInt("win_startup:pos.x", -1), Config.getInt("win_startup:pos.y", -1));
-			win().setResizable(true);
+			
+			Config mainWinCfg=Config.getConfig("MainWin");
+			win().setResizable(true)
+			.setPos(mainWinCfg.get("pos", new Vec2i(-1, -1)));
+			mainWinCfg.set("pos", win().getPos());
+			
+			Game.get().registry.register((IResizeEventListener)e->mainWinCfg.fill("size", Vec2i::new).set(win().getSize()));
 			SplashScreenHost.close();
 		}
 		if(win().isVisible()){
@@ -127,18 +132,20 @@ public class Game{
 		}
 	}
 	
-	public synchronized void loadGLData(){
+	public void loadGLData(){
 		if(openglLoadQueue.isEmpty()) return;
-		UtilL.doAndClear(openglLoadQueue, p->{
-			try{
-				GLUtil.checkError();
-				p.obj1.run();
-				GLUtil.checkError();
-			}catch(Exception e){
-				e.initCause(p.obj2);
-				throw e;
-			}
-		});
+		synchronized(this){
+			UtilL.doAndClear(openglLoadQueue, p->{
+				try{
+					GLUtil.checkError();
+					p.obj1.run();
+					GLUtil.checkError();
+				}catch(Exception e){
+					e.initCause(p.obj2);
+					throw e;
+				}
+			});
+		}
 	}
 	
 	private void initContent(){
@@ -153,11 +160,17 @@ public class Game{
 	
 	public static void glCtx(Runnable runnable){
 		if(get().glCtx.isGlThread()) runnable.run();
-		else get().openglLoadQueue.add(new PairM<>(runnable, new Exception()));
+		else glCtxLater(runnable);
 	}
 	
-	public static void glCtxLatter(Runnable runnable){
-		get().openglLoadQueue.add(new PairM<>(runnable, new Exception()));
+	private void _glCtxLater(Runnable runnable){
+		synchronized(this){
+			openglLoadQueue.add(new PairM<>(runnable, new Exception()));
+		}
+	}
+	
+	public static void glCtxLater(Runnable runnable){
+		get()._glCtxLater(runnable);
 	}
 	
 	public static IGLWindow win(){

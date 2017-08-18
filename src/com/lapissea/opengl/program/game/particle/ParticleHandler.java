@@ -10,7 +10,7 @@ import java.util.Queue;
 
 import com.lapissea.opengl.program.rendering.GLUtil;
 import com.lapissea.opengl.program.rendering.GLUtil.BlendFunc;
-import com.lapissea.opengl.program.rendering.gl.shader.Shaders;
+import com.lapissea.opengl.program.rendering.shader.Shaders;
 import com.lapissea.opengl.program.util.NanoTimer;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;

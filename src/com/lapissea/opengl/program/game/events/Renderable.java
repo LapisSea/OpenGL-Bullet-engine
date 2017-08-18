@@ -1,7 +1,7 @@
 package com.lapissea.opengl.program.game.events;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.gl.Renderer;
+import com.lapissea.opengl.program.rendering.Renderer;
 
 public interface Renderable{
 	

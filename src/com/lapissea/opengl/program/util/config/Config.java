@@ -1,173 +1,317 @@
 package com.lapissea.opengl.program.util.config;
 
+import static com.lapissea.util.UtilL.*;
+
+import java.awt.Dimension;
+import java.awt.Point;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-import org.json.JSONObject;
-
+import com.lapissea.opengl.program.util.Objholder;
 import com.lapissea.opengl.program.util.OperatingSystem;
-import com.lapissea.util.LogUtil;
+import com.lapissea.opengl.program.util.math.vec.Vec2f;
+import com.lapissea.opengl.program.util.math.vec.Vec2i;
+import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.IVec2i;
+import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.util.UtilL;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
 
-/**
- * Usage: folder1.folder2.filename:keyname.keyname = file at
- * "config/folder1/folder2/filename.cfg" with value inside keyname.keyname
- */
+@SuppressWarnings("unchecked")
 public class Config{
 	
-	private static class Node{
+	public static abstract class CSVTypeParser<T>{
 		
-		Object obj;
+		public final String		typeName;
+		public final Class<T>	type;
 		
-		@Override
-		public String toString(){
-			return Objects.toString(obj);
+		public CSVTypeParser(String typeName, Class<T> type){
+			this.typeName=Objects.requireNonNull(typeName);
+			this.type=Objects.requireNonNull(type);
 		}
+		
+		public abstract void read(Consumer<T> add, int size, IntFunction<String> get);
+		
+		public void write(Consumer<String> add, T data){
+			add.accept(data.toString());
+		}
+		
 	}
 	
-	private static class FileCfg{
+	private static final Map<String,Config> CACHE=new HashMap<>();
+	
+	private static final List<CSVTypeParser<?>> PARSERS=new ArrayList<>();
+	
+	public static void registerParser(CSVTypeParser<?> newParser){
+		if(PARSERS.stream().anyMatch(p->p.typeName.equals(newParser.typeName))) throw new IllegalArgumentException("Type with name "+newParser.typeName+" already exists!");
+		if(PARSERS.stream().anyMatch(p->p.type.equals(newParser.type))) throw new IllegalArgumentException("type "+newParser.type+" already exists!");
+		PARSERS.add(newParser);
+	}
+	
+	static{
 		
-		Map<String,Node> data=new HashMap<>();
 		
-		final String path;
 		
-		boolean dirty=true;
+		registerParser(new CSVTypeParser<Boolean>("b", Boolean.class){
+			
+			@Override
+			public void read(Consumer<Boolean> add, int size, IntFunction<String> get){
+				if(size==0) return;
+				String s=get.apply(0);
+				if(s.equalsIgnoreCase("true")) add.accept(true);
+				else if(s.equalsIgnoreCase("false")) add.accept(false);
+			}
+		});
 		
-		public FileCfg(String path){
-			this.path=path;
-			path=OperatingSystem.APP_DATA+"/OpenGL engine/config/"+path;
-			try{
-				add("", new JSONObject(new String(Files.readAllBytes(new File(path).toPath()))));
-			}catch(NoSuchFileException e){}catch(Exception e){
-				e.printStackTrace();
+		registerParser(new CSVTypeParser<Integer>("i", Integer.class){
+			
+			@Override
+			public void read(Consumer<Integer> add, int size, IntFunction<String> get){
+				if(size>0) add.accept((int)Float.parseFloat(get.apply(0)));
+			}
+		});
+		
+		registerParser(new CSVTypeParser<Float>("f", Float.class){
+			
+			@Override
+			public void read(Consumer<Float> add, int size, IntFunction<String> get){
+				if(size>0) add.accept(Float.parseFloat(get.apply(0)));
+			}
+		});
+		
+		registerParser(new CSVTypeParser<CharSequence>("s", CharSequence.class){
+			
+			@Override
+			public void read(Consumer<CharSequence> add, int size, IntFunction<String> get){
+				if(size>0) add.accept(get.apply(0));
+			}
+		});
+		
+		registerParser(new CSVTypeParser<IVec2i>("i2", IVec2i.class){
+			
+			@Override
+			public void read(Consumer<IVec2i> add, int size, IntFunction<String> get){
+				if(size>=2) add.accept(new Vec2i((int)Float.parseFloat(get.apply(0)), (int)Float.parseFloat(get.apply(1))));
 			}
 			
-		}
-		
-		private boolean dirty(){
-			return dirty;
-		}
-		
-		private void add(String path, JSONObject jsonObject){
-			for(String key:jsonObject.keySet()){
-				
-				String p=path.isEmpty()?key:path+"."+key;
-				Object o=jsonObject.get(key);
-				
-				if(o instanceof JSONObject){
-					add(p, (JSONObject)o);
-					continue;
-				}
-				
-				Node n=get(p);
-				if(n==null) data.put(p, n=new Node());
-				
-				n.obj=o;
+			@Override
+			public void write(Consumer<String> add, IVec2i data){
+				add.accept(Integer.toString(data.x()));
+				add.accept(Integer.toString(data.y()));
 			}
-		}
+		});
+		registerParser(new CSVTypeParser<Vec2f>("f2", Vec2f.class){
+			
+			@Override
+			public void read(Consumer<Vec2f> add, int size, IntFunction<String> get){
+				if(size>=2) add.accept(new Vec2f(Float.parseFloat(get.apply(0)), Float.parseFloat(get.apply(1))));
+			}
+			
+			@Override
+			public void write(Consumer<String> add, Vec2f data){
+				add.accept(Float.toString(data.x()));
+				add.accept(Float.toString(data.y()));
+			}
+		});
+		registerParser(new CSVTypeParser<IVec3f>("f3", IVec3f.class){
+			
+			@Override
+			public void read(Consumer<IVec3f> add, int size, IntFunction<String> get){
+				if(size>=3) add.accept(new Vec3f(Float.parseFloat(get.apply(0)), Float.parseFloat(get.apply(1)), Float.parseFloat(get.apply(2))));
+			}
+			
+			@Override
+			public void write(Consumer<String> add, IVec3f data){
+				add.accept(Float.toString(data.x()));
+				add.accept(Float.toString(data.y()));
+				add.accept(Float.toString(data.z()));
+			}
+		});
 		
-		Node get(String name){
-			return data.get(name);
-		}
-		
-	}
-	
-	private static Map<String,FileCfg> DATA=new HashMap<>();
-	
-	public static void set(String path, Object obj){
-		int split=path.indexOf(":");
-		if(split<1) throw new IllegalArgumentException("config path was not defined!");
-		
-		String f=path.substring(0, split)+".cfg";
-		FileCfg file=DATA.get(f);
-		if(file==null) DATA.put(f, file=new FileCfg(f));
-		String name=path.substring(split+1);
-		Node n=file.get(name);
-		if(n==null) file.data.put(name, n=new Node());
-		
-		n.obj=obj;
-		file.dirty=true;
-	}
-	
-	public static boolean getBool(String path, boolean onNull){
-		Object o=get(path);
-		return o==null?onNull:(boolean)o;
-	}
-	
-	public static int getInt(String path, int onNull){
-		Object o=get(path);
-		return o==null?onNull:(int)o;
-	}
-	
-	public static float getFloat(String path, float onNull){
-		Object o=get(path);
-		return o==null?onNull:(float)o;
-	}
-	
-	public static Supplier<Object> getDirect(String path){
-		Node node=getN(path);
-		return ()->node==null?null:node.obj;
-	}
-	
-	public static Object get(String path){
-		return get(path, Object.class);
-	}
-	
-	public static <T> T get(String path, Class<T> type){
-		return get(path, null, type);
-	}
-	
-	public static Object get(String path, Object onNull){
-		return get(path, onNull, Object.class);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static <T> T get(String path, T onNull, Class<T> type){
-		Node node=getN(path);
-		if(node==null) return onNull;
-		return (T)node.obj;
-	}
-	
-	private static Node getN(String path){
-		
-		int split=path.indexOf(":");
-		if(split<1) throw new IllegalArgumentException("config path was not defined!");
-		
-		String f=path.substring(0, split)+".cfg";
-		FileCfg file=DATA.get(f);
-		if(file==null) file=new FileCfg(f);
-		
-		return file.get(path.substring(split+1));
-	}
-	
-	public static void save(){
-		DATA.values().stream().filter(FileCfg::dirty).forEach(f->{
-			f.dirty=false;
-			JSONObject obj=new JSONObject();
-			f.data.forEach((k, v)->{
-				JSONObject target=obj;
-				String[] parts=k.split(".");
-				for(int i=0, j=parts.length-1;i<j;i++){
-					String part=parts[i];
-					LogUtil.println(part);
-					if(target.has(part)){
-						
-					}
-				}
-				obj.put(k, v.obj);
-			});
-			try{
-				File fil=new File(OperatingSystem.APP_DATA+"/OpenGL engine/config/"+f.path);
-				if(!fil.getParentFile().exists()) fil.getParentFile().mkdirs();
-				if(!fil.exists()) fil.createNewFile();
-				Files.write(fil.toPath(), obj.toString(4).getBytes());
-			}catch(Exception e){
-				e.printStackTrace();
+		registerParser(new CSVTypeParser<Dimension>("dim", Dimension.class){
+			
+			@Override
+			public void read(Consumer<Dimension> add, int size, IntFunction<String> get){
+				if(size>=3) add.accept(new Dimension(Integer.parseInt(get.apply(0)), Integer.parseInt(get.apply(1))));
+			}
+			
+			@Override
+			public void write(Consumer<String> add, Dimension data){
+				add.accept(Integer.toString(data.width));
+				add.accept(Integer.toString(data.height));
+			}
+		});
+		registerParser(new CSVTypeParser<Point>("pnt", Point.class){
+			
+			@Override
+			public void read(Consumer<Point> add, int size, IntFunction<String> get){
+				if(size>=3) add.accept(new Point(Integer.parseInt(get.apply(0)), Integer.parseInt(get.apply(1))));
+			}
+			
+			@Override
+			public void write(Consumer<String> add, Point data){
+				add.accept(Integer.toString(data.x));
+				add.accept(Integer.toString(data.y));
 			}
 		});
 	}
+	
+	//================================================================
+	
+	public static Config getConfig(String name){
+		Config conf=CACHE.get(name);
+		if(conf==null){
+			CACHE.put(name, conf=new Config(name));
+		}
+		return conf;
+	}
+	
+	private static final Float		F	=new Float(-1);
+	private static final Integer	I	=new Integer(-1);
+	private static final Boolean	B	=new Boolean(false);
+	
+	private static final String BASE=OperatingSystem.APP_DATA+"/OpenGL engine/config/";
+	
+	public final File file;
+	
+	private Map<String,Object> data;
+	
+	private Config(String path){
+		file=new File(BASE, new File(path+".csv").getPath());
+	}
+	
+	public boolean getBoolean(String key, boolean def){
+		Boolean n=(Boolean)data().get(key);
+		if(n==null) return def;
+		return n;
+	}
+	
+	public boolean getBoolean(String key){
+		return (Boolean)data().getOrDefault(key, B);
+	}
+	
+	public int getInt(String key, int def){
+		Number n=(Number)data().get(key);
+		if(n==null) return def;
+		return n.intValue();
+	}
+	
+	public int getInt(String key){
+		return ((Number)data().getOrDefault(key, I)).intValue();
+	}
+	
+	public float getFloat(String key, float def){
+		Number n=(Number)data().get(key);
+		if(n==null) return def;
+		return n.floatValue();
+	}
+	
+	public float getFloat(String key){
+		return ((Number)data().getOrDefault(key, F)).floatValue();
+	}
+	
+	public <T> T get(String key, Supplier<T> def){
+		T t=(T)data().get(key);
+		if(t==null) return def.get();
+		return t;
+	}
+	
+	public <T> T get(String key, T def){
+		return (T)data().getOrDefault(key, def);
+	}
+	
+	public <T> T get(T key){
+		return (T)data().get(key);
+	}
+	/**
+	 * If value exists it will be returned but if it does not exist the result of obj argument set to key and will be returned.<br>
+	 * Example: <code><br>
+	 * class Foo{<br>
+	 * 	Foo(){<br>
+	 * 		System.out.println("foo created!")<br>
+	 * 	}<br>
+	 * }<br>
+	 * emptyConfig.fill("foo1", Foo::new); \\ foo created<br>
+	 * emptyConfig.fill("foo1", Foo::new);<br>
+	 * </code>
+	 */
+	public <T> T fill(String key, Supplier<T> obj){
+		T t=(T)data().get(key);
+		if(t==null)data.put(key, t=obj.get());
+		return t;
+	}
+	
+	public void set(String key, Object obj){
+		data().put(key, obj);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void save(){
+		if(data==null){
+			file.getParentFile().mkdirs();
+		}
+		try(CSVWriter csv=new CSVWriter(new FileWriter(file))){
+			List<String> build=new ArrayList<>();
+			Objholder<String[]> line=new Objholder(new String[0]);
+			
+			data.entrySet().stream()
+			.filter(e->e.getValue()!=null)
+			.forEach(e->{
+				Object val=e.getValue();
+				Class cls=val.getClass();
+				CSVTypeParser parser=PARSERS.stream()
+						.filter(p->p.type.equals(cls))
+						.findAny()
+						.orElseGet(()->PARSERS.stream()
+								.filter(p->instanceOf(cls, p.type))
+								.findAny().orElse(null));
+				
+				if(parser==null) return;
+				build.clear();
+				
+				build.add(e.getKey());
+				build.add(parser.typeName);
+				parser.write((Consumer<String>)build::add, val);
+				
+				csv.writeNext(line.obj=UtilL.array(build, line.obj), false);
+			});
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	private Map<String,Object> data(){
+		if(data==null) read();
+		return data;
+	}
+	
+	private void read(){
+		data=new HashMap<>();
+		try(CSVReader csv=new CSVReader(new FileReader(file))){
+			csv.readAll().stream()
+			.filter(line->line.length>1)
+			.forEach(arr->{
+				PARSERS.stream()
+				.filter(p->p.typeName.equals(arr[1]))
+				.findAny().ifPresent(parser->{
+					parser.read(o->data.put(arr[0], o), arr.length-2, i->arr[Math.max(0, i)+2]);
+				});
+			});
+		}catch(FileNotFoundException e){}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
 }

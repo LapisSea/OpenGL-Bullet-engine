@@ -43,9 +43,8 @@ public class ModelLoader{
 	
 	private static final Vec3f V0=new Vec3f(),V1=new Vec3f(),V2=new Vec3f(),V01=new Vec3f(),V12=new Vec3f(),NORMAL=new Vec3f();
 	
-	private static final List<IModel>			MODELS			=new ArrayList<>();
-	private static final HashMap<String,Object>	MODEL_BUILD_DATA=new HashMap<>();
-	private static final List<ModelParser>		MODEL_PARSERS	=new ArrayList<>();
+	private static final List<IModel>		MODELS			=new ArrayList<>();
+	private static final List<ModelParser>	MODEL_PARSERS	=new ArrayList<>();
 	
 	private static final Predicate<String> ANY_SUPPORTED=s->{
 		int pos=s.lastIndexOf('.');
@@ -244,7 +243,7 @@ public class ModelLoader{
 	 * <br>
 	 * vertexType = ModelAttribute
 	 */
-	public synchronized static IModel buildModel(String name, int format, Object...data){
+	public static IModel buildModel(String name, int format, Object...data){
 		return buildModel(Model.class, name, format, data);
 	}
 	
@@ -275,10 +274,10 @@ public class ModelLoader{
 	 * <br>
 	 * vertexType = ModelAttribute
 	 */
-	public synchronized static <T extends IModel> T buildModel(Class<T> type, String name, int format, Object...data){
+	public static <T extends IModel> T buildModel(Class<T> type, String name, int format, Object...data){
 		if(data==null||data.length==0) return null;
 		if(data.length%2!=0) throw new IllegalArgumentException("Bad data!");
-		
+		HashMap<String,Object> MODEL_BUILD_DATA=new HashMap<>();
 		MODEL_BUILD_DATA.clear();
 		
 		for(int i=0;i<data.length;i+=2){
@@ -555,7 +554,7 @@ public class ModelLoader{
 		}catch(NoSuchMethodException e){
 			throw new RuntimeException("Missing "+type.getName()+".<init>(String)", e);
 		}catch(Exception e){
-			throw new RuntimeException(e);
+			throw UtilL.uncheckedThrow(e);
 		}
 		
 		IFrustrumShape shape=calcShape(vertex, vertexType.size);

@@ -21,6 +21,8 @@ public class ModelDataBuilder{
 	public FloatList	normals		=new FloatArrayList();
 	public IntList		materials	=new IntArrayList();
 	
+	public IntList indices	=new IntArrayList();
+	
 	public List<IMaterial>	materialDefs=new ArrayList<>();
 	public String			name;
 	
@@ -56,6 +58,7 @@ public class ModelDataBuilder{
 		
 		if(!normals.isEmpty()) compiled.normals=normals.toFloatArray();
 		if(!uvs.isEmpty()) compiled.uvs=uvs.toFloatArray();
+		if(!indices.isEmpty())compiled.indices=indices.toIntArray();
 		
 		if(!materialDefs.isEmpty()) compiled.materialIds=materials.toIntArray();
 		else materialDefs.add(new Material(0));

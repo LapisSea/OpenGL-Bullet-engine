@@ -10,6 +10,7 @@ import com.lapissea.opengl.program.resources.texture.TextureLoader;
 import com.lapissea.opengl.program.util.OperatingSystem;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.config.Config;
+import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.window.api.IGLWindow;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
 import com.lapissea.opengl.window.impl.LWJGL2Ctx;
@@ -65,25 +66,26 @@ public class Launch{
 			
 			Thread.currentThread().setName("Render");
 			
+			Config mainWinCfg=Config.getConfig("MainWin");
 			ILWJGLCtx glCtx=new LWJGL2Ctx();
 			Game.createGame(glCtx);
 			
 			IGLWindow window=glCtx.getCtxWindow();
+			
 			SplashScreenHost.sendMsg("Initalised game base!");
 			try{
 				SplashScreenHost.sendMsg("Configuring window...");
 				
+				
 				//window.setTitle("Genine and Lee");
 				window
-				.setSize(Config.getInt("win_startup:size.x", 1000), Config.getInt("win_startup:size.y", 600))
 				.setPos(-10000, -10000)
+				.setSize(mainWinCfg.get("size",()->new Vec2i(600,400)))
 				.setTitle("The abandoned")
 				.setFullScreen(false)
 				.setResizable(true)
 				.setVSync(true);
 				
-				//				window.setPos(winCfg.position);
-				//				window.setSize(winCfg.size);
 				ByteBuffer[] ico=new ByteBuffer[2];
 				try(InputStream img=UtilM.getResource("textures/icon/16.png")){
 					ico[0]=TextureLoader.imgToBuff(ImageIO.read(img));
@@ -101,16 +103,10 @@ public class Launch{
 				e.printStackTrace();
 				System.exit(1);
 			}
-			
 			Game.get().start();
-			if(window.getPos().x()!=-10000){
-				Config.set("win_startup:size.x", window.getSize().x());
-				Config.set("win_startup:size.y", window.getSize().y());
-				Config.set("win_startup:pos.x", window.getPos().x());
-				Config.set("win_startup:pos.y", window.getPos().y());
-			}
+			mainWinCfg.set("pos", window.getPos());
+			mainWinCfg.save();
 			glCtx.destroy();
-			Config.save();
 			
 		}catch(Exception e){
 			e.printStackTrace();

@@ -21,15 +21,22 @@ public class Camera implements IMouseMoveEventListener{
 	
 	private static final Vec3f EFF_POS=new Vec3f(),MOVE=new Vec3f();
 	
-	public Vec3f	pos	=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();
-	public float	zoom=1,farPlane=1000,nearPlane=0.1F,fov=1.39626F,lastRenderFow,viewDistanceWanted=0;
-	public FloatSmooth viewDistance=new FloatSmooth(viewDistanceWanted);
+	public final Vec3f			pos			=new Vec3f(),rot=new Vec3f(),prevPos=new Vec3f();
+	public float				zoom		=1,farPlane=1000,nearPlane=0.1F,fov=1.39626F,lastRenderFow,viewDistanceWanted=0;
+	public final FloatSmooth	viewDistance=new FloatSmooth(viewDistanceWanted);
 	
 	private final Matrix4f	projection		=new Matrix4f();
 	protected boolean		projectionDirty	=true;
 	public boolean			noMouseMode		=false;
 	public Vec3f			activeRotVec	=new Vec3f();
 	public Quat4			activeRotQuat	=new Quat4();
+	
+	public Camera(){}
+	
+	public Camera(Vec3f pos){
+		this.pos.set(pos);
+		prevPos.set(pos);
+	}
 	
 	public void update(){
 		viewDistance.update();
@@ -58,8 +65,7 @@ public class Camera implements IMouseMoveEventListener{
 		
 		if(EntityCrazyCube.CAM!=null&&false){
 			pos.set(EntityCrazyCube.CAM.pos);
-		}
-		else pos.add(MOVE);
+		}else pos.add(MOVE);
 		viewDistance.setValue((viewDistance.getValue()+viewDistanceWanted)/2);
 	}
 	
@@ -91,7 +97,7 @@ public class Camera implements IMouseMoveEventListener{
 		MatrixUtil.rotateZXY(dest, activeRotVec.set(rot));
 		
 		Vec3f rotV=activeRotVec.clone().eulerToVector().mul(-viewDistance.get());
-		if(rotV.y()<0)rotV.y((float)-Math.sqrt(-rotV.y()));
+		if(rotV.y()<0) rotV.y((float)-Math.sqrt(-rotV.y()));
 		
 		dest.translate(PartialTick.calc(EFF_POS, prevPos, pos).add(rotV).mul(-1F));
 		activeRotVec.mul(-1);

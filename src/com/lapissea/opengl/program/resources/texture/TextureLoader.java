@@ -168,7 +168,7 @@ public class TextureLoader{
 		}
 		if(!texture.isLoaded()){
 			if(texture.isLoading()){
-				Game.glCtxLatter(()->reloadTexture0(texture, image));
+				Game.glCtxLater(()->reloadTexture0(texture, image));
 				return;
 			}
 			throw new IllegalStateException("Texture can not be reloaded if not loaded!");
@@ -360,7 +360,7 @@ public class TextureLoader{
 			}
 		}catch(Exception e){
 			LogUtil.printlnEr("No", type.getSimpleName()+"(String) constructor!");
-			throw new RuntimeException(e);
+			throw UtilL.uncheckedThrow(e);
 		}
 	}
 	
