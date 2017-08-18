@@ -1,6 +1,6 @@
-package com.lapissea.opengl.program.rendering.gl.gui.elements;
+package com.lapissea.opengl.program.gui.elements;
 
-import com.lapissea.opengl.program.rendering.gl.gui.GuiElement;
+import com.lapissea.opengl.program.gui.GuiElement;
 import com.lapissea.opengl.program.util.math.vec.FloatSmooth;
 import com.lapissea.opengl.window.api.events.MouseButtonEvent;
 import com.lapissea.opengl.window.api.events.MouseButtonEvent.Action;

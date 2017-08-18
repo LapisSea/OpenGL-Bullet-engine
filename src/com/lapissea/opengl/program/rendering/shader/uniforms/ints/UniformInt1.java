@@ -1,9 +1,9 @@
-package com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints;
+package com.lapissea.opengl.program.rendering.shader.uniforms.ints;
 
 import static org.lwjgl.opengl.GL20.*;
 
-import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
+import com.lapissea.opengl.program.rendering.shader.Shader;
+import com.lapissea.opengl.program.rendering.shader.uniforms.AbstractUniform;
 
 public class UniformInt1 extends AbstractUniform{
 	

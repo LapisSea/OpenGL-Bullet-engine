@@ -1,9 +1,9 @@
-package com.lapissea.opengl.program.rendering.gl.shader.modules;
+package com.lapissea.opengl.program.rendering.shader.modules;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.Global;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat1;
+import com.lapissea.opengl.program.rendering.shader.Shader;
+import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule.Global;
+import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat1;
 
 public class ShaderModuleTime extends ShaderModule implements Global{
 	

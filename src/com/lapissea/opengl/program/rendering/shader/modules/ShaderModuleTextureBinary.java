@@ -1,7 +1,7 @@
-package com.lapissea.opengl.program.rendering.gl.shader.modules;
+package com.lapissea.opengl.program.rendering.shader.modules;
 
-import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.ints.UniformInt2;
+import com.lapissea.opengl.program.rendering.shader.Shader;
+import com.lapissea.opengl.program.rendering.shader.uniforms.ints.UniformInt2;
 import com.lapissea.opengl.window.assets.ITexture;
 
 public class ShaderModuleTextureBinary extends ShaderModule{

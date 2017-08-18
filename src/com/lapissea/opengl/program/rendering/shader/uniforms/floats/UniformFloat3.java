@@ -1,9 +1,9 @@
-package com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats;
+package com.lapissea.opengl.program.rendering.shader.uniforms.floats;
 
 import static org.lwjgl.opengl.GL20.*;
 
-import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
+import com.lapissea.opengl.program.rendering.shader.Shader;
+import com.lapissea.opengl.program.rendering.shader.uniforms.AbstractUniform;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 

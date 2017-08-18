@@ -1,12 +1,12 @@
-package com.lapissea.opengl.program.rendering.gl.gui.elements;
+package com.lapissea.opengl.program.gui.elements;
 
 import static org.lwjgl.opengl.GL11.*;
 
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.gui.GuiElement;
+import com.lapissea.opengl.program.gui.GuiFlow.SizeCalcStatic;
+import com.lapissea.opengl.program.rendering.DynamicModel;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
-import com.lapissea.opengl.program.rendering.gl.gui.GuiElement;
-import com.lapissea.opengl.program.rendering.gl.gui.GuiFlow.SizeCalcStatic;
-import com.lapissea.opengl.program.rendering.gl.model.DynamicModel;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;

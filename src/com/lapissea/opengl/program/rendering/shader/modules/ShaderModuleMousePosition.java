@@ -1,10 +1,10 @@
-package com.lapissea.opengl.program.rendering.gl.shader.modules;
+package com.lapissea.opengl.program.rendering.shader.modules;
 
 import org.lwjgl.input.Mouse;
 
-import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.Global;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.floats.UniformFloat2;
+import com.lapissea.opengl.program.rendering.shader.Shader;
+import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule.Global;
+import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat2;
 
 public class ShaderModuleMousePosition extends ShaderModule implements Global{
 	

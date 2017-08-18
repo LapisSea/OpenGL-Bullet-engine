@@ -1,10 +1,10 @@
-package com.lapissea.opengl.program.rendering.gl.shader.modules;
+package com.lapissea.opengl.program.rendering.shader.modules;
 
 import java.util.function.Consumer;
 
-import com.lapissea.opengl.program.rendering.gl.shader.Shader;
-import com.lapissea.opengl.program.rendering.gl.shader.modules.ShaderModule.Global;
-import com.lapissea.opengl.program.rendering.gl.shader.uniforms.AbstractUniform;
+import com.lapissea.opengl.program.rendering.shader.Shader;
+import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule.Global;
+import com.lapissea.opengl.program.rendering.shader.uniforms.AbstractUniform;
 
 public abstract class ShaderModuleGlobalUniform<T extends AbstractUniform>extends ShaderModule implements Global{
 	
