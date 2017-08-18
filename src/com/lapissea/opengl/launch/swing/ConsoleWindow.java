@@ -22,7 +22,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import com.lapissea.opengl.program.util.config.Config;
+import com.lapissea.opengl.program.util.Config;
 import com.lapissea.opengl.program.util.math.vec.Vec2i;
 
 public class ConsoleWindow extends JFrame{

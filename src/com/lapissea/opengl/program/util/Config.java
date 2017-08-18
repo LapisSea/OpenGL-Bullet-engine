@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util.config;
+package com.lapissea.opengl.program.util;
 
 import static com.lapissea.util.UtilL.*;
 
@@ -18,8 +18,6 @@ import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-import com.lapissea.opengl.program.util.Objholder;
-import com.lapissea.opengl.program.util.OperatingSystem;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;

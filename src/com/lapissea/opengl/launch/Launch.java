@@ -7,9 +7,9 @@ import javax.imageio.ImageIO;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.resources.texture.TextureLoader;
+import com.lapissea.opengl.program.util.Config;
 import com.lapissea.opengl.program.util.OperatingSystem;
 import com.lapissea.opengl.program.util.UtilM;
-import com.lapissea.opengl.program.util.config.Config;
 import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.window.api.IGLWindow;
 import com.lapissea.opengl.window.api.ILWJGLCtx;
