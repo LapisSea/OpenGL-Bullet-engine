@@ -54,6 +54,10 @@ public class Launch{
 //				}
 //				ImageIO.write(img, "png", f);
 //			}
+			
+//			Config cfg=Config.getConfig("test");
+//			for(int i=0;i<200;i++)cfg.set("vector_"+i, new Vec3f());
+//			cfg.save();
 //			System.exit(0);
 			
 			LogUtil.printWrapped("=======GAME_INIT=======");

@@ -2,6 +2,7 @@ package com.lapissea.opengl.program.util.math.vec;
 
 import com.lapissea.opengl.window.api.util.Calculateable;
 import com.lapissea.opengl.window.api.util.IVec2i;
+import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.api.util.SimpleLoadable;
 
 public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
@@ -42,7 +43,9 @@ public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 	}
 	
 	public Vec2f set(float x, float y){
-		return x(x).y(y);
+		x(x);
+		y(y);
+		return this;
 	}
 	
 	public float x(){
@@ -190,5 +193,12 @@ public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 	public Vec2f load(int offset, float[] data){
 		set(data[offset], data[offset+1]);
 		return this;
+	}
+	
+	public double length() {
+		return MathUtil.length(x(), y());
+	}
+	public double distanceTo(Vec2i pos){
+		return MathUtil.length(x()-pos.x(), y()-pos.y());
 	}
 }

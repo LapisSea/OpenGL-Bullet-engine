@@ -1,14 +1,15 @@
 package com.lapissea.opengl.program.game.world;
 
+import static com.lapissea.opengl.program.util.UtilM.*;
+import static com.lapissea.util.UtilL.*;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
 import javax.imageio.ImageIO;
 
@@ -24,26 +25,28 @@ import com.lapissea.opengl.program.game.terrain.IHeightMapProvider;
 import com.lapissea.opengl.program.rendering.Fog;
 import com.lapissea.opengl.program.rendering.shader.modules.ShaderModuleLight;
 import com.lapissea.opengl.program.util.BlackBody;
+import com.lapissea.opengl.program.util.Performance;
 import com.lapissea.opengl.program.util.RandUtil;
-import com.lapissea.opengl.program.util.SegmentedIterator;
-import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.data.OffsetArray;
+import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.util.LogUtil;
-import com.lapissea.util.UtilL;
 
 public class World extends PhysicsWorldJbullet{
 	
-	public static int		PHYSICS_CUBE_AMMOUNT=50,CHUNK_GRID_SIZE=50;
+	public static int		PHYSICS_CUBE_AMMOUNT=50;
 	private List<Entity>	entitys				=new ArrayList<>();
 	public List<EntityUpd>	entitysUpd			=new ArrayList<>();
-	private boolean			checkDead;
+	private boolean			checkDead,runningChunk;
 	private long			ticksPassed;
 	private double			dayDuration			=1000;
 	public Fog				fog					=new Fog();
 	
-	public final OffsetArray<OffsetArray<Chunk>> chunks=new OffsetArray<>();
+	public final OffsetArray<OffsetArray<Chunk>>	chunks				=new OffsetArray<>();
+	private ChunkLoadingSorter						chunkLoadingSorter	=new ChunkLoadingSorter();
+	private IHeightMapProvider						hMap;
 	
 	public World(){
 		setUpWorld();
@@ -52,11 +55,11 @@ public class World extends PhysicsWorldJbullet{
 	private void setUpWorld(){
 		BufferedImage img;
 		try{
-			img=ImageIO.read(UtilM.getResource("textures/h-maps/hm.png"));
+			img=ImageIO.read(getResource("textures/h-maps/hm.png"));
 		}catch(IOException e){
-			throw UtilL.uncheckedThrow(e);
+			throw uncheckedThrow(e);
 		}
-		IHeightMapProvider hMap=(x, y)->{
+		hMap=(x, y)->{
 			x/=4;
 			y/=4;
 			x++;
@@ -67,35 +70,6 @@ public class World extends PhysicsWorldJbullet{
 			y*=img.getHeight();
 			return new Color(img.getRGB((int)Math.abs(x)%img.getWidth(), (int)Math.abs(y)%img.getHeight())).getRed()/4F;
 		};
-		new Thread(()->{
-			Vec2i[] pos=new Vec2i[CHUNK_GRID_SIZE*CHUNK_GRID_SIZE];
-			for(int x=0;x<CHUNK_GRID_SIZE;x++){
-				for(int z=0;z<CHUNK_GRID_SIZE;z++){
-					pos[x+z*CHUNK_GRID_SIZE]=new Vec2i(x-CHUNK_GRID_SIZE/2, z-CHUNK_GRID_SIZE/2);
-				}
-			}
-			
-			UtilL.sleep(5000);
-			
-			Vec3f cam=Game.get().renderer.getCamera().pos.clone().div(Chunk.SIZE);
-			int threadCount=4;
-			IntStream.range(0, threadCount).parallel().forEach(threadId->{
-				Vec3f v=new Vec3f();
-				StreamSupport.stream(Spliterators.spliteratorUnknownSize(new SegmentedIterator<>(pos, threadId, threadCount), Spliterator.NONNULL), false)
-				.sorted((i, j)->{
-					v.set(i.x(), 0, i.y());
-					double di=v.distanceTo(cam);
-					v.set(j.x(), 0, j.y());
-					double dj=v.distanceTo(cam);
-					return Double.compare(di, dj);
-				})
-				.forEach(close->addChunk(new Chunk(close, hMap)));
-			});
-			
-			
-		}, "World builder").start();
-		
-		LogUtil.println("Done!");
 		
 		for(int i=0;i<PHYSICS_CUBE_AMMOUNT;i++){
 			EntityCrazyCube c;
@@ -107,6 +81,8 @@ public class World extends PhysicsWorldJbullet{
 		
 		spawn(new EntityPlayer(this, new Vec3f(0, 50, 0)));
 		
+		LogUtil.println("Done!");
+		
 		//		for(int i=0, j=10;i<j;i++){
 		//			spawn(new EntityLight(this, new Vec3f(RandUtil.CRF(worldSize*1.5), 2, RandUtil.CRF(worldSize*1.5)), IColorM.randomRGB()));
 		//		}
@@ -114,7 +90,6 @@ public class World extends PhysicsWorldJbullet{
 	}
 	
 	private void addChunk(Chunk chunk){
-		
 		synchronized(Game.get()){
 			OffsetArray<Chunk> zLine=chunks.get(chunk.x);
 			if(zLine==null) chunks.set(chunk.x, zLine=new OffsetArray<>());
@@ -140,7 +115,40 @@ public class World extends PhysicsWorldJbullet{
 		entitys.add(e);
 	}
 	
+	private void handleChunks(){
+		
+		if(!chunkLoadingSorter.hasNext()){
+			if(time()%10!=0)return;
+			
+			int siz=(int)Math.ceil(fog.getMaxDistance()/Chunk.SIZE);
+			Vec2f vec=new Vec2f();
+			for(int i=-siz;i<siz;i++){
+				for(int j=-siz;j<siz;j++){
+					vec.set(i, j);
+					if(vec.length()>siz) continue;
+					if(getChunk(i, j)==null)chunkLoadingSorter.add(new Vec2i(i,j));
+				}
+			}
+			
+			return;
+		}
+		chunkLoadingSorter.update();
+		
+		if(runningChunk) return;
+		runningChunk=true;
+		
+		CompletableFuture.runAsync(()->{
+			int threads=MathUtil.snap(chunkLoadingSorter.remaining()/4, 1, Performance.getMaxThread());
+			
+			IntStream s=IntStream.range(0, threads);
+			(threads==1?s:s.parallel()).forEach(i->chunkLoadingSorter.iterate(pos->addChunk(new Chunk(pos, hMap))));
+			
+			runningChunk=false;
+		});
+	}
+	
 	public void update(){
+		handleChunks();
 		
 		dayDuration=2000;
 		fog.setDensity(0.0015F);

@@ -7,8 +7,31 @@ import java.util.function.Consumer;
 import com.lapissea.opengl.window.api.util.SimpleLoadable;
 
 import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 public class ModelUtil{
+	
+	public static void triangulateSingleNum(IntList data, List<int[]> idsVert){
+		IntList dataNew=new IntArrayList(idsVert.size());
+		int count=0;
+		
+		for(int[] face:idsVert){
+			
+			dataNew.add(data.getInt(count));
+			dataNew.add(data.getInt(count+1));
+			dataNew.add(data.getInt(count+2));
+			if(face.length>3){
+				dataNew.add(data.getInt(count));
+				dataNew.add(data.getInt(count+2));
+				dataNew.add(data.getInt(count+3));
+			}
+			count+=face.length;
+		}
+		
+		data.clear();
+		data.addAll(dataNew);
+	}
 	
 	public static void triangulate(List<int[]> ids){
 		List<int[]> idsNew=new ArrayList<>(ids.size());
@@ -20,7 +43,7 @@ public class ModelUtil{
 			idsNew.add(new int[]{face[0],face[1],face[2]});
 			idsNew.add(new int[]{face[0],face[2],face[3]});
 		});
-		if(idsNew.size()!=ids.size()) {
+		if(idsNew.size()!=ids.size()){
 			ids.clear();
 			ids.addAll(idsNew);
 		}

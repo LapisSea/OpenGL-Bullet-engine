@@ -43,6 +43,7 @@ public class Quat4 implements IRotation,Interpolateble<Quat4>{
 	
 	public void normalize(){
 		scale(1/MathUtil.length(x, y, z, w));
+		
 	}
 	
 	public void set(Matrix3f m1){
@@ -385,4 +386,32 @@ public class Quat4 implements IRotation,Interpolateble<Quat4>{
 		return interpolate(this, first, second, percent);
 	}
 	
+	public Vec3f forward(Vec3f dest){
+		dest.x(2*(x*z+w*y));
+		dest.y(2*(y*z-w*x));
+		dest.z(1-2*(x*x+y*y));
+		return dest;
+	}
+	
+	public Vec3f up(Vec3f dest){
+		dest.x(2*(x*y-w*z));
+		dest.y(1-2*(x*x+z*z));
+		dest.z(2*(y*z+w*x));
+		return dest;
+	}
+	
+	public Vec3f left(Vec3f dest){
+		dest.x(1-2*(y*y+z*z));
+		dest.y(2*(x*y+w*z));
+		dest.z(2*(x*z-w*y));
+		return dest;
+	}
+	
+	@Override
+	public boolean equals(Object obj){
+		if(obj==this) return true;
+		if(!(obj instanceof Quat4)) return false;
+		Quat4 q=(Quat4)obj;
+		return x==q.x&&y==q.y&&z==q.z&&w==q.w;
+	}
 }

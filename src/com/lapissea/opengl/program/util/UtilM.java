@@ -22,6 +22,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import com.bulletphysics.collision.shapes.IndexedMesh;
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import com.lapissea.opengl.program.core.Globals;
+import com.lapissea.opengl.program.util.function.Predicates;
 import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.util.UtilL;
 

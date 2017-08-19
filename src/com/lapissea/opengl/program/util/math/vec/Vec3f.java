@@ -216,6 +216,7 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		z(z()/f);
 		return this;
 	}
+	
 	public Vec3f div(float x, float y, float z){
 		x(x()/x);
 		y(y()/y);
@@ -340,7 +341,11 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		return this;
 	}
 	
-	public Vec3f toAngular(){
+	public void set(double x, double y, double z){
+		set((float)x, (float)y, (float)z);
+	}
+	
+	public Vec3f directionToEuler(){
 		
 		float distanceX=-x(),distanceY=-y(),distanceZ=-z();
 		x((float)-Math.atan2(distanceY, MathUtil.length(-distanceX, -distanceZ)));
@@ -349,11 +354,7 @@ public class Vec3f extends Vector3f implements Calculateable<Vec3f>,IVec3f,Inter
 		return this;
 	}
 	
-	public void set(double x, double y, double z){
-		set((float)x, (float)y, (float)z);
-	}
-	
-	public Vec3f eulerToVector(){
+	public Vec3f eulerToDirection(){
 		double xCos=Math.cos(x());
 		double xSin=Math.sin(x());
 		

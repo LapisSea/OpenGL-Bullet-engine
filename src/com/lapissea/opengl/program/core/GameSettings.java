@@ -24,7 +24,6 @@ public class GameSettings{
 		Renderer.SKY_RESOLUTION_DEVIDER=skyResolutionDevider;
 		
 		World.PHYSICS_CUBE_AMMOUNT=physicsCubeAmmount;
-		World.CHUNK_GRID_SIZE=chunkGridSize;
 		
 		Chunk.GRASS_MIN=perChunkGrassMin;
 		Chunk.GRASS_RAND=perChunkGrassRand;
@@ -52,7 +51,6 @@ public class GameSettings{
 		Renderer.SKY_RESOLUTION_DEVIDER=skyResolutionDevider;
 		
 		World.PHYSICS_CUBE_AMMOUNT=physicsCubeAmmount;
-		World.CHUNK_GRID_SIZE=chunkGridSize;
 		
 		Chunk.GRASS_MIN=perChunkGrassMin;
 		Chunk.GRASS_RAND=perChunkGrassRand;

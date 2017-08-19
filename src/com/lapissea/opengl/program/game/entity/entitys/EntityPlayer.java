@@ -37,7 +37,7 @@ public class EntityPlayer extends EntityUpd{
 			Vec3f vec=new Vec3f(0, -((FrustrumCube)model.getFrustrumShape()).getSizeY()*scale.y()*1.4F, 0);
 			rot.rotate(vec);
 			
-			vec.add(Game.get().renderer.getCamera().pos).sub(pos).normalize().toAngular();
+			vec.add(Game.get().renderer.getCamera().pos).sub(pos).normalize().directionToEuler();
 			Matrix4f mat=new Matrix4f();
 			MatrixUtil.rotateX(mat, vec.x());
 			MatrixUtil.rotateY(mat, vec.y());

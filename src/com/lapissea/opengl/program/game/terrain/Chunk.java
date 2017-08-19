@@ -14,9 +14,9 @@ import com.lapissea.opengl.program.rendering.ModelTransformed;
 import com.lapissea.opengl.program.resources.model.ModelData;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.resources.model.ModelUtil;
-import com.lapissea.opengl.program.util.Predicates;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.program.util.function.Predicates;
 import com.lapissea.opengl.program.util.math.vec.Quat4;
 import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
@@ -35,8 +35,8 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	
 	public static ModelData[] grass=ModelLoader.loadFolder("Grass", Predicates.FIRST_NUMERIC);
 	
-	public static final float	SIZE		=178;
-	public static int			RESOLUTION	=32,GRASS_MIN=20,GRASS_RAND=30;
+	public static final float	SIZE		=50;
+	public static int			RESOLUTION	=9,GRASS_MIN=20,GRASS_RAND=30;
 	
 	public final int	x,z;
 	public IModel		model	=ModelLoader.EMPTY_MODEL;

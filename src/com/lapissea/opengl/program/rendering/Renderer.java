@@ -231,7 +231,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		List<Entity> entitys=Game.get().world.getAll();
 		
-		Vec3f sunDir=new Vec3f((float)(sunPos+Math.PI), 0, 0).eulerToVector();
+		Vec3f sunDir=new Vec3f((float)(sunPos+Math.PI), 0, 0).eulerToDirection();
 		Vec3f moonRot=sunDir.clone().mul(-1);
 		
 		ColorM sunCol=new ColorM(1, 0.3+sunDir.y()*0.5, 0.2+sunDir.y()*0.6, bright*bright);

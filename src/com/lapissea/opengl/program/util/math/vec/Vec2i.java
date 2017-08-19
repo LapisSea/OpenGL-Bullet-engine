@@ -157,4 +157,7 @@ public class Vec2i implements Calculateable<Vec2i>,Serializable,IVec2i{
 	public double length() {
 		return MathUtil.length(x(), y());
 	}
+	public double distanceTo(Vec2i pos){
+		return MathUtil.length(x()-pos.x(), y()-pos.y());
+	}
 }

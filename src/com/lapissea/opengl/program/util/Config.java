@@ -60,8 +60,6 @@ public class Config{
 	
 	static{
 		
-		
-		
 		registerParser(new CSVTypeParser<Boolean>("b", Boolean.class){
 			
 			@Override
@@ -200,6 +198,12 @@ public class Config{
 		return (Boolean)data().getOrDefault(key, B);
 	}
 	
+	public int fillInt(String key, int def){
+		Number n=(Number)data().get(key);
+		if(n==null) data().put(key, n=def);
+		return n.intValue();
+	}
+	
 	public int getInt(String key, int def){
 		Number n=(Number)data().get(key);
 		if(n==null) return def;
@@ -233,8 +237,10 @@ public class Config{
 	public <T> T get(T key){
 		return (T)data().get(key);
 	}
+	
 	/**
-	 * If value exists it will be returned but if it does not exist the result of obj argument set to key and will be returned.<br>
+	 * If value exists it will be returned but if it does not exist the result
+	 * of obj argument set to key and will be returned.<br>
 	 * Example: <code><br>
 	 * class Foo{<br>
 	 * 	Foo(){<br>
@@ -247,7 +253,7 @@ public class Config{
 	 */
 	public <T> T fill(String key, Supplier<T> obj){
 		T t=(T)data().get(key);
-		if(t==null)data.put(key, t=obj.get());
+		if(t==null) data.put(key, t=obj.get());
 		return t;
 	}
 	

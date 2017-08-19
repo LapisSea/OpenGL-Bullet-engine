@@ -60,7 +60,7 @@ public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 		float sunPos0=(float)(world.getSunPos(Game.getPartialTicks())*Math.PI*2+Math.PI);
 		dir.set(sunPos0, 0, 0);
 		
-		dir.eulerToVector();
+		dir.eulerToDirection();
 		
 		//dir.set(getRenderer().getCamera().rot).eulerToVector();
 		

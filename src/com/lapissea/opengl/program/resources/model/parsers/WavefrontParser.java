@@ -22,14 +22,11 @@ import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.impl.assets.Material;
-import com.lapissea.util.LogUtil;
 import com.lapissea.util.UtilL;
 
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
 import it.unimi.dsi.fastutil.floats.FloatList;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 
 public class WavefrontParser extends ModelParser{
 	
@@ -93,33 +90,15 @@ public class WavefrontParser extends ModelParser{
 		}
 		
 		Map<Integer,Long> faceTypes=idsVert.stream().collect(Collectors.groupingBy(p->p.length, Collectors.counting()));
-		LogUtil.printlnEr(name,faceTypes);
-		if(faceTypes.keySet().stream().max(Integer::max).orElse(-1)==4){//mixed quads and triangles not allowed!
-//		if(faceTypes.size()>1){
+		if(faceTypes.size()>1){//mixed quads and triangles not allowed!
 			
-			IntList materialsNew=new IntArrayList(model.materials.size());
-			int count=0;
-			for(int[] face:idsVert){
-				
-				materialsNew.add(model.materials.getInt(count));
-				materialsNew.add(model.materials.getInt(count+1));
-				materialsNew.add(model.materials.getInt(count+2));
-				if(face.length>3){
-					materialsNew.add(model.materials.getInt(count));
-					materialsNew.add(model.materials.getInt(count+2));
-					materialsNew.add(model.materials.getInt(count+3));
-				}
-				count+=face.length;
-			};
-			model.materials.clear();
-			model.materials.addAll(materialsNew);
-			
+			ModelUtil.triangulateSingleNum(model.materials, idsVert);
 			ModelUtil.triangulate(idsVert);
 			ModelUtil.triangulate(idsUv);
 			ModelUtil.triangulate(idsNorm);
 		}
 		
-		model.format=GL_TRIANGLES;
+		model.format=faceTypes.keySet().stream().max(Integer::max).orElse(-1)==4?GL_QUADS:GL_TRIANGLES;
 		
 		uncompress(idsVert, model.vertecies, 3);
 		uncompress(idsUv, model.uvs, 2);

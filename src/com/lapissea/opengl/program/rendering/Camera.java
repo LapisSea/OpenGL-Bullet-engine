@@ -6,7 +6,6 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
 
 import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.game.entity.entitys.EntityCrazyCube;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
 import com.lapissea.opengl.program.util.math.vec.FloatSmooth;
@@ -63,9 +62,10 @@ public class Camera implements IMouseMoveEventListener{
 		MOVE.y=vec4.y;
 		MOVE.z=vec4.z;
 		
-		if(EntityCrazyCube.CAM!=null&&false){
-			pos.set(EntityCrazyCube.CAM.pos);
-		}else pos.add(MOVE);
+//		if(EntityCrazyCube.CAM!=null&&false){
+//			pos.set(EntityCrazyCube.CAM.pos);
+//		}else
+		pos.add(MOVE);
 		viewDistance.setValue((viewDistance.getValue()+viewDistanceWanted)/2);
 	}
 	
@@ -96,7 +96,7 @@ public class Camera implements IMouseMoveEventListener{
 		//		MatrixUtil.rotateZXY(dest, PartialTick.calc(activeRotVec, prevRot, rot));
 		MatrixUtil.rotateZXY(dest, activeRotVec.set(rot));
 		
-		Vec3f rotV=activeRotVec.clone().eulerToVector().mul(-viewDistance.get());
+		Vec3f rotV=activeRotVec.clone().eulerToDirection().mul(-viewDistance.get());
 		if(rotV.y()<0) rotV.y((float)-Math.sqrt(-rotV.y()));
 		
 		dest.translate(PartialTick.calc(EFF_POS, prevPos, pos).add(rotV).mul(-1F));
