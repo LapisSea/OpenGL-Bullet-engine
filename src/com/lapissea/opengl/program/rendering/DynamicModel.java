@@ -11,8 +11,8 @@ import org.lwjgl.BufferUtils;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
 import com.lapissea.opengl.window.api.util.BufferUtil;
-import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
 import com.lapissea.opengl.window.assets.Vbo;
@@ -56,7 +56,7 @@ public class DynamicModel extends Model{
 		data[i]=BufferUtils.createFloatBuffer(size);
 	}
 	
-	public DynamicModel pos(IVec3f vec){
+	public DynamicModel pos(IVec3fR vec){
 		return add(ModelAttribute.VERTEX_ATTR_3D, vec.x(), vec.y(), vec.z());
 	}
 	
@@ -68,7 +68,7 @@ public class DynamicModel extends Model{
 		return add(ModelAttribute.UV_ATTR, u, v);
 	}
 	
-	public DynamicModel norm(IVec3f vec){
+	public DynamicModel norm(IVec3fR vec){
 		return add(ModelAttribute.NORMAL_ATTR, vec.x(), vec.y(), vec.z());
 	}
 	

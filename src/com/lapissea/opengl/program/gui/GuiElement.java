@@ -21,8 +21,8 @@ import com.lapissea.opengl.window.api.events.KeyEvent;
 import com.lapissea.opengl.window.api.events.MouseButtonEvent;
 import com.lapissea.opengl.window.api.events.MouseMoveEvent;
 import com.lapissea.opengl.window.api.events.MouseScrollEvent;
-import com.lapissea.opengl.window.api.util.IVec2i;
 import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
 
@@ -37,7 +37,7 @@ public class GuiElement implements ModelTransformed{
 	protected static final Vec3f	_POS		=new Vec3f(),_ROT=new Vec3f();
 	protected static final Vec2f	VEC2		=new Vec2f();
 	
-	protected static final IVec2i MOUSE=new IVec2i(){
+	protected static final IVec2iR MOUSE=new IVec2iR(){
 		
 		@Override
 		public int x(){
@@ -47,16 +47,6 @@ public class GuiElement implements ModelTransformed{
 		@Override
 		public int y(){
 			return Game.win().getSize().y()-Mouse.getY();
-		}
-		
-		@Override
-		public IVec2i x(int x){
-			return null;
-		}
-		
-		@Override
-		public IVec2i y(int y){
-			return null;
 		}
 	};
 	

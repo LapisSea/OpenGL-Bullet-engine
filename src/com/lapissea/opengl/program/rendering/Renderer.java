@@ -44,6 +44,7 @@ import com.lapissea.opengl.window.api.events.util.WindowEvents;
 import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
 import com.lapissea.util.UtilL;
@@ -150,11 +151,11 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		if(e.action==Action.DOWN){
 			if(Shaders.ENTITY!=null){
-				Shaders.ENTITY.load();
-				Shaders.TERRAIN.load();
-				Shaders.SKYBOX.load();
-				Shaders.GUI_RECT.load();
-				//Shaders.POST_COPY.load();
+//				Shaders.ENTITY.load();
+//				Shaders.TERRAIN.load();
+//				Shaders.SKYBOX.load();
+//				Shaders.GUI_RECT.load();
+//				Shaders.POST_COPY.load();
 			}
 		}
 		
@@ -305,10 +306,10 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 	}
 	
-	public void drawLine(Vec3f from, Vec3f to, IColorM color){
+	public void drawLine(IVec3fR from, IVec3fR to, IColorM color){
 		
-		lines.add(ModelAttribute.VERTEX_ATTR_3D, from.x, from.y, from.z);
-		lines.add(ModelAttribute.VERTEX_ATTR_3D, to.x, to.y, to.z);
+		lines.add(ModelAttribute.VERTEX_ATTR_3D, from.x(), from.y(), from.z());
+		lines.add(ModelAttribute.VERTEX_ATTR_3D, to.x(), to.y(), to.z());
 		
 		lines.add(ModelAttribute.COLOR_ATTR, color.r(), color.g(), color.b(), 1);
 		lines.add(ModelAttribute.COLOR_ATTR, color.r(), color.g(), color.b(), 1);

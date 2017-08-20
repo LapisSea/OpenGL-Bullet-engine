@@ -15,7 +15,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.shader.Shaders;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
-import com.lapissea.opengl.window.api.util.IVec2i;
+import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ITexture;
 import com.lapissea.opengl.window.impl.assets.BasicTexture;
@@ -176,7 +176,7 @@ public class Fbo{
 		}
 	}
 	
-	public void setSize(IVec2i size){
+	public void setSize(IVec2iR size){
 		setSize(size.x(), size.y());
 	}
 	

@@ -133,9 +133,9 @@ public class Game{
 	}
 	
 	public void loadGLData(){
-		if(openglLoadQueue.isEmpty()) return;
 		synchronized(this){
-			UtilL.doAndClear(openglLoadQueue, p->{
+			if(openglLoadQueue.isEmpty()) return;
+			for(PairM<Runnable,Exception> p:openglLoadQueue){
 				try{
 					GLUtil.checkError();
 					p.obj1.run();
@@ -144,7 +144,9 @@ public class Game{
 					e.initCause(p.obj2);
 					throw e;
 				}
-			});
+				
+			}
+			openglLoadQueue.clear();
 		}
 	}
 	

@@ -61,7 +61,7 @@ public class Camera implements IMouseMoveEventListener{
 		MOVE.x=vec4.x;
 		MOVE.y=vec4.y;
 		MOVE.z=vec4.z;
-		
+		MOVE.mul(100);
 //		if(EntityCrazyCube.CAM!=null&&false){
 //			pos.set(EntityCrazyCube.CAM.pos);
 //		}else

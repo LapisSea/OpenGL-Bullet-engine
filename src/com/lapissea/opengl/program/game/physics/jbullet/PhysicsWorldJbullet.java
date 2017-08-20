@@ -13,7 +13,8 @@ import com.bulletphysics.dynamics.DynamicsWorld;
 import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 import com.lapissea.opengl.program.game.physics.IPhysicsWorld;
-import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
+import com.lapissea.opengl.window.api.util.vec.IVec3fW;
 
 public class PhysicsWorldJbullet implements IPhysicsWorld<PhysicsObjJBullet>{
 	
@@ -55,7 +56,7 @@ public class PhysicsWorldJbullet implements IPhysicsWorld<PhysicsObjJBullet>{
 	}
 	
 	@Override
-	public PhysicsObjJBullet rayTrace(IVec3f start, IVec3f end, IVec3f dest){
+	public PhysicsObjJBullet rayTrace(IVec3fR start, IVec3fR end, IVec3fW dest){
 		ClosestRayResultCallback v=new ClosestRayResultCallback(new Vector3f(start.x(), start.y(), start.z()), new Vector3f(end.x(), end.y(), end.z()));
 		bulletWorld.rayTest(v.rayFromWorld, v.rayToWorld, v);
 		if(!v.hasHit()) return null;

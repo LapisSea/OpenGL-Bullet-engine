@@ -4,13 +4,13 @@ import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.window.api.events.KeyEvent;
 import com.lapissea.opengl.window.api.events.KeyEvent.KeyAction;
-import com.lapissea.opengl.window.api.util.IVec2i;
+import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 
 public class Gui extends IngameDisplay{
 	
 	protected static final Vec2f SCREEN_SIZE_F=new Vec2f(){
 		
-		IVec2i src=Game.win().getSize();
+		IVec2iR src=Game.win().getSize();
 		
 		@Override
 		public float x(){

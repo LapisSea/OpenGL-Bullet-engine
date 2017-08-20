@@ -10,6 +10,9 @@ import com.lapissea.opengl.program.rendering.Renderer;
 import com.lapissea.opengl.program.rendering.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.shader.uniforms.UniformSampler2D;
 import com.lapissea.opengl.program.util.data.OffsetArray;
+import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.assets.IModel;
 
 public class TerrainShader extends ShaderRenderer.Basic3D<Chunk>{
 	
@@ -71,16 +74,18 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Chunk>{
 	}
 	
 	private void renderChunk(Chunk ter){
-		if(!ter.model.isLoaded()) return;
+		
+		IModel model=ter.getModel();
 		Renderer r=getRenderer();
+		r.drawLine(ter.spacePos, new Vec3f(ter.spacePos).addX(Chunk.SIZE), model.isLoaded()?IColorM.GREEN:IColorM.RED);
+		r.drawLine(ter.spacePos, new Vec3f(ter.spacePos).addZ(Chunk.SIZE), model.isLoaded()?IColorM.GREEN:IColorM.RED);
+		if(!model.isLoaded())return;
+		
 		r.notifyEntityRender();
-		if(!ter.model.getFrustrumShape().isVisibleAt(ter.x*Chunk.SIZE, -2, ter.z*Chunk.SIZE, r.frustrum)) return;
+		if(!model.getFrustrumShape().isVisibleAt(ter.spacePos, r.frustrum)) return;
 		r.notifyEntityActualRender();
 		
-		prepareModel(ter.model);
-		prepareInstance(ter);
-		ter.model.drawCall();
-		unbindModel(ter.model);
+		renderSingleBare(ter);
 		
 	}
 }

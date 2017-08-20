@@ -5,7 +5,7 @@ import static org.lwjgl.opengl.GL20.*;
 import com.lapissea.opengl.program.rendering.shader.Shader;
 import com.lapissea.opengl.program.rendering.shader.uniforms.AbstractUniform;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
-import com.lapissea.opengl.window.api.util.IVec2i;
+import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 
 public class UniformFloat2 extends AbstractUniform{
 	
@@ -33,7 +33,7 @@ public class UniformFloat2 extends AbstractUniform{
 		upload(prev1,prev2);
 	}
 	
-	public void upload(IVec2i size){
+	public void upload(IVec2iR size){
 		upload(size.x(), size.y());
 	}
 	

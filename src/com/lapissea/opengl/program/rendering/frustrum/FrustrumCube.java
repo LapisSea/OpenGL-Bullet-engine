@@ -5,9 +5,9 @@ import com.lapissea.opengl.program.rendering.Renderer;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
-import com.lapissea.opengl.window.api.util.IRotation;
-import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.api.util.vec.IRotation;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
 
 public class FrustrumCube implements IFrustrumShape{
 	
@@ -84,7 +84,7 @@ public class FrustrumCube implements IFrustrumShape{
 	}
 	
 	@Override
-	public boolean isVisibleAt(IVec3f pos, Frustum frustrum){
+	public boolean isVisibleAt(IVec3fR pos, Frustum frustrum){
 		
 		Vec3f camPos=CP.set(Game.get().renderer.getCamera().pos);
 		

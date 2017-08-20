@@ -9,8 +9,8 @@ import java.util.function.Consumer;
 
 import org.lwjgl.opengl.OpenGLException;
 
-import com.lapissea.opengl.window.api.util.IVec2i;
 import com.lapissea.opengl.window.api.util.color.IColorM;
+import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 import com.lapissea.util.LogUtil;
 
 public class GLUtil{
@@ -170,7 +170,7 @@ public class GLUtil{
 	private static int	viewportWidth;
 	private static int	viewportHeight;
 	
-	public static void viewport(IVec2i size){
+	public static void viewport(IVec2iR size){
 		viewport(size.x(), size.y());
 	}
 	

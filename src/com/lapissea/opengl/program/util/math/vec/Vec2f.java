@@ -1,9 +1,9 @@
 package com.lapissea.opengl.program.util.math.vec;
 
 import com.lapissea.opengl.window.api.util.Calculateable;
-import com.lapissea.opengl.window.api.util.IVec2i;
 import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.api.util.SimpleLoadable;
+import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 
 public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 	
@@ -150,7 +150,7 @@ public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 		return "Vec2f{x="+x()+", y="+y()+"}";
 	}
 	
-	public Vec2f set(IVec2i src){
+	public Vec2f set(IVec2iR src){
 		x(src.x());
 		y(src.y());
 		return this;

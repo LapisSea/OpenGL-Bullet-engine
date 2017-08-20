@@ -21,8 +21,8 @@ import java.util.function.Supplier;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
-import com.lapissea.opengl.window.api.util.IVec2i;
-import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.opengl.window.api.util.vec.IVec2iR;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
 import com.lapissea.util.UtilL;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -95,15 +95,15 @@ public class Config{
 			}
 		});
 		
-		registerParser(new CSVTypeParser<IVec2i>("i2", IVec2i.class){
+		registerParser(new CSVTypeParser<IVec2iR>("i2", IVec2iR.class){
 			
 			@Override
-			public void read(Consumer<IVec2i> add, int size, IntFunction<String> get){
+			public void read(Consumer<IVec2iR> add, int size, IntFunction<String> get){
 				if(size>=2) add.accept(new Vec2i((int)Float.parseFloat(get.apply(0)), (int)Float.parseFloat(get.apply(1))));
 			}
 			
 			@Override
-			public void write(Consumer<String> add, IVec2i data){
+			public void write(Consumer<String> add, IVec2iR data){
 				add.accept(Integer.toString(data.x()));
 				add.accept(Integer.toString(data.y()));
 			}
@@ -121,15 +121,15 @@ public class Config{
 				add.accept(Float.toString(data.y()));
 			}
 		});
-		registerParser(new CSVTypeParser<IVec3f>("f3", IVec3f.class){
+		registerParser(new CSVTypeParser<IVec3fR>("f3", IVec3fR.class){
 			
 			@Override
-			public void read(Consumer<IVec3f> add, int size, IntFunction<String> get){
+			public void read(Consumer<IVec3fR> add, int size, IntFunction<String> get){
 				if(size>=3) add.accept(new Vec3f(Float.parseFloat(get.apply(0)), Float.parseFloat(get.apply(1)), Float.parseFloat(get.apply(2))));
 			}
 			
 			@Override
-			public void write(Consumer<String> add, IVec3f data){
+			public void write(Consumer<String> add, IVec3fR data){
 				add.accept(Float.toString(data.x()));
 				add.accept(Float.toString(data.y()));
 				add.accept(Float.toString(data.z()));

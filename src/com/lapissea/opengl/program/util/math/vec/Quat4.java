@@ -5,10 +5,11 @@ import javax.vecmath.Quat4f;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.window.api.util.IRotation;
-import com.lapissea.opengl.window.api.util.IVec3f;
 import com.lapissea.opengl.window.api.util.Interpolateble;
 import com.lapissea.opengl.window.api.util.MathUtil;
+import com.lapissea.opengl.window.api.util.vec.IRotation;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
+import com.lapissea.opengl.window.api.util.vec.IVec3fW;
 
 public class Quat4 implements IRotation,Interpolateble<Quat4>{
 	
@@ -153,7 +154,7 @@ public class Quat4 implements IRotation,Interpolateble<Quat4>{
 		return "Quat4["+x+", "+y+", "+z+", "+w+"]";
 	}
 	
-	public Quat4(Vec3f euler){
+	public Quat4(IVec3fR euler){
 		set(euler);
 	}
 	
@@ -258,7 +259,7 @@ public class Quat4 implements IRotation,Interpolateble<Quat4>{
 		return dest;
 	}
 	
-	public void set(Vec3f euler){
+	public Quat4 set(IVec3fR euler){
 		double x2=euler.x()/2,y2=euler.y()/2,z2=euler.z()/2,c1=Math.cos(y2),s1=Math.sin(y2),c2=Math.cos(z2),s2=Math.sin(z2),c3=Math.cos(x2),s3=Math.sin(x2),c1c2=c1*c2,s1s2=s1*s2;
 		
 		w((float)(c1c2*c3-s1s2*s3));
@@ -266,6 +267,7 @@ public class Quat4 implements IRotation,Interpolateble<Quat4>{
 		y((float)(s1*c2*c3+c1*s2*s3));
 		z((float)(c1*s2*c3-s1*c2*s3));
 		normalize();
+		return this;
 	}
 	
 	@Override
@@ -309,7 +311,7 @@ public class Quat4 implements IRotation,Interpolateble<Quat4>{
 	}
 	
 	@Override
-	public <T extends IVec3f> T rotate(T src, T dest){
+	public <T extends IVec3fR&IVec3fW> T rotate(T src, T dest){
 		float k0=w*w-0.5f;
 		float k1;
 		float rx,ry,rz;
@@ -386,21 +388,21 @@ public class Quat4 implements IRotation,Interpolateble<Quat4>{
 		return interpolate(this, first, second, percent);
 	}
 	
-	public Vec3f forward(Vec3f dest){
+	public <T extends IVec3fW> T forward(T dest){
 		dest.x(2*(x*z+w*y));
 		dest.y(2*(y*z-w*x));
 		dest.z(1-2*(x*x+y*y));
 		return dest;
 	}
 	
-	public Vec3f up(Vec3f dest){
+	public <T extends IVec3fW> T up(T dest){
 		dest.x(2*(x*y-w*z));
 		dest.y(1-2*(x*x+z*z));
 		dest.z(2*(y*z+w*x));
 		return dest;
 	}
 	
-	public Vec3f left(Vec3f dest){
+	public <T extends IVec3fW> T left(T dest){
 		dest.x(1-2*(y*y+z*z));
 		dest.y(2*(x*y+w*z));
 		dest.z(2*(x*z-w*y));

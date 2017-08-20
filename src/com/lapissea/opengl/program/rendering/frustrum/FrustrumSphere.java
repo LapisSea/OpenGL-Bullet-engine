@@ -2,8 +2,8 @@ package com.lapissea.opengl.program.rendering.frustrum;
 
 import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
-import com.lapissea.opengl.window.api.util.IRotation;
-import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.opengl.window.api.util.vec.IRotation;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
 
 public class FrustrumSphere implements IFrustrumShape{
 	
@@ -15,7 +15,7 @@ public class FrustrumSphere implements IFrustrumShape{
 	}
 	
 	@Override
-	public boolean isVisibleAt(IVec3f pos, Frustum frustrum){
+	public boolean isVisibleAt(IVec3fR pos, Frustum frustrum){
 		return frustrum.sphere(pos, radius*scale);
 	}
 	

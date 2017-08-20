@@ -556,29 +556,31 @@ public class ModelLoader{
 		}catch(Exception e){
 			throw UtilL.uncheckedThrow(e);
 		}
-		
+		model.notifyLoading();
 		IFrustrumShape shape=calcShape(vertex, vertexType.size);
-		
 		Game.glCtx(()->{
-			int vao=createVao();
-			List<Vbo> vbos=new ArrayList<>();
-			List<ModelAttribute> attributes=new ArrayList<>();
-			
-			boolean hasIds=indices!=null;
-			
-			if(hasIds) bindIndices(indices);
-			putAttribute(vbos, attributes, vertexType, vertex);
-			for(int i=0;i<data.length;i++){
-				Object dataPart=data[i];
-				if(dataPart==null) continue;
-				if(dataPart.getClass().equals(float[].class)) putAttribute(vbos, attributes, attrs[i], (float[])dataPart);
-				else putAttribute(vbos, attributes, attrs[i], (int[])dataPart);
+			synchronized(model){
+				List<Vbo> vbos=new ArrayList<>();
+				List<ModelAttribute> attributes=new ArrayList<>();
+				
+				boolean hasIds=indices!=null;
+				
+				int vao=glGenVertexArrays();
+				glBindVertexArray(vao);
+				
+				if(hasIds) bindIndices(indices);
+				putAttribute(vbos, attributes, vertexType, vertex);
+				for(int i=0;i<data.length;i++){
+					Object dataPart=data[i];
+					if(dataPart==null) continue;
+					if(dataPart.getClass().equals(float[].class)) putAttribute(vbos, attributes, attrs[i], (float[])dataPart);
+					else putAttribute(vbos, attributes, attrs[i], (int[])dataPart);
+				}
+				
+				unbindVao();
+				model.load(vao, hasIds?indices.length:vertex.length, hasIds, format, UtilL.array(vbos), vertexType, attributes.toArray(new ModelAttribute[attributes.size()]), shape);
+				if(print&&!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 			}
-			
-			unbindVao();
-			
-			model.load(vao, hasIds?indices.length:vertex.length, hasIds, format, UtilL.array(vbos), vertexType, attributes.toArray(new ModelAttribute[attributes.size()]), shape);
-			if(print&&!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 		});
 		return model;
 	}
@@ -715,11 +717,6 @@ public class ModelLoader{
 		return normals;
 	}
 	
-	private static int createVao(){
-		int vao=glGenVertexArrays();
-		glBindVertexArray(vao);
-		return vao;
-	}
 	
 	private static void bindIndices(int[] indicies){
 		int vbo=glGenBuffers();

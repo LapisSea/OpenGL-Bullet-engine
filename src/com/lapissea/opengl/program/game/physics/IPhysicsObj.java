@@ -1,15 +1,16 @@
 package com.lapissea.opengl.program.game.physics;
 
 import com.lapissea.opengl.program.util.math.vec.Quat4;
-import com.lapissea.opengl.window.api.util.IVec3f;
+import com.lapissea.opengl.window.api.util.vec.IVec3fR;
+import com.lapissea.opengl.window.api.util.vec.IVec3fW;
 
 public interface IPhysicsObj{
 	
-	void hookPos(IVec3f pos);
+	void hookPos(IVec3fW pos);
 	
 	void hookRot(Quat4 rot);
 	
-	default void applyForce(IVec3f force){
+	default void applyForce(IVec3fR force){
 		applyForce(force.x(), force.y(), force.z());
 	}
 	
