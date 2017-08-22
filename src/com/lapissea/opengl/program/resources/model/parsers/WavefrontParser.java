@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.lapissea.opengl.program.resources.model.ModelData;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelDataBuilder;
 import com.lapissea.opengl.program.resources.model.ModelParser;
 import com.lapissea.opengl.program.resources.model.ModelUtil;
@@ -35,7 +35,7 @@ public class WavefrontParser extends ModelParser{
 	}
 	
 	@Override
-	public ModelData load(String name, InputStream modelStream){
+	public ModelBuilder load(String name, InputStream modelStream){
 		
 		ModelDataBuilder model=new ModelDataBuilder(name);
 		Objholder<IMaterial> activeMaterial=new Objholder<>();

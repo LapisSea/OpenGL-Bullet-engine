@@ -27,6 +27,7 @@ import com.lapissea.opengl.program.rendering.shader.light.LightSource;
 import com.lapissea.opengl.program.rendering.shader.light.LineLight;
 import com.lapissea.opengl.program.rendering.shader.light.PointLight;
 import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.util.NanoTimer;
 import com.lapissea.opengl.program.util.math.PartialTick;
@@ -59,7 +60,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public static int		SKY_RESOLUTION_DEVIDER	=1;
 	
 	private final Matrix4f	projection	=new Matrix4f(),view=new Matrix4f(),identity=new Matrix4f();
-	private Camera			camera		=new Camera(new Vec3f(0,70,0));
+	private Camera			camera		=new Camera(new Vec3f(0, 70, 0));
 	public final Frustum	frustrum	=new Frustum();
 	
 	private final List<ShaderRenderer<?>>	toRender	=new ArrayList<>();
@@ -77,39 +78,39 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	private NanoTimer renderBuildBechmark=new NanoTimer(),renderBechmark=new NanoTimer();
 	
-	public DynamicModel		lines		=ModelLoader.buildModel(DynamicModel.class, "lines", GL_LINES, "vertices", new float[9], "primitiveColor", new float[12], "genNormals", false);
+	public DynamicModel		lines		=ModelLoader.buildModel(new ModelBuilder().withType(DynamicModel.class).withName("lines").withFormat(GL_LINES).withAutoVertecies().withAutoVertexColors());
 	private IModel			moon		=ModelLoader.loadAndBuild("moon");
 	public FboRboTextured	worldFbo	=new FboRboTextured();
 	public Fbo				skyFbo		=new Fbo(Fbo.TEXTURE);
 	public GuiHandler		guiHandler	=new GuiHandler();
 	
-	private boolean renderWorldFlag=true;
-	private float lastPt;
+	private boolean	renderWorldFlag	=true;
+	private float	lastPt;
 	
 	public Renderer(){
 		
 		worldFbo.initHook=()->renderWorldFlag=true;
 		fpsCounter.activate();
 		particleHandler=new ParticleHandler<>((parent, pos)->new ParticleFoo(parent, pos));
-		particleHandler.models.add(ModelLoader.buildModel("ParticleQuad", GL_TRIANGLES, "genNormals", false, "vertices", new float[]{
-				-0.5F,-0.5F,0,
-				+0.5F,-0.5F,0,
-				+0.5F,+0.5F,0,
-				
-				-0.5F,-0.5F,0,
-				+0.5F,+0.5F,0,
-				-0.5F,+0.5F,0,
-		}, "uvs",
-				new float[]{
-						0,0,
-						1,0,
-						1,1,
+		particleHandler.models.add(ModelLoader.buildModel(new ModelBuilder()
+				.withName("ParticleQuad")
+				.withVertecies(
+						-0.5F, -0.5F, 0,
+						+0.5F, -0.5F, 0,
+						+0.5F, +0.5F, 0,
 						
-						0,0,
-						1,1,
-						0,1,
-		}, "textures", "particle/SoftBloom"));
-		
+						-0.5F, -0.5F, 0,
+						+0.5F, +0.5F, 0,
+						-0.5F, +0.5F, 0)
+				.withUvs(
+						0, 0,
+						1, 0,
+						1, 1,
+						
+						0, 0,
+						1, 1,
+						0, 1)
+				.withTextures("particle/SoftBloom")));
 	}
 	
 	public Camera getCamera(){
@@ -206,7 +207,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		//PREPARE
 		RENDER_FRUSTRUM=false;
 		fpsCounter.newFrame();
-		if(renderWorldFlag)renderWorld();
+		if(renderWorldFlag) renderWorld();
 		renderWorldFlag=!Game.isPaused();
 		
 		Fbo.bindDefault();
@@ -228,7 +229,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		double sunPos=world.getSunPos(pt);
 		float bright=(float)world.getSunBrightnessPos(sunPos);
 		sunPos*=Math.PI*2;
-		
 		
 		List<Entity> entitys=Game.get().world.getAll();
 		
@@ -296,7 +296,9 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		UtilL.doAndClear(toRender, ShaderRenderer::render);
 		glEnable(GL_LINE_SMOOTH);
 		GLUtil.DEPTH_TEST.set(false);
+		GLUtil.BLEND.set(true);
 		Shaders.LINE.renderSingle(identity, lines);
+		GLUtil.BLEND.set(false);
 		GLUtil.DEPTH_TEST.set(true);
 		lines.clear();
 		Shaders.LINE.render();

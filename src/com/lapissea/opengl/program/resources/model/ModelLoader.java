@@ -10,19 +10,15 @@ import static org.lwjgl.opengl.GL30.*;
 import java.lang.reflect.Constructor;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumBool;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
 import com.lapissea.opengl.program.resources.model.parsers.WavefrontParser;
-import com.lapissea.opengl.program.resources.texture.TextureLoader;
 import com.lapissea.opengl.program.util.PairM;
 import com.lapissea.opengl.program.util.UtilM;
 import com.lapissea.opengl.program.util.function.Predicates;
@@ -55,58 +51,7 @@ public class ModelLoader{
 		registerModelParser(new WavefrontParser());
 	}
 	
-	public static final IModel EMPTY_MODEL=new Model("EMPTY_MODEL"){
-		
-		@Override
-		public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, Vbo[] vbos, ModelAttribute vertexType, ModelAttribute[] attributeIds, IFrustrumShape shape){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public IModel drawCall(){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public IModel enableAttributes(){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public IModel disableAttributes(){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public boolean isLoaded(){
-			return false;
-		}
-		
-		@Override
-		public IModel bindVao(){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public void addMaterial(IMaterial material){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public void addTexture(ITexture texture){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public IMaterial createMaterial(){
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public IMaterial createMaterial(String name){
-			throw new UnsupportedOperationException();
-		}
-	};
+	public static final IModel EMPTY_MODEL=new EmptyModel();
 	
 	public static void registerModelParser(ModelParser parser){
 		if(MODEL_PARSERS.contains(parser)) throw new IllegalArgumentException(parser+" parser already exists!");
@@ -118,8 +63,7 @@ public class ModelLoader{
 	}
 	
 	public static <T extends IModel> T loadAndBuild(Class<T> type, String location){
-		ModelData data=load(location);
-		return buildModel(type, data);
+		return buildModel(load(location).withType(type));
 	}
 	
 	public static IModel[] loadFolderAndBuild(String location){
@@ -127,11 +71,14 @@ public class ModelLoader{
 	}
 	
 	public static <T extends IModel> T[] loadFolderAndBuild(Class<T> type, String location){
-		ModelData[] data=loadFolder(location);
-		return buildModels(type, data);
+		ModelBuilder[] data=loadFolder(location);
+		for(ModelBuilder builder:data){
+			builder.withType(type);
+		}
+		return buildModels(data);
 	}
 	
-	private static ModelData load(String location, ModelParser parser){
+	private static ModelBuilder load(String location, ModelParser parser){
 		LogUtil.println("Loading model:", location);
 		try(InputStreamSilent modelData=UtilL.silentClose(UtilM.getResource("models/"+location))){
 			if(modelData==null) throw new IllegalArgumentException("Model \""+location+"\" does not exist!");
@@ -139,7 +86,7 @@ public class ModelLoader{
 		}
 	}
 	
-	public static ModelData load(String location){
+	public static ModelBuilder load(String location){
 		
 		int pos=location.lastIndexOf('.');
 		if(pos==-1){
@@ -181,173 +128,54 @@ public class ModelLoader{
 		return null;
 	}
 	
-	public static ModelData[] loadFolder(String location){
+	public static ModelBuilder[] loadFolder(String location){
 		return loadFolder(location, Predicates.TRUE());
 	}
 	
-	public static ModelData[] loadFolder(String location, Predicate<String> fileFilter){
-		List<ModelData> models=new ArrayList<>();
+	public static ModelBuilder[] loadFolder(String location, Predicate<String> fileFilter){
+		List<ModelBuilder> models=new ArrayList<>();
 		if(UtilM.getResourceFolderContent("models/"+location, fileFilter.and(ANY_SUPPORTED), (Consumer<String>)name->models.add(load(location+"/"+name)))==-1) throw new IllegalArgumentException("Folder "+location+" does not exist!");
 		return UtilL.array(models);
 	}
 	
-	public static IModel[] buildModels(ModelData...modelsData){
-		IModel[] models=new IModel[modelsData.length];
-		for(int i=0;i<modelsData.length;i++){
-			models[i]=buildModel(modelsData[0]);
-		}
-		return models;
+	@SuppressWarnings("unchecked")
+	public static <T extends IModel> T[] buildModels(ModelBuilder...modelsData){
+		return (T[])convert(modelsData, modelsData[0].type, ModelLoader::buildModel);
 	}
 	
-	public static <T extends IModel> T[] buildModels(Class<T> type, ModelData...modelsData){
-		T[] models=UtilL.array(type, modelsData.length);
-		for(int i=0;i<modelsData.length;i++){
-			models[i]=buildModel(type, modelsData[0]);
-		}
+	public static <T extends IModel> T buildModel(ModelBuilder builder){
+		int faceSize=builder.format==GL_LINES?2:builder.format==GL_QUADS?4:3;
 		
-		return models;
-	}
-	
-	public static IModel buildModel(ModelData modelData){
-		return buildModel(Model.class, modelData);
-	}
-	
-	public static <T extends IModel> T buildModel(Class<T> type, ModelData modelData){
-		return buildModel(type, modelData.name, modelData.format, "vertices", modelData.vertecies, "uvs", modelData.uvs, "normals", modelData.normals, "materialIds", modelData.materialIds, "materials", modelData.materials);
-	}
-	
-	/**
-	 * Use "0" on any array for minimal empty array<br>
-	 * Values:<br>
-	 * vertices = float[]
-	 * <br>
-	 * uvs = float[]
-	 * <br>
-	 * normals = float[]
-	 * <br>
-	 * materialIds = float[] (only round numbers)
-	 * <br>
-	 * indices = int[]
-	 * <br>
-	 * genNormals = boolean (defaults to yes if no normals are present)
-	 * <br>
-	 * killSmooth = boolean (defaults to yes)
-	 * <br>
-	 * textures = array or {@link Iterable} or single element of
-	 * {@link ITexture} or String (texture name)
-	 * <br>
-	 * materials = array or {@link Iterable} or single element of
-	 * {@link IMaterial}
-	 * <br>
-	 * primitiveColor = float[] (rgba)
-	 * <br>
-	 * vertexType = ModelAttribute
-	 */
-	public static IModel buildModel(String name, int format, Object...data){
-		return buildModel(Model.class, name, format, data);
-	}
-	
-	/**
-	 * Use "0" on any array for minimal empty array<br>
-	 * Values:<br>
-	 * vertices = float[]
-	 * <br>
-	 * uvs = float[]
-	 * <br>
-	 * normals = float[]
-	 * <br>
-	 * materialIds = float[] (only round numbers)
-	 * <br>
-	 * indices = int[]
-	 * <br>
-	 * genNormals = boolean (defaults to yes if no normals are present)
-	 * <br>
-	 * killSmooth = boolean (defaults to yes)
-	 * <br>
-	 * textures = array or {@link Iterable} or single element of
-	 * {@link ITexture} or String (texture name)
-	 * <br>
-	 * materials = array or {@link Iterable} or single element of
-	 * {@link IMaterial}
-	 * <br>
-	 * primitiveColor = float[] (rgba)
-	 * <br>
-	 * vertexType = ModelAttribute
-	 */
-	public static <T extends IModel> T buildModel(Class<T> type, String name, int format, Object...data){
-		if(data==null||data.length==0) return null;
-		if(data.length%2!=0) throw new IllegalArgumentException("Bad data!");
-		HashMap<String,Object> MODEL_BUILD_DATA=new HashMap<>();
-		MODEL_BUILD_DATA.clear();
-		
-		for(int i=0;i<data.length;i+=2){
-			MODEL_BUILD_DATA.put((String)data[i], data[i+1]);
-		}
-		T model=buildModel(type, name, format, MODEL_BUILD_DATA);
-		MODEL_BUILD_DATA.clear();
-		return model;
-	}
-	
-	/**
-	 * Use "0" on any array for minimal empty array<br>
-	 * Values:<br>
-	 * vertices = float[]
-	 * <br>
-	 * uvs = float[]
-	 * <br>
-	 * normals = float[]
-	 * <br>
-	 * materialIds = int[]
-	 * <br>
-	 * indices = int[]
-	 * <br>
-	 * genNormals = boolean (defaults to yes if no normals are present)
-	 * <br>
-	 * killSmooth = boolean (defaults to yes)
-	 * <br>
-	 * textures = array or {@link Iterable} or single element of
-	 * {@link ITexture} or String (texture name)
-	 * <br>
-	 * materials = array or {@link Iterable} or single element of
-	 * {@link IMaterial}
-	 * <br>
-	 * primitiveColor = float[] (rgba)
-	 * <br>
-	 * vertexType = ModelAttribute
-	 */
-	public static <T extends IModel> T buildModel(Class<T> type, String name, int format, Map<String,Object> data){
-		
-		data.keySet().stream().filter(key->data.get(key)==null).collect(Collectors.toList()).forEach(key->data.remove(key));
+		if(builder.vertexColors==ModelBuilder.AUTO_FLOAT) builder.withVertexColors(new float[faceSize*4]);
+		if(builder.vertices==ModelBuilder.AUTO_FLOAT) builder.withVertecies(new float[faceSize*builder.vertexType.size]);
+		if(builder.uvs==ModelBuilder.AUTO_FLOAT) builder.withUvs(new float[faceSize*2]);
 		
 		//PROCESS DATA
-		int[] indices=(int[])data.get("indices");
+		int[] indices=builder.indices;
 		boolean hasIds=indices!=null;
 		
-		ModelAttribute vertexType=(ModelAttribute)data.get("vertexType");
-		if(vertexType==null) vertexType=ModelAttribute.VERTEX_ATTR_3D;
+		float[] vert=builder.vertices;
 		
-		Object vertObj=Objects.requireNonNull(data.get("vertices"));
-		float[] vert=vertObj instanceof Number&&((Number)vertObj).intValue()==0?new float[(format==GL_QUADS?4:3)*vertexType.size]:(float[])vertObj;
+		boolean killSmooth=hasIds&&builder.killSmooth;
 		
-		Object killSmoothObj=data.get("killSmooth");
-		boolean killSmooth=hasIds&&(killSmoothObj==null||(boolean)killSmoothObj);
+		boolean genNormal=builder.generateNormals;
+		if(!killSmooth&&genNormal) builder.withNormals(hasIds?generateNormals(vert, indices):generateNormals(vert));
 		
-		Object genNormalObj=data.get("genNormals");
-		boolean genNormal=genNormalObj==null?!data.containsKey("normals"):(boolean)genNormalObj;
-		if(!killSmooth&&genNormal) data.put("normals", hasIds?generateNormals(vert, indices):generateNormals(vert));
+		float[] uvs=builder.uvs;
+		float[] normals=builder.normals;
+		float[] vertexColors=builder.vertexColors;
+		int[] materialIds=builder.materials;
 		
-		float[] uvs=(float[])data.get("uvs"),normals=(float[])data.get("normals"),primitiveColor=(float[])data.get("primitiveColor");
-		int[] materialIds=(int[])data.get("materialIds");
 		if(killSmooth){
-			float[] vert0=vert,uvs0=uvs,normals0=normals,primitiveColor0=primitiveColor;
+			float[] vert0=vert,uvs0=uvs,normals0=normals,vertexColors0=vertexColors;
 			int[] materialIds0=materialIds;
 			vert=new float[indices.length*3];
 			if(uvs!=null) uvs=new float[indices.length*2];
 			if(normals!=null) normals=new float[indices.length*3];
 			if(materialIds!=null) materialIds=new int[indices.length];
-			if(primitiveColor!=null) primitiveColor=new float[indices.length*4];
+			if(vertexColors!=null) vertexColors=new float[indices.length*4];
 			
-			if(format==GL_QUADS){
+			if(builder.format==GL_QUADS){
 				int counter=0;
 				for(int i=0;i<indices.length;i+=4){
 					vert[counter++]=vert0[indices[i+0]*3+0];
@@ -414,28 +242,28 @@ public class ModelLoader{
 						materialIds[counter++]=materialIds0[indices[i+3]];
 					}
 				}
-				if(primitiveColor!=null){
+				if(vertexColors!=null){
 					counter=0;
 					for(int i=0;i<indices.length;i+=4){
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+0];
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+1];
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+2];
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+3];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+0];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+1];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+2];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+3];
 						
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+0];
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+1];
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+2];
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+3];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+0];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+1];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+2];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+3];
 						
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+0];
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+1];
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+2];
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+3];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+0];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+1];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+2];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+3];
 						
-						primitiveColor[counter++]=primitiveColor0[indices[i+3]*4+0];
-						primitiveColor[counter++]=primitiveColor0[indices[i+3]*4+1];
-						primitiveColor[counter++]=primitiveColor0[indices[i+3]*4+2];
-						primitiveColor[counter++]=primitiveColor0[indices[i+3]*4+3];
+						vertexColors[counter++]=vertexColors0[indices[i+3]*4+0];
+						vertexColors[counter++]=vertexColors0[indices[i+3]*4+1];
+						vertexColors[counter++]=vertexColors0[indices[i+3]*4+2];
+						vertexColors[counter++]=vertexColors0[indices[i+3]*4+3];
 					}
 				}
 			}else{
@@ -492,23 +320,23 @@ public class ModelLoader{
 						materialIds[counter++]=materialIds0[indices[i+2]];
 					}
 				}
-				if(primitiveColor!=null){
+				if(vertexColors!=null){
 					counter=0;
 					for(int i=0;i<indices.length;i+=3){
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+0];
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+1];
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+2];
-						primitiveColor[counter++]=primitiveColor0[indices[i+0]*4+3];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+0];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+1];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+2];
+						vertexColors[counter++]=vertexColors0[indices[i+0]*4+3];
 						
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+0];
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+1];
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+2];
-						primitiveColor[counter++]=primitiveColor0[indices[i+1]*4+3];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+0];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+1];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+2];
+						vertexColors[counter++]=vertexColors0[indices[i+1]*4+3];
 						
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+0];
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+1];
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+2];
-						primitiveColor[counter++]=primitiveColor0[indices[i+2]*4+3];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+0];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+1];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+2];
+						vertexColors[counter++]=vertexColors0[indices[i+2]*4+3];
 					}
 				}
 			}
@@ -518,15 +346,22 @@ public class ModelLoader{
 			if(genNormal) normals=generateNormals(vert);
 		}
 		
-		if(vert.length%vertexType.size!=0) throw new IllegalArgumentException(vert.length+" is not a valid vertex count for dimensions of "+vertexType.size+" in model "+name);
+		if(vert.length%builder.vertexType.size!=0) throw new IllegalArgumentException(vert.length+" is not a valid vertex count for dimensions of "+builder.vertexType.size+" in model "+builder.name);
 		
-		T model=create(type, name, format, hasIds?indices:null, vertexType, vert, new Object[]{uvs,normals,materialIds,primitiveColor}, UV_ATTR, NORMAL_ATTR, MATERIAL_ID_ATTR, COLOR_ATTR);
+		@SuppressWarnings("unchecked")
+		T model=(T)create(builder.type, builder.name, builder.format, hasIds?indices:null, builder.vertexType, vert, new Object[]{uvs,normals,materialIds,vertexColors}, UV_ATTR, NORMAL_ATTR, MATERIAL_ID_ATTR, COLOR_ATTR);
 		
 		//INJECT TEXTURE
-		UtilL.iterate(data.get("textures"), obj->model.addTexture(obj instanceof ITexture?(ITexture)obj:TextureLoader.loadTexture((String)obj)));
+		if(builder.textures!=null){
+			for(ITexture t:builder.textures){
+				model.addTexture(t);
+			}
+		}
 		
-		UtilL.iterate(data.get("materials"), IMaterial.class, model::addMaterial);
+		UtilL.iterate(builder.materialDefs, IMaterial.class, model::addMaterial);
 		if(model.getMaterialCount()==0) model.createMaterial();
+		
+		model.culface(builder.culface);
 		
 		return model;
 	}
@@ -716,7 +551,6 @@ public class ModelLoader{
 		
 		return normals;
 	}
-	
 	
 	private static void bindIndices(int[] indicies){
 		int vbo=glGenBuffers();

@@ -11,6 +11,7 @@ import com.lapissea.opengl.program.rendering.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.shader.uniforms.UniformSampler2D;
 import com.lapissea.opengl.program.util.data.OffsetArray;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.opengl.window.assets.IModel;
 
@@ -77,8 +78,9 @@ public class TerrainShader extends ShaderRenderer.Basic3D<Chunk>{
 		
 		IModel model=ter.getModel();
 		Renderer r=getRenderer();
-		r.drawLine(ter.spacePos, new Vec3f(ter.spacePos).addX(Chunk.SIZE), model.isLoaded()?IColorM.GREEN:IColorM.RED);
-		r.drawLine(ter.spacePos, new Vec3f(ter.spacePos).addZ(Chunk.SIZE), model.isLoaded()?IColorM.GREEN:IColorM.RED);
+		ColorM c=new ColorM(model.isLoaded()?IColorM.GREEN:IColorM.RED).a(0.2F);
+		r.drawLine(ter.spacePos, new Vec3f(ter.spacePos).addX(Chunk.SIZE), c);
+		r.drawLine(ter.spacePos, new Vec3f(ter.spacePos).addZ(Chunk.SIZE), c);
 		if(!model.isLoaded())return;
 		
 		r.notifyEntityRender();

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.lapissea.util.UtilL;
@@ -124,7 +125,7 @@ public class OffsetArray<T> implements Iterable<T>{
 	}
 	
 	public void removeIf(Predicate<T> predicate){
-		data.removeIf(predicate);
+		data.removeIf(((Predicate<T>)Objects::nonNull).and(predicate));
 		trim();
 	}
 }

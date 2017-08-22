@@ -1,7 +1,5 @@
 package com.lapissea.opengl.program.game.terrain;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
@@ -9,10 +7,11 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.bulletphysics.collision.shapes.BvhTriangleMeshShape;
 import com.bulletphysics.linearmath.Transform;
+import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
-import com.lapissea.opengl.program.resources.model.ModelData;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.resources.model.ModelUtil;
 import com.lapissea.opengl.program.util.RandUtil;
@@ -38,19 +37,20 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	protected static final Matrix4f	TRANSFORM	=new Matrix4f();
 	protected static final Vec3f	POS			=new Vec3f();
 	
-	public static ModelData[] grass=ModelLoader.loadFolder("Grass", Predicates.FIRST_NUMERIC);
+	public static ModelBuilder[] GRASS_MODELS=ModelLoader.loadFolder("Grass", Predicates.FIRST_NUMERIC);
 	
 	public static final float	SIZE		=100;
 	public static int			RESOLUTION	=18,GRASS_MIN=20,GRASS_RAND=30;
 	
 	public final IVec2iR	pos;
 	public final IVec3fR	spacePos;
-	private IModel			model=ModelLoader.EMPTY_MODEL;
+	private IModel			model	=ModelLoader.EMPTY_MODEL;
 	
 	protected final Matrix4f mat=new Matrix4f();
 	
 	private float[]	hMap;
 	private boolean	loaded;
+	private boolean	loading;
 	
 	public final World world;
 	
@@ -65,14 +65,20 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	}
 	
 	public void unload(){
-		if(!isLoaded())return;
+		if(!isLoaded()) return;
 		loaded=false;
-		getModel().delete();
+		if(isLoading()){
+			LogUtil.printlnEr("nope");
+			Game.glCtxLater(this::unload);
+		}else getModel().delete();
 	}
 	
 	public void load(IHeightMapProvider hMap){
+		if(!loading) return;
+		
 		loaded=true;
-		mat.translate(new Vec3f(pos.x()*SIZE, -2, pos.y()*SIZE));
+		loading=false;
+		mat.translate(new Vec3f(spacePos));
 		generateModel(pos.x(), pos.y(), hMap);
 	}
 	
@@ -125,7 +131,7 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 			q.set(rot.setThis(0, RandUtil.RF(Math.PI*2), RandUtil.CRF(0.2)));
 			
 			float scale=0.7F+RandUtil.RF(0.3);
-			ModelUtil.iterate(grass[RandUtil.RI(grass.length)].vertecies, iterator, v->{
+			ModelUtil.iterate(GRASS_MODELS[RandUtil.RI(GRASS_MODELS.length)].vertices, iterator, v->{
 				q.rotate(vRot.set(v));
 				indices.add(vertices.size()/3);
 				vertices.add(vRot.x()*scale+xOnChunk);
@@ -134,17 +140,24 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 				mats.add(1);
 			});
 		}
-		model=ModelLoader.buildModel("Gen_Chunk-"+gridX+"_"+gridZ, GL_TRIANGLES, "vertices", vertices.toFloatArray(), /*"uvs", uvs.toFloatArray(), */"indices", indices.toIntArray(), "materialIds", mats.toIntArray(), "genNormals", true, "materials", new Material(0, "ground")).culface(false);
+		model=ModelLoader.buildModel(new ModelBuilder()
+				.withName("Gen_Chunk-"+gridX+"_"+gridZ)
+				.withVertecies(vertices)
+				.withIndices(indices)
+				.withMaterials(mats)
+				.generateNormals(true)
+				.killSmooth(true)
+				.withCulface(false).withMaterialDefs(
+						new Material(0, "ground")
+						.setShineDamper(50)
+						.setDiffuse(0.2F, 1, 0.25F, 1)
+						.setSpecular(1, 1, 1, 1),
+						
+						new Material(1, "grass")
+						.setDiffuse(0.2F, 1, 0.25F, 1)
+						.setLightTroughput(0.5F)
+						.setJelly(0.3F)));
 		
-		model.createMaterial("grass")
-		.setDiffuse(0.2F, 1, 0.25F, 1)
-		.setLightTroughput(0.5F)
-		.setJelly(0.3F);
-		
-		model.getMaterial("ground")
-		.setShineDamper(50)
-		.setDiffuse(0.2F, 1, 0.25F, 1)
-		.setSpecular(1, 1, 1, 1);
 	}
 	
 	@Override
@@ -192,11 +205,29 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	public boolean isLoaded(){
 		return loaded;
 	}
+	
 	@Override
 	protected void finalize(){
-		if(isLoaded()) {
-			LogUtil.printlnEr("Chunk deleted but not unloaded! pos:",pos);
+		if(isLoaded()){
+			LogUtil.printlnEr("Chunk deleted but not unloaded! pos:", pos);
 			System.exit(0);
 		}
+	}
+	
+	public boolean isLoading(){
+		return loading;
+	}
+	
+	public void notifyStartLoading(){
+		loading=true;
+	}
+	
+	public void cancelLoading(){
+		loading=false;
+	}
+	
+	@Override
+	public String toString(){
+		return "Chunk{at="+pos+(isLoading()?", loading":isLoaded()?", loaded":"")+"}";
 	}
 }

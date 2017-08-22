@@ -18,6 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.resources.texture.TextureLoader;
 import com.lapissea.opengl.program.resources.texture.UvArea;
@@ -28,7 +29,6 @@ import com.lapissea.opengl.program.util.data.IntTree;
 import com.lapissea.opengl.program.util.function.Float2Consumer;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.window.assets.IModel;
-import com.lapissea.opengl.window.assets.ModelAttribute;
 import com.lapissea.opengl.window.impl.assets.Model;
 import com.lapissea.util.LogUtil;
 
@@ -383,7 +383,7 @@ public class FontFamily{
 	
 	public <T extends IModel> T buildAsModel(float size, String toBuild, Class<T> type, boolean genNormals){
 		PairM<FloatList,FloatList> data=Game.get().renderer.fontComfortaa.build(size, toBuild);
-		T model=ModelLoader.buildModel(type, "Gen_TextModel:"+toBuild, GL_TRIANGLES, "vertices", data.obj1.toFloatArray(), "uvs", data.obj2.toFloatArray(), "genNormals", genNormals, "vertexType", ModelAttribute.VERTEX_ATTR_2D);
+		T model=ModelLoader.buildModel(new ModelBuilder().withName("Gen_TextModel:"+toBuild).withType(type).withFormat(GL_TRIANGLES).withVertecies(data.obj1).withUvs(data.obj2).generateNormals(genNormals).withVertexType(2));
 		model.culface(false);
 		return model;
 	}

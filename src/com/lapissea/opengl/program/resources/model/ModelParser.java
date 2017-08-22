@@ -38,7 +38,7 @@ public abstract class ModelParser{
 		
 	}
 	
-	public abstract ModelData load(String location, InputStream modelStream);
+	public abstract ModelBuilder load(String location, InputStream modelStream);
 	
 	/**
 	 * returns if this parser is able to read data of a model with an extension

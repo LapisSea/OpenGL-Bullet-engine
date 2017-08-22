@@ -9,7 +9,7 @@ import com.lapissea.opengl.program.rendering.shader.shaders.TerrainShader;
 
 public class Shaders{
 	
-	public static final float[] VERTEX_BOX=new float[]{
+	public static final float[] VERTEX_BOX_TRIANGLES=new float[]{
 			-1,+1,-1,
 			-1,-1,-1,
 			+1,-1,-1,

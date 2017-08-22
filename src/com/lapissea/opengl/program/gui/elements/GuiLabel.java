@@ -1,12 +1,11 @@
 package com.lapissea.opengl.program.gui.elements;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.gui.GuiElement;
 import com.lapissea.opengl.program.gui.GuiFlow.SizeCalcStatic;
 import com.lapissea.opengl.program.rendering.DynamicModel;
 import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;
@@ -31,7 +30,14 @@ public class GuiLabel extends GuiElement{
 			preferedWidth=new SizeCalcStatic(c.getSizeX()*2);
 			preferedHeight=new SizeCalcStatic(c.getSizeY()*2);
 		}else{
-			model=ModelLoader.buildModel(DynamicModel.class, "changing label", GL_TRIANGLES, "vertices", new float[6], "uvs", new float[6], "genNormals", false, "vertexType", ModelAttribute.VERTEX_ATTR_2D).culface(false);
+			model=ModelLoader.buildModel(new ModelBuilder()
+					.withType(DynamicModel.class)
+					.withName("changing label")
+					.withAutoVertecies()
+					.withAutoUvs()
+					.withVertexType(2)
+					.withCulface(false));
+			
 			setText(text);
 		}
 		size.set(1, -1);

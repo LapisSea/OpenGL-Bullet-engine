@@ -14,6 +14,7 @@ import org.lwjgl.util.vector.Matrix4f;
 
 import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.rendering.shader.Shaders;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 import com.lapissea.opengl.window.assets.IModel;
@@ -36,12 +37,12 @@ public class Fbo{
 	
 	public Runnable initHook;
 	
-	public static final IModel FULL_SCREEN_MODEL=ModelLoader.buildModel("gen_fscren", GL_TRIANGLE_STRIP, "genNormals", false, "vertices", new float[]{
+	public static final IModel FULL_SCREEN_MODEL=ModelLoader.buildModel(new ModelBuilder().withName("gen_fscren").withFormat(GL_QUADS).withVertecies(
 			-1,-1,0,
 			+1,-1,0,
 			-1,+1,0,
-			+1,+1,0,
-	});
+			+1,+1,0
+			));
 	
 	public Fbo(){
 		this(0, 0);

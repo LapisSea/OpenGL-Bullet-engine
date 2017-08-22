@@ -1,10 +1,9 @@
 package com.lapissea.opengl.program.game.entity.entitys;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import com.lapissea.opengl.program.game.entity.EntityUpd;
 import com.lapissea.opengl.program.game.world.World;
 import com.lapissea.opengl.program.rendering.shader.light.PointLight;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.util.RandUtil;
 import com.lapissea.opengl.program.util.math.PartialTick;
@@ -49,7 +48,7 @@ public class EntityLight extends EntityUpd{
 					-0.5f,-0.5f,-0.5f,
 					0.5f,-0.5f,-0.5f,
 					0.5f,-0.5f,0.5f
-			
+					
 			};
 			
 			float[] uvs={
@@ -78,7 +77,7 @@ public class EntityLight extends EntityUpd{
 					0,1,
 					1,1,
 					1,0
-			
+					
 			};
 			
 			int[] indices={
@@ -103,7 +102,7 @@ public class EntityLight extends EntityUpd{
 			for(int i=0;i<vertices.length;i++){
 				vertices[i]/=10;
 			}
-			MODEL=ModelLoader.buildModel("LileCube", GL_TRIANGLES, "vertices", vertices, "uvs", uvs, "indices", indices, "genNormals", true, "textures", new String[]{"WCveg256"});
+			MODEL=ModelLoader.buildModel(new ModelBuilder().withName("LileCube").withVertecies(vertices).withUvs(uvs).withIndices(indices).generateNormals(true).withTextures("WCveg256"));
 		}
 		return MODEL;
 	}

@@ -1,7 +1,5 @@
 package com.lapissea.opengl.program.rendering.shader.shaders;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import java.util.Collection;
 
 import org.lwjgl.util.vector.Matrix4f;
@@ -14,6 +12,7 @@ import com.lapissea.opengl.program.rendering.shader.ShaderRenderer;
 import com.lapissea.opengl.program.rendering.shader.Shaders;
 import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat1;
 import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat3;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.resources.texture.TextureLoader;
 import com.lapissea.opengl.program.util.math.PartialTick;
@@ -24,7 +23,7 @@ import com.lapissea.opengl.window.impl.assets.BasicTextureCube;
 
 public class SkyboxShader extends ShaderRenderer<ModelTransformed>{
 	
-	private IModel cube=ModelLoader.buildModel("Skybox", GL_TRIANGLES, "vertices", Shaders.VERTEX_BOX, "genNormals", false, "textures", TextureLoader.loadTexture("skybox/ame_nebula", BasicTextureCube.class));
+	private IModel cube=ModelLoader.buildModel(new ModelBuilder().withName("Skybox").withVertecies(Shaders.VERTEX_BOX_TRIANGLES).withTextures(TextureLoader.loadTexture("skybox/ame_nebula", BasicTextureCube.class)));
 	
 	UniformFloat3	sunPos;
 	UniformFloat1	eyeHeight;

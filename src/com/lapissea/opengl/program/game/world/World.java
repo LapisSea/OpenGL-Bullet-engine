@@ -1,7 +1,6 @@
 package com.lapissea.opengl.program.game.world;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
@@ -23,6 +22,7 @@ import com.lapissea.opengl.program.util.data.OffsetArray;
 import com.lapissea.opengl.program.util.math.SimplexNoise;
 import com.lapissea.opengl.program.util.math.vec.Vec2i;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.util.LogUtil;
 
 public class World extends PhysicsWorldJbullet{
@@ -107,7 +107,7 @@ public class World extends PhysicsWorldJbullet{
 	private void handleChunks(){
 		Vec3f camPos=Game.get().renderer.getCamera().pos;
 		
-		if(time()%10!=0){
+		if(time()%10==0){
 			synchronized(chunkLoadingSorter){
 				int camX=(int)(camPos.x()/Chunk.SIZE);
 				int camZ=(int)(camPos.z()/Chunk.SIZE);
@@ -116,55 +116,59 @@ public class World extends PhysicsWorldJbullet{
 					camXLast=camX;
 					camZLast=camZ;
 					lastSiz=siz;
+					LogUtil.println(camX,camZ,getChunk(camX,camZ).pos);
+					
 					Vec2i veci=new Vec2i();
 					Vec3f vec3=new Vec3f();
 					for(int x=-siz;x<siz;x++){
 						for(int z=-siz;z<siz;z++){
 							
 							veci.set(x+camX, z+camZ);
-							vec3.set(veci.x()*Chunk.SIZE, 0, veci.y()*Chunk.SIZE);
-							if(vec3.distanceTo(camPos)*0.9+1>lastSiz*Chunk.SIZE) continue;
 							
 							Chunk c=getChunk(veci);
 							if(c!=null) continue;
 							
+							vec3.set(veci.x()*Chunk.SIZE, 0, veci.y()*Chunk.SIZE);
+							
+							Game.get().renderer.drawLine(vec3, vec3.clone().addX(Chunk.SIZE), IColorM.WHITE);
+							
+							if(vec3.distanceTo(camPos)*0.9+1>lastSiz*Chunk.SIZE) continue;
+							
 							c=new Chunk(this, veci);
 							addChunk(c);
+							
+							c.notifyStartLoading();
 							chunkLoadingSorter.add(c);
 						}
 					}
 				}
-				Iterator<OffsetArray<Chunk>> x=chunks.iterator();
-				while(x.hasNext()){
-					OffsetArray<Chunk> line=x.next();
-					Iterator<Chunk> z=line.iterator();
-					while(z.hasNext()){
-						Chunk c=z.next();
-						if(c.spacePos.distanceTo(camPos)*0.8>lastSiz*Chunk.SIZE){
+				for(OffsetArray<Chunk> line:chunks){
+					line.removeIf(c->{
+						if(c.spacePos.distanceTo(camPos)*0.8>lastSiz*Chunk.SIZE||!c.isLoaded()&&!c.isLoading()){
 							Game.glCtxLater(c::unload);
-							z.remove();
+							return true;
 						}
-					}
+						return false;
+					});
 				}
 				chunks.removeIf(OffsetArray::isEmpty);
 			}
+			if(chunkLoadingSorter.hasNext()) LOADING_POOL.submit(this::loadChunks);
 		}
 		if(!chunkLoadingSorter.hasNext()) return;
 		chunkLoadingSorter.update();
 		
-		LOADING_POOL.submit(this::loadChunks);
 	}
 	
 	private void loadChunks(){
 		if(!chunkLoadingSorter.hasNext()) return;
 		
 		Vec3f camPos=Game.get().renderer.getCamera().pos;
+		
 		chunkLoadingSorter.iterate(chunk->{
 			if(chunk.spacePos.distanceTo(camPos)*0.9<lastSiz*Chunk.SIZE){
-				if(!chunk.isLoaded()){
-					chunk.load(hMap);
-				}
-			}else removeChunk(chunk);
+				if(!chunk.isLoaded()) chunk.load(hMap);
+			}
 		});
 	}
 	

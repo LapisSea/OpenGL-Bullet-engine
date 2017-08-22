@@ -7,7 +7,6 @@ import com.lapissea.opengl.program.util.math.vec.Vec2f;
 import com.lapissea.opengl.program.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.impl.assets.Material;
-import com.lapissea.util.UtilL;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
@@ -21,7 +20,7 @@ public class ModelDataBuilder{
 	public FloatList	normals		=new FloatArrayList();
 	public IntList		materials	=new IntArrayList();
 	
-	public IntList indices	=new IntArrayList();
+	public IntList indices=new IntArrayList();
 	
 	public List<IMaterial>	materialDefs=new ArrayList<>();
 	public String			name;
@@ -49,20 +48,18 @@ public class ModelDataBuilder{
 		uvs.add(vec.y());
 	}
 	
-	public ModelData compile(){
-		ModelData compiled=new ModelData(name);
+	public ModelBuilder compile(){
 		
-		compiled.vertecies=vertecies.toFloatArray();
+		ModelBuilder compiled=new ModelBuilder().withName(name).withVertecies(vertecies).withFormat(format);
 		
-		compiled.format=format;
+		if(!normals.isEmpty()) compiled.withNormals(normals);
+		if(!uvs.isEmpty()) compiled.withUvs(uvs);
+		if(!indices.isEmpty()) compiled.withIndices(indices);
 		
-		if(!normals.isEmpty()) compiled.normals=normals.toFloatArray();
-		if(!uvs.isEmpty()) compiled.uvs=uvs.toFloatArray();
-		if(!indices.isEmpty())compiled.indices=indices.toIntArray();
-		
-		if(!materialDefs.isEmpty()) compiled.materialIds=materials.toIntArray();
+		if(!materialDefs.isEmpty()) compiled.withMaterials(materials);
 		else materialDefs.add(new Material(0));
-		compiled.materials=UtilL.array(materialDefs);
+		
+		compiled.withMaterialDefs(materialDefs);
 		
 		return compiled;
 	}

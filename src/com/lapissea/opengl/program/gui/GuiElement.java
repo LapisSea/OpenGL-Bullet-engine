@@ -13,6 +13,7 @@ import com.lapissea.opengl.program.core.Game;
 import com.lapissea.opengl.program.gui.GuiFlow.ISizeCalc;
 import com.lapissea.opengl.program.gui.GuiFlow.SizeCalcStatic;
 import com.lapissea.opengl.program.rendering.ModelTransformed;
+import com.lapissea.opengl.program.resources.model.ModelBuilder;
 import com.lapissea.opengl.program.resources.model.ModelLoader;
 import com.lapissea.opengl.program.util.math.MatrixUtil;
 import com.lapissea.opengl.program.util.math.vec.Vec2f;
@@ -24,15 +25,14 @@ import com.lapissea.opengl.window.api.events.MouseScrollEvent;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 import com.lapissea.opengl.window.assets.IModel;
-import com.lapissea.opengl.window.assets.ModelAttribute;
 
 public class GuiElement implements ModelTransformed{
 	
-	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel("UNIT_QUAD", GL_TRIANGLE_STRIP, "genNormals", false, "vertices", new float[]{
-			0,0,
-			0,1,
-			1,0,
-			1,1}, "vertexType", ModelAttribute.VERTEX_ATTR_2D);
+	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel(new ModelBuilder().withName("UNIT_QUAD").withFormat(GL_QUADS).withVertecies(
+			0, 0,
+			0, 1,
+			1, 0,
+			1, 1).withVertexType(2));
 	protected static final Matrix4f	_MAT		=new Matrix4f();
 	protected static final Vec3f	_POS		=new Vec3f(),_ROT=new Vec3f();
 	protected static final Vec2f	VEC2		=new Vec2f();
