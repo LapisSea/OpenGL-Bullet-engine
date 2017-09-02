@@ -1,13 +1,13 @@
-package com.lapissea.opengl.program.rendering.shader.modules;
+package com.lapissea.opengl.rendering.shader.modules;
 
 import static org.lwjgl.opengl.GL13.*;
 
 import java.util.List;
 
-import com.lapissea.opengl.program.rendering.shader.Shader;
-import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule.ModelMdl;
-import com.lapissea.opengl.program.rendering.shader.uniforms.UniformBoolean;
-import com.lapissea.opengl.program.rendering.shader.uniforms.ints.UniformInt1;
+import com.lapissea.opengl.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.modules.ShaderModule.ModelMdl;
+import com.lapissea.opengl.rendering.shader.uniforms.UniformBoolean;
+import com.lapissea.opengl.rendering.shader.uniforms.ints.UniformInt1;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ITexture;
 

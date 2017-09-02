@@ -1,10 +1,10 @@
-package com.lapissea.opengl.program.rendering.shader.uniforms.floats;
+package com.lapissea.opengl.rendering.shader.uniforms.floats;
 
 import static org.lwjgl.opengl.GL20.*;
 
-import com.lapissea.opengl.program.rendering.shader.Shader;
-import com.lapissea.opengl.program.rendering.shader.uniforms.AbstractUniform;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.uniforms.AbstractUniform;
+import com.lapissea.opengl.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.color.IColorM;
 
 public class UniformFloat3 extends AbstractUniform{

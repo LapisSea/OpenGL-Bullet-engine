@@ -1,8 +1,8 @@
-package com.lapissea.opengl.program.rendering.frustrum;
+package com.lapissea.opengl.rendering.frustrum;
 
-import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.Renderer;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.core.Game;
+import com.lapissea.opengl.rendering.Renderer;
+import com.lapissea.opengl.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;
 import com.lapissea.opengl.window.api.util.color.IColorM;

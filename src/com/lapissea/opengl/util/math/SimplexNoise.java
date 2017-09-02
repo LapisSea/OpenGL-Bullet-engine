@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util.math;
+package com.lapissea.opengl.util.math;
 /*
  * A speed-improved simplex noise algorithm for 2D, 3D and 4D in Java.
  *

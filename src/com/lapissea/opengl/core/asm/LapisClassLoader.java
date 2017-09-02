@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.core.asm;
+package com.lapissea.opengl.core.asm;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -10,7 +10,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
-import com.lapissea.opengl.program.util.data.PrefixTree;
+import com.lapissea.opengl.util.data.PrefixTree;
 
 public class LapisClassLoader extends URLClassLoader{
 	

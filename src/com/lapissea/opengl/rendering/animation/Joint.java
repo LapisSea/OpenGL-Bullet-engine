@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.animation;
+package com.lapissea.opengl.rendering.animation;
 
 import java.util.ArrayList;
 import java.util.List;

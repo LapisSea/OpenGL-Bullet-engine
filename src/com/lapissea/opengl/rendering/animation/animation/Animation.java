@@ -1,6 +1,6 @@
-package com.lapissea.opengl.program.rendering.animation.animation;
+package com.lapissea.opengl.rendering.animation.animation;
 
-import com.lapissea.opengl.program.rendering.animation.AnimatedModel;
+import com.lapissea.opengl.rendering.animation.AnimatedModel;
 
 /**
  * 

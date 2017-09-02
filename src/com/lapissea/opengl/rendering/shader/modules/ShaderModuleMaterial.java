@@ -1,13 +1,13 @@
-package com.lapissea.opengl.program.rendering.shader.modules;
+package com.lapissea.opengl.rendering.shader.modules;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.shader.Shader;
-import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule.ModelMdl;
-import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat1;
-import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat3;
+import com.lapissea.opengl.core.Game;
+import com.lapissea.opengl.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.modules.ShaderModule.ModelMdl;
+import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat1;
+import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat3;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.assets.ModelAttribute;

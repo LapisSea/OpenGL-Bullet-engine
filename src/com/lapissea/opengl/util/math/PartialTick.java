@@ -1,6 +1,6 @@
-package com.lapissea.opengl.program.util.math;
+package com.lapissea.opengl.util.math;
 
-import com.lapissea.opengl.program.core.Game;
+import com.lapissea.opengl.core.Game;
 import com.lapissea.opengl.window.api.util.Interpolateble;
 
 public class PartialTick{

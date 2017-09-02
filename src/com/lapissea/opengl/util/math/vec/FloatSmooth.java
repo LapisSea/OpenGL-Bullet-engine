@@ -1,6 +1,6 @@
-package com.lapissea.opengl.program.util.math.vec;
+package com.lapissea.opengl.util.math.vec;
 
-import com.lapissea.opengl.program.util.math.PartialTick;
+import com.lapissea.opengl.util.math.PartialTick;
 
 public class FloatSmooth{
 	

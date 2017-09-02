@@ -1,9 +1,9 @@
-package com.lapissea.opengl.program.rendering.shader.uniforms.floats;
+package com.lapissea.opengl.rendering.shader.uniforms.floats;
 
 import static org.lwjgl.opengl.GL20.*;
 
-import com.lapissea.opengl.program.rendering.shader.Shader;
-import com.lapissea.opengl.program.rendering.shader.uniforms.AbstractUniform;
+import com.lapissea.opengl.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.uniforms.AbstractUniform;
 
 public class UniformFloat1 extends AbstractUniform{
 	

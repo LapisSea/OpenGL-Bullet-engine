@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.animation.animation;
+package com.lapissea.opengl.rendering.animation.animation;
 
 import java.util.Map;
 

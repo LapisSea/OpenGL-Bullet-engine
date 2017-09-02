@@ -1,10 +1,10 @@
-package com.lapissea.opengl.program.gui.guis;
+package com.lapissea.opengl.gui.guis;
 
-import com.lapissea.opengl.program.gui.Gui;
-import com.lapissea.opengl.program.gui.GuiElementMaterial;
-import com.lapissea.opengl.program.gui.GuiFlow.SizeCalcStatic;
-import com.lapissea.opengl.program.gui.elements.GuiButton;
-import com.lapissea.opengl.program.gui.elements.GuiLabel;
+import com.lapissea.opengl.gui.Gui;
+import com.lapissea.opengl.gui.GuiElementMaterial;
+import com.lapissea.opengl.gui.GuiFlow.SizeCalcStatic;
+import com.lapissea.opengl.gui.elements.GuiButton;
+import com.lapissea.opengl.gui.elements.GuiLabel;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 
 public class GuiPause extends Gui{

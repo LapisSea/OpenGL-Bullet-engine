@@ -1,13 +1,13 @@
-package com.lapissea.opengl.program.game.entity.entitys;
+package com.lapissea.opengl.game.entity.entitys;
 
-import com.lapissea.opengl.program.game.entity.EntityUpd;
-import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.shader.light.PointLight;
-import com.lapissea.opengl.program.resources.model.ModelBuilder;
-import com.lapissea.opengl.program.resources.model.ModelLoader;
-import com.lapissea.opengl.program.util.RandUtil;
-import com.lapissea.opengl.program.util.math.PartialTick;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.game.entity.EntityUpd;
+import com.lapissea.opengl.game.world.World;
+import com.lapissea.opengl.rendering.shader.light.PointLight;
+import com.lapissea.opengl.resources.model.ModelBuilder;
+import com.lapissea.opengl.resources.model.ModelLoader;
+import com.lapissea.opengl.util.RandUtil;
+import com.lapissea.opengl.util.math.PartialTick;
+import com.lapissea.opengl.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.assets.IModel;
 

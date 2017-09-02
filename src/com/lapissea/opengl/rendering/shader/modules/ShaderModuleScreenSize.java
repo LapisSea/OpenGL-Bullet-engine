@@ -1,9 +1,9 @@
-package com.lapissea.opengl.program.rendering.shader.modules;
+package com.lapissea.opengl.rendering.shader.modules;
 
-import com.lapissea.opengl.program.rendering.GLUtil;
-import com.lapissea.opengl.program.rendering.shader.Shader;
-import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule.Global;
-import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat2;
+import com.lapissea.opengl.rendering.GLUtil;
+import com.lapissea.opengl.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.modules.ShaderModule.Global;
+import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat2;
 
 public class ShaderModuleScreenSize extends ShaderModule implements Global{
 	

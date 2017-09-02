@@ -1,15 +1,15 @@
-package com.lapissea.opengl.program.game.entity.entitys;
+package com.lapissea.opengl.game.entity.entitys;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.game.entity.EntityUpd;
-import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.frustrum.FrustrumCube;
-import com.lapissea.opengl.program.resources.model.ModelLoader;
-import com.lapissea.opengl.program.util.math.MatrixUtil;
-import com.lapissea.opengl.program.util.math.vec.Quat4;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.core.Game;
+import com.lapissea.opengl.game.entity.EntityUpd;
+import com.lapissea.opengl.game.world.World;
+import com.lapissea.opengl.rendering.frustrum.FrustrumCube;
+import com.lapissea.opengl.resources.model.ModelLoader;
+import com.lapissea.opengl.util.math.MatrixUtil;
+import com.lapissea.opengl.util.math.vec.Quat4;
+import com.lapissea.opengl.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.assets.IModel;
 
 public class EntityPlayer extends EntityUpd{

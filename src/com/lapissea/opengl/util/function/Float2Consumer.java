@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util.function;
+package com.lapissea.opengl.util.function;
 
 public interface Float2Consumer{
 	

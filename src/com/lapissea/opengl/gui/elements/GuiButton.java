@@ -1,6 +1,6 @@
-package com.lapissea.opengl.program.gui.elements;
+package com.lapissea.opengl.gui.elements;
 
-import com.lapissea.opengl.program.gui.GuiElementMaterial;
+import com.lapissea.opengl.gui.GuiElementMaterial;
 
 public class GuiButton extends GuiMouseReact{
 	

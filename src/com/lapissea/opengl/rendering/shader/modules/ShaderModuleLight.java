@@ -1,6 +1,6 @@
-package com.lapissea.opengl.program.rendering.shader.modules;
+package com.lapissea.opengl.rendering.shader.modules;
 
-import static com.lapissea.opengl.program.rendering.shader.modules.ShaderModuleArrayList.*;
+import static com.lapissea.opengl.rendering.shader.modules.ShaderModuleArrayList.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,16 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.Renderer;
-import com.lapissea.opengl.program.rendering.shader.Shader;
-import com.lapissea.opengl.program.rendering.shader.light.DirLight;
-import com.lapissea.opengl.program.rendering.shader.light.LineLight;
-import com.lapissea.opengl.program.rendering.shader.light.PointLight;
-import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat1;
-import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat3;
-import com.lapissea.opengl.program.rendering.shader.uniforms.ints.UniformInt1;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.core.Game;
+import com.lapissea.opengl.rendering.Renderer;
+import com.lapissea.opengl.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.light.DirLight;
+import com.lapissea.opengl.rendering.shader.light.LineLight;
+import com.lapissea.opengl.rendering.shader.light.PointLight;
+import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat1;
+import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat3;
+import com.lapissea.opengl.rendering.shader.uniforms.ints.UniformInt1;
+import com.lapissea.opengl.util.math.vec.Vec3f;
 
 public class ShaderModuleLight extends ShaderModule implements ShaderModule.Global{
 	

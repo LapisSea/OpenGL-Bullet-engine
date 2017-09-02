@@ -1,8 +1,8 @@
-package com.lapissea.opengl.program.util.timer;
+package com.lapissea.opengl.util.timer;
 
 import java.util.Objects;
 
-import com.lapissea.opengl.program.util.UtilM;
+import com.lapissea.opengl.util.UtilM;
 
 public class TimerOld extends GameTimer{
 	

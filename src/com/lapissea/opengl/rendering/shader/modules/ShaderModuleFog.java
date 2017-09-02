@@ -1,12 +1,12 @@
-package com.lapissea.opengl.program.rendering.shader.modules;
+package com.lapissea.opengl.rendering.shader.modules;
 
-import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.rendering.Fog;
-import com.lapissea.opengl.program.rendering.Renderer;
-import com.lapissea.opengl.program.rendering.shader.Shader;
-import com.lapissea.opengl.program.rendering.shader.modules.ShaderModule.Global;
-import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat1;
-import com.lapissea.opengl.program.rendering.shader.uniforms.floats.UniformFloat3;
+import com.lapissea.opengl.core.Game;
+import com.lapissea.opengl.rendering.Fog;
+import com.lapissea.opengl.rendering.Renderer;
+import com.lapissea.opengl.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.modules.ShaderModule.Global;
+import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat1;
+import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat3;
 
 public class ShaderModuleFog extends ShaderModule implements Global{
 	

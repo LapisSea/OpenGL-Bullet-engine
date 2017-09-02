@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.core.asm.poll;
+package com.lapissea.opengl.core.asm.poll;
 
 public class AsmPoll{
 	

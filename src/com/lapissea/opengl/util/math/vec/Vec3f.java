@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util.math.vec;
+package com.lapissea.opengl.util.math.vec;
 
 import org.lwjgl.util.vector.ReadableVector3f;
 import org.lwjgl.util.vector.Vector3f;

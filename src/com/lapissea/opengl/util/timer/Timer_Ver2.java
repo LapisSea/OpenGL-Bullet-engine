@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util.timer;
+package com.lapissea.opengl.util.timer;
 
 import com.lapissea.util.LogUtil;
 

@@ -1,8 +1,8 @@
-package com.lapissea.opengl.program.rendering.shader.modules;
+package com.lapissea.opengl.rendering.shader.modules;
 
 import java.util.function.Function;
 
-import com.lapissea.opengl.program.rendering.shader.Shader;
+import com.lapissea.opengl.rendering.shader.Shader;
 
 public class ShaderModuleArrayList extends ShaderModule{
 	

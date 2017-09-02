@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util.math.vec;
+package com.lapissea.opengl.util.math.vec;
 
 import com.lapissea.opengl.window.api.util.vec.IRotation;
 import com.lapissea.opengl.window.api.util.vec.IVec3fR;

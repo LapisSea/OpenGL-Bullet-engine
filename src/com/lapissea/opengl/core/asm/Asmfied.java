@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.core.asm;
+package com.lapissea.opengl.core.asm;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.core.asm;
+package com.lapissea.opengl.core.asm;
 
 import java.util.List;
 

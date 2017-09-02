@@ -1,12 +1,12 @@
-package com.lapissea.opengl.program.rendering.animation.animation;
+package com.lapissea.opengl.rendering.animation.animation;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.rendering.animation.AnimatedModel;
-import com.lapissea.opengl.program.rendering.animation.Joint;
+import com.lapissea.opengl.rendering.animation.AnimatedModel;
+import com.lapissea.opengl.rendering.animation.Joint;
 
 /**
  * 

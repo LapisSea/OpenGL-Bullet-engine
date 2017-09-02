@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.rendering.frustrum;
+package com.lapissea.opengl.rendering.frustrum;
 
 import com.lapissea.opengl.window.api.frustrum.Frustum;
 import com.lapissea.opengl.window.api.frustrum.IFrustrumShape;

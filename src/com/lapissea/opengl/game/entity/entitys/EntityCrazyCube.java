@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.game.entity.entitys;
+package com.lapissea.opengl.game.entity.entitys;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
@@ -10,18 +10,18 @@ import com.bulletphysics.collision.shapes.SphereShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
-import com.lapissea.opengl.program.core.Game;
-import com.lapissea.opengl.program.game.entity.EntityUpd;
-import com.lapissea.opengl.program.game.physics.jbullet.PhysicsObjJBullet;
-import com.lapissea.opengl.program.game.world.World;
-import com.lapissea.opengl.program.rendering.Camera;
-import com.lapissea.opengl.program.rendering.shader.light.PointLight;
-import com.lapissea.opengl.program.resources.model.ModelLoader;
-import com.lapissea.opengl.program.util.BlackBody;
-import com.lapissea.opengl.program.util.RandUtil;
-import com.lapissea.opengl.program.util.math.PartialTick;
-import com.lapissea.opengl.program.util.math.SimplexNoise;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.core.Game;
+import com.lapissea.opengl.game.entity.EntityUpd;
+import com.lapissea.opengl.game.physics.jbullet.PhysicsObjJBullet;
+import com.lapissea.opengl.game.world.World;
+import com.lapissea.opengl.rendering.Camera;
+import com.lapissea.opengl.rendering.shader.light.PointLight;
+import com.lapissea.opengl.resources.model.ModelLoader;
+import com.lapissea.opengl.util.BlackBody;
+import com.lapissea.opengl.util.RandUtil;
+import com.lapissea.opengl.util.math.PartialTick;
+import com.lapissea.opengl.util.math.SimplexNoise;
+import com.lapissea.opengl.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.color.ColorM;
 import com.lapissea.opengl.window.assets.IModel;
 
@@ -32,7 +32,7 @@ public class EntityCrazyCube extends EntityUpd{
 	private static IModel getModel0(){
 		if(MODEL==null){
 //			MODEL=ModelLoader.loadAndBuild("FancyCube");
-			MODEL=ModelLoader.loadAndBuild("nothing");
+			MODEL=ModelLoader.loadAndBuild("icosphere radius 0.5--triangulated.obj");
 		}
 		return MODEL;
 	}
@@ -72,6 +72,7 @@ public class EntityCrazyCube extends EntityUpd{
 	public void update(){
 		if(Float.isNaN(pos.x())) kill();
 		updatePrevs();
+//		LogUtil.println(model);
 //		LogUtil.println(model.getMaterial(1));
 //		LogUtil.println(pos);
 //		pos.y-=0.2;
@@ -121,6 +122,7 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	@Override
 	public void preRender(){
+//		LogUtil.println(MODEL.getVertexCount());
 		if(lightColor!=null){
 			if(light==null) light=new PointLight(new Vec3f(), lightColor, new Vec3f(1F, 0.01F, 0.01F/(scale.max()*scale.max())));
 			BlackBody.fromKelvin(light.color, (float)(prevPos.distanceTo(pos)*2000+1000+50+50*SimplexNoise.noise(hashCode(), (world.time()+Game.getPartialTicks())/5D)));

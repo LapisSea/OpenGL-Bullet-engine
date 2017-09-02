@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.core.asm.poll;
+package com.lapissea.opengl.core.asm.poll;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -17,8 +17,8 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import com.lapissea.opengl.program.core.asm.ClassTransformer;
-import com.lapissea.opengl.program.core.asm.LapisClassLoader;
+import com.lapissea.opengl.core.asm.ClassTransformer;
+import com.lapissea.opengl.core.asm.LapisClassLoader;
 
 public class TransformerAsmPoll implements ClassTransformer{
 	

@@ -1,4 +1,4 @@
-package com.lapissea.opengl.program.util.data;
+package com.lapissea.opengl.util.data;
 
 import java.util.ArrayList;
 import java.util.List;

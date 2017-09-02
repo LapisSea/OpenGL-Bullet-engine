@@ -1,9 +1,9 @@
-package com.lapissea.opengl.program.rendering.animation;
+package com.lapissea.opengl.rendering.animation;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.rendering.animation.animation.Animation;
-import com.lapissea.opengl.program.rendering.animation.animation.Animator;
+import com.lapissea.opengl.rendering.animation.animation.Animation;
+import com.lapissea.opengl.rendering.animation.animation.Animator;
 import com.lapissea.opengl.window.assets.IModel;
 
 /**

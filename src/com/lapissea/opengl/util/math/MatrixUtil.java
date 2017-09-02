@@ -1,9 +1,9 @@
-package com.lapissea.opengl.program.util.math;
+package com.lapissea.opengl.util.math;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import com.lapissea.opengl.program.util.math.vec.Quat4;
-import com.lapissea.opengl.program.util.math.vec.Vec3f;
+import com.lapissea.opengl.util.math.vec.Quat4;
+import com.lapissea.opengl.util.math.vec.Vec3f;
 
 public class MatrixUtil{
 	
