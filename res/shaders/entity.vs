@@ -26,7 +26,7 @@ uniform float fogGradient;
 void main(void){
 	uv=uvIn;
 	
-	ModelMaterial m=getMaterial(materialId=materialIdIn);
+	Material m=getMaterial(materialId=materialIdIn);
 	
 	vec3 pos0=pos;
 	if(m.jelly>0){

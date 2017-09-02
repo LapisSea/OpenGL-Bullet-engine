@@ -1,6 +1,6 @@
 package com.lapissea.opengl.launch;
 
-import com.lapissea.opengl.program.core.asm.Asmfied;
+import com.lapissea.opengl.core.asm.Asmfied;
 
 @Asmfied
 public class Test{

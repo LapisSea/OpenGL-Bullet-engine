@@ -18,7 +18,7 @@ uniform float fogDensity;
 uniform float fogGradient;
 
 /*MODULE_START: Material.smd*/
-struct ModelMaterial{
+struct Material{
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -28,9 +28,9 @@ struct ModelMaterial{
 	float lightTroughput;
 };
 
-uniform ModelMaterial materials[20];
+uniform Material materials[20];
 
-ModelMaterial getMaterial(int id){
+Material getMaterial(int id){
 	return materials[id];
 }
 /*MODULE_END: Material.smd*/
@@ -73,7 +73,7 @@ uniform float systemTime;
 void main(void){
 	uv=uvIn;
 	
-	ModelMaterial m=getMaterial(materialId=materialIdIn);
+	Material m=getMaterial(materialId=materialIdIn);
 	
 	vec3 pos0=pos;
 	if(m.jelly>0){

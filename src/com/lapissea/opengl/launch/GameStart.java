@@ -2,7 +2,7 @@ package com.lapissea.opengl.launch;
 
 import java.net.URLClassLoader;
 
-import com.lapissea.opengl.program.core.asm.LapisClassLoader;
+import com.lapissea.opengl.core.asm.LapisClassLoader;
 
 public class GameStart{
 	

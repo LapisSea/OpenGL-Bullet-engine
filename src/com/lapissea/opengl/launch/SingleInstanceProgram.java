@@ -6,7 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
-import com.lapissea.opengl.program.util.OperatingSystem;
+import com.lapissea.opengl.util.OperatingSystem;
 
 @SuppressWarnings("resource")
 class SingleInstanceProgram{

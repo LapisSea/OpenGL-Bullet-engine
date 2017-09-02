@@ -27,7 +27,7 @@ void main(void){
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
 	
-	ModelMaterial m=getMaterial(materialId);
+	Material m=getMaterial(materialId);
 	
 	calculateLighting(m, pointLights, lineLights, dirLights);
 	pixelColor=applyLighting(pixelColor, minBrightness, m);

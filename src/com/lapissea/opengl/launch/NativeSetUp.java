@@ -17,7 +17,7 @@ import java.util.zip.ZipException;
 import javax.swing.UIManager;
 
 import com.lapissea.opengl.launch.swing.ConsoleWindow;
-import com.lapissea.opengl.program.util.OperatingSystem;
+import com.lapissea.opengl.util.OperatingSystem;
 
 class NativeSetUp{
 	

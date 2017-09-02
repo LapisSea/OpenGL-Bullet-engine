@@ -20,7 +20,7 @@ vec4 mainTexture(vec2 uv){
 
 
 /*MODULE_START: Material.smd*/
-struct ModelMaterial{
+struct Material{
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -30,9 +30,9 @@ struct ModelMaterial{
 	float lightTroughput;
 };
 
-uniform ModelMaterial materials[20];
+uniform Material materials[20];
 
-ModelMaterial getMaterial(int id){
+Material getMaterial(int id){
 	return materials[id];
 }
 /*MODULE_END: Material.smd*/
@@ -141,7 +141,7 @@ vec3 calculateLineLineIntersection(vec3 line1Point1, vec3 line1Point2, vec3 line
 	return resultSegmentPoint;
 }
 
-void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, ModelMaterial material, vec3 wPos, float fresnel, bool hasSpecular){
+void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, Material material, vec3 wPos, float fresnel, bool hasSpecular){
 	vec3 toLight=light.pos-wPos;
 	float dist=length(toLight);
 	float attFact= 1/(
@@ -177,7 +177,7 @@ void calcPointLightColor(vec3 unitToCamera, vec3 unitNormal, PointLight light, M
 		light_specularTotal+=dampedSpecular*brightness*col*fresnel;
 	}
 }
-void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, ModelMaterial material, vec3 wPos, float fresnel, bool hasSpecular){
+void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, Material material, vec3 wPos, float fresnel, bool hasSpecular){
 	vec3 toLight=getClosetPoint(light.pos1,light.pos2, wPos)-wPos;
 	
 	float dist=length(toLight);
@@ -229,17 +229,18 @@ void calcLineLightColor(vec3 unitToCamera, vec3 unitNormal, LineLight light, Mod
 	}
 }
 
-void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, ModelMaterial material, float fresnel, bool hasSpecular){
+void calcDirLightColor(vec3 unitToCamera, vec3 unitNormal, DirectionalLight light, Material material, float fresnel, bool hasSpecular){
 	
 	vec3 unitToLight=light.direction;
 	float brightness=1;
 	if(unitNormal.x!=0||unitNormal.y!=0||unitNormal.z!=0)brightness=mix(dot(unitNormal,unitToLight), 1 ,material.lightTroughput);
 
-	float amb;
-	if(brightness>-0.5)amb=(1-brightness)/1.5;
-	else amb=1.25+brightness/2;
+	// float amb;
+	// if(brightness>-0.5)amb=(1-brightness)/1.5;
+	// else amb=1.25+brightness/2;
 	
-	light_AmbientTotal+=light.ambient*sqrt(amb);
+	// light_AmbientTotal+=light.ambient*sqrt(amb);
+	light_AmbientTotal+=light.ambient;
 	
 	if(brightness<0)return;
 	vec3 col=light.color;
@@ -293,7 +294,7 @@ in vec3 normal;
 in vec3 toCamera;
 in vec3 wPos;
 
-void calculateLighting(ModelMaterial material, ListPointLight pointLights, ListLineLight lineLights, ListDirectionalLight dirLights){
+void calculateLighting(Material material, ListPointLight pointLights, ListLineLight lineLights, ListDirectionalLight dirLights){
 	
 	vec3 unitToCamera=normalize(toCamera);
 	vec3 unitNormal=normalize(normal);
@@ -317,8 +318,13 @@ void calculateLighting(ModelMaterial material, ListPointLight pointLights, ListL
 	}
 }
 
-vec4 applyLighting(vec4 baseColor, float minBrightness, ModelMaterial material){
-	baseColor.rgb*=max(vec3(minBrightness),(light_diffuseTotal+light_AmbientTotal*material.ambient)*material.diffuse);
+vec4 applyLighting(vec4 baseColor, float minBrightness, Material material){
+	baseColor.rgb*=max(
+		vec3(minBrightness),
+		max(
+		light_AmbientTotal*material.diffuse*material.ambient, 
+		light_diffuseTotal*material.diffuse
+	));
 	baseColor.rgb+=light_specularTotal*material.specular+material.emission;
 	
 	return baseColor;
@@ -450,7 +456,7 @@ void main(void){
 	pixelColor=mainTexture(uv);
 	if(pixelColor.a==0)discard;
 	
-	ModelMaterial m=getMaterial(materialId);
+	Material m=getMaterial(materialId);
 	
 	calculateLighting(m, pointLights, lineLights, dirLights);
 	pixelColor=applyLighting(pixelColor, minBrightness, m);

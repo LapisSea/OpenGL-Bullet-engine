@@ -1,5 +1,5 @@
 
-struct ModelMaterial{
+struct Material{
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -9,8 +9,8 @@ struct ModelMaterial{
 	float lightTroughput;
 };
 
-uniform ModelMaterial materials[<MATERIAL_MAX_COUNT>];
+uniform Material materials[<MATERIAL_MAX_COUNT>];
 
-ModelMaterial getMaterial(int id){
+Material getMaterial(int id){
 	return materials[id];
 }
