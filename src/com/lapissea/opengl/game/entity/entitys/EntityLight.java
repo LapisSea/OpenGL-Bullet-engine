@@ -5,7 +5,7 @@ import com.lapissea.opengl.game.world.World;
 import com.lapissea.opengl.rendering.shader.light.PointLight;
 import com.lapissea.opengl.resources.model.ModelBuilder;
 import com.lapissea.opengl.resources.model.ModelLoader;
-import com.lapissea.opengl.util.RandUtil;
+import com.lapissea.opengl.util.Rand;
 import com.lapissea.opengl.util.math.PartialTick;
 import com.lapissea.opengl.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.color.ColorM;
@@ -110,7 +110,7 @@ public class EntityLight extends EntityUpd{
 	ColorM		color;
 	PointLight	light;
 	Vec3f		origin;
-	double		random	=RandUtil.RD()*Math.PI*2,speed=0.5+RandUtil.RD();
+	double		random	=Rand.d()*Math.PI*2,speed=0.5+Rand.d();
 	
 	public EntityLight(World world, Vec3f pos, ColorM color){
 		super(world, getModel0(), pos);
@@ -132,7 +132,7 @@ public class EntityLight extends EntityUpd{
 	@Override
 	public void update(){
 		updatePrevs();
-		light.attenuation.x=0.9F+RandUtil.RF(0.1);
+		light.attenuation.x=0.9F+Rand.f(0.1);
 		pos.y=origin.y+(float)Math.sin((world.time()/(10*speed)+random)%(Math.PI*2))*3;
 	}
 }

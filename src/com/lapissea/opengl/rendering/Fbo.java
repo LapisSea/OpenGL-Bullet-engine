@@ -37,11 +37,11 @@ public class Fbo{
 	
 	public Runnable initHook;
 	
-	public static final IModel FULL_SCREEN_MODEL=ModelLoader.buildModel(new ModelBuilder().withName("gen_fscren").withFormat(GL_QUADS).withVertecies(
+	public static final IModel FULL_SCREEN_MODEL=ModelLoader.buildModel(new ModelBuilder().withName("gen_fscren").withFormat(GL_TRIANGLE_FAN).withVertecies(
 			-1,-1,0,
 			+1,-1,0,
-			-1,+1,0,
-			+1,+1,0
+			+1,+1,0,
+			-1,+1,0
 			));
 	
 	public Fbo(){
@@ -257,11 +257,12 @@ public class Fbo{
 	}
 	
 	public void drawImg(){
-		Objects.requireNonNull(getTexture());
-		List<ITexture> tx=FULL_SCREEN_MODEL.getTextures();
-		if(tx.size()==0) tx.add(getTexture());
+		ITexture texture=Objects.requireNonNull(getTexture());
 		
-		tx.set(0, getTexture());
+		List<ITexture> tx=FULL_SCREEN_MODEL.getTextures();
+		
+		if(tx.size()==0) tx.add(texture);
+		else tx.set(0, texture);
 		
 		GLUtil.DEPTH_TEST.set(false);
 		Shaders.POST_COPY.renderSingle(zero, FULL_SCREEN_MODEL);

@@ -10,7 +10,7 @@ import com.lapissea.opengl.window.api.util.color.ColorM;
 public class GuiPause extends Gui{
 	
 	public GuiPause(){
-		background.color.set(0F, 0F, 0F, 0.4F);
+		background.color.set(0F, 0F, 0F, 0.3F);
 		
 		GuiLabel l=new GuiLabel("Paused", 100);
 		l.preferedX=Align.CENTER;
@@ -23,14 +23,15 @@ public class GuiPause extends Gui{
 		e.preferedHeight=new SizeCalcStatic(100);
 		
 		e.backgroundNormal=new GuiElementMaterial(7, new ColorM(0, 0.2, 0.3, 0.3), -1);
-		e.borderNormal=new GuiElementMaterial(15, new ColorM(0.6, 0.8, 1, 1), 200);
+		e.borderNormal=new GuiElementMaterial(15, new ColorM(0.6, 0.8, 1, 1), 400);
 		
-		e.borderHighlight.color=new ColorM(1, 1, 0, 0.6);
-		//e.backgroundHighlight.color=new ColorM(0,0,1,0.4);
+		e.borderHighlight.color=null;
+		e.backgroundHighlight.color=new ColorM(0.2, 0.3, 1, 0.4);
 		e.backgroundHighlight.blurRad=0;
 		
-		e.borderActive.color=new ColorM(1, 0, 0, 1);
-		e.backgroundActive.color=new ColorM(0, 1, 1, 0.2);
+		e.borderActive.color=new ColorM(0.8, 1, 1, 1);
+		e.borderActive.mouseRad=700;
+		e.backgroundActive.color=new ColorM(0.1, 0.2, 1, 0.6);
 		e.backgroundActive.blurRad=0;
 		
 		e.borderWidth=4;
@@ -51,7 +52,6 @@ public class GuiPause extends Gui{
 	
 	@Override
 	public boolean pausesGame(){
-//		background.color.set(1F, 0F, 0F, 0.4F);
 		return true;
 	}
 }

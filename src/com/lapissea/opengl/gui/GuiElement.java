@@ -28,11 +28,11 @@ import com.lapissea.opengl.window.assets.IModel;
 
 public class GuiElement implements ModelTransformed{
 	
-	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel(new ModelBuilder().withName("UNIT_QUAD").withFormat(GL_QUADS).withVertecies(
-			0, 0,
-			0, 1,
-			1, 0,
-			1, 1).withVertexType(2));
+	protected static final IModel	UNIT_QUAD	=ModelLoader.buildModel(new ModelBuilder().withName("UNIT_QUAD").withFormat(GL_TRIANGLE_FAN).withVertecies(
+			0, 0, 0,
+			0, 1, 0,
+			1, 1, 0,
+			1, 0, 0).withCulface(false));
 	protected static final Matrix4f	_MAT		=new Matrix4f();
 	protected static final Vec3f	_POS		=new Vec3f(),_ROT=new Vec3f();
 	protected static final Vec2f	VEC2		=new Vec2f();
@@ -192,7 +192,7 @@ public class GuiElement implements ModelTransformed{
 	}
 	
 	public void updateFlow(){
-		//		this.elementSize.set(preferedWidth!=null?preferedWidth.calc(parent!=null?parent.size.x():Game.win().getSize().x()):elementSize.x(), preferedHeight!=null?preferedHeight.calc(parent!=null?parent.size.y():Game.win().getSize().y()):elementSize.y());
+		elementSize.set(preferedWidth!=null?preferedWidth.calc(parent!=null?parent.size.x():Game.win().getSize().x(),true):elementSize.x(), preferedHeight!=null?preferedHeight.calc(parent!=null?parent.size.y():Game.win().getSize().y(),false):elementSize.y());
 		pos.set(preferedX.calc(this, true), preferedY.calc(this, false));
 		children.forEach(GuiElement::updateFlow);
 	}

@@ -14,7 +14,7 @@ import com.lapissea.opengl.rendering.ModelTransformed;
 import com.lapissea.opengl.resources.model.ModelBuilder;
 import com.lapissea.opengl.resources.model.ModelLoader;
 import com.lapissea.opengl.resources.model.ModelUtil;
-import com.lapissea.opengl.util.RandUtil;
+import com.lapissea.opengl.util.Rand;
 import com.lapissea.opengl.util.UtilM;
 import com.lapissea.opengl.util.function.Predicates;
 import com.lapissea.opengl.util.math.vec.Quat4;
@@ -129,15 +129,15 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 		
 		Quat4 q=new Quat4();
 		Vec3f rot=new Vec3f(),vRot=new Vec3f(),iterator=new Vec3f();
-		for(int i=0, j=GRASS_MIN+RandUtil.RI(GRASS_RAND);i<j;i++){
-			float xOnChunk=RandUtil.RF(SIZE);
-			float zOnChunk=RandUtil.RF(SIZE);
+		for(int i=0, j=GRASS_MIN+Rand.i(GRASS_RAND);i<j;i++){
+			float xOnChunk=Rand.f(SIZE);
+			float zOnChunk=Rand.f(SIZE);
 			float y=getHeightAt(xOnChunk, zOnChunk);
 			
-			q.set(rot.setThis(0, RandUtil.RF(Math.PI*2), RandUtil.CRF(0.2)));
+			q.set(rot.setThis(0, Rand.f(Math.PI*2), Rand.cf(0.2F)));
 			
-			float scale=0.7F+RandUtil.RF(0.3);
-			ModelUtil.iterate(GRASS_MODELS[RandUtil.RI(GRASS_MODELS.length)].vertices, iterator, v->{
+			float scale=0.7F+Rand.f(0.3);
+			ModelUtil.iterate(GRASS_MODELS[Rand.i(GRASS_MODELS.length)].vertices, iterator, v->{
 				q.rotate(vRot.set(v));
 				indices.add(vertices.size()/3);
 				vertices.add(vRot.x()*scale+xOnChunk);

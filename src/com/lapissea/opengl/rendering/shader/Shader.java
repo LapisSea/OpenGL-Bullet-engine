@@ -1,5 +1,6 @@
 package com.lapissea.opengl.rendering.shader;
 
+import static com.lapissea.util.UtilL.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.*;
@@ -261,16 +262,20 @@ public abstract class Shader{
 	}
 	
 	public <T extends AbstractUniform> T[] getUniformArray(Function<Integer,String> name){
-		
+//		if(this.getClass()==GuiRectShader.class){
+//
+//		}
 		List<T> unis=new ArrayList<>();
-		T unif;
 		String nm;
-		while((unif=getUniform(nm=name.apply(unis.size())))!=null){
-			if(!nm.equals(unif.name())) break;
+		while(glGetUniformLocation(program,nm=name.apply(unis.size()))!=-1){
+			T unif=getUniform(nm);
+			if(unif!=null&&!nm.equals(unif.name())) {
+				break;
+			}
 			unis.add(unif);
 		}
 		try{
-			return UtilL.array(unis);
+			return array(unis);
 		}catch(Exception e){
 			GLUtil.printAllUniforms(program);
 			throw e;

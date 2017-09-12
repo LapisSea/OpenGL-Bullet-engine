@@ -7,7 +7,7 @@ import com.lapissea.opengl.rendering.shader.uniforms.floats.UniformFloat2;
 
 public class ShaderModuleScreenSize extends ShaderModule implements Global{
 	
-	protected UniformFloat2 mousePos;
+	protected UniformFloat2 screenSize;
 	
 	public ShaderModuleScreenSize(Shader parent){
 		super(parent);
@@ -15,12 +15,12 @@ public class ShaderModuleScreenSize extends ShaderModule implements Global{
 	
 	@Override
 	public void setUpUniforms(){
-		mousePos=getUniform("screenSize");
+		screenSize=getUniform("screenSize");
 	}
 	
 	@Override
 	public void uploadUniformsGlobal(){
-		if(mousePos!=null) mousePos.upload(GLUtil.getViewportWidth(), GLUtil.getViewportHeight());
+		if(screenSize!=null) screenSize.upload(GLUtil.getViewportWidth(), GLUtil.getViewportHeight());
 	}
 	
 }

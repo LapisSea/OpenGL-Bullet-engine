@@ -57,28 +57,28 @@ public class ShaderModuleTexture extends ShaderModule implements ModelMdl{
 	
 	@Override
 	public void setUpUniforms(){
-		texturesUsed=getUniformArray("MDL_TEXTURE_USED");
+		texturesUsed=getUniformArray(i->"MDL_TEXTURE_USED_"+i);
 	}
 	
 	@Override
 	public void uploadUniformsModel(IModel model){
 		if(notInit){
 			notInit=false;
-			if(texturesUsed!=null){
-				for(int i=0;i<texturesUsed.length;i++){
-					UniformInt1 u=getUniform("MDL_TEXTURE"+i);
+			UniformInt1[] us=getUniformArray(i->"MDL_TEXTURE_"+i);
+			if(us!=null){
+				for(int i=0;i<us.length;i++){
+					UniformInt1 u=us[i];
 					if(u!=null) u.upload(i);
 				}
 			}
 		}
-		
 		if(texturesUsed!=null){
 			List<ITexture> txts=model.getTextures();
 			for(int i=0;i<texturesUsed.length;i++){
 				ITexture texture=i<txts.size()?txts.get(i):null;
 				boolean valid=texture!=null&&texture.isLoaded();
 				
-				texturesUsed[i].upload(valid);
+				if(texturesUsed[i]!=null)texturesUsed[i].upload(valid);
 				glActiveTexture(GL_TEXTURE0+i);
 				if(valid) texture.bind();
 			}

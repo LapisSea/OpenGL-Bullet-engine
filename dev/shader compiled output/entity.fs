@@ -6,14 +6,14 @@ flat in int materialId;
 out vec4 pixelColor;
 
 /*MODULE_START: Texture.smd*/
-uniform bool MDL_TEXTURE_USED[1];
 ////////////////////////////////////////////////
 
-uniform sampler2D MDL_TEXTURE0;
+uniform sampler2D MDL_TEXTURE_0;
+uniform bool MDL_TEXTURE_USED_0;
 
 vec4 mainTexture(vec2 uv){
-	if(!MDL_TEXTURE_USED[0])return vec4(1);
-	return texture(MDL_TEXTURE0, uv);
+	if(!MDL_TEXTURE_USED_0)return vec4(1);
+	return texture(MDL_TEXTURE_0, uv);
 }
 ////////////////////////////////////////////////
 /*MODULE_END: Texture.smd*/

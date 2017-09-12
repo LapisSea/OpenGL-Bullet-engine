@@ -68,7 +68,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	public final List<LineLight>			lineLights	=new ArrayList<>();
 	public final List<DirLight>				dirLights	=new ArrayList<>();
 	
-	public final FontFamily fontComfortaa=new FontFamily("Comfortaa");
+	public final FontFamily fontComfortaa=new FontFamily("Arial");
 	
 	public FpsCounter fpsCounter=new FpsCounter(true);
 	
@@ -89,7 +89,9 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	
 	public Renderer(){
 		
-		worldFbo.initHook=()->renderWorldFlag=true;
+		worldFbo.initHook=()->{
+			renderWorldFlag=true;
+		};
 		fpsCounter.activate();
 		particleHandler=new ParticleHandler<>((parent, pos)->new ParticleFoo(parent, pos));
 		particleHandler.models.add(ModelLoader.buildModel(new ModelBuilder()
@@ -152,8 +154,8 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		if(e.action==Action.DOWN){
 			if(Shaders.ENTITY!=null){
-				Shaders.ENTITY.load();
-				Shaders.TERRAIN.load();
+//				Shaders.ENTITY.load();
+//				Shaders.TERRAIN.load();
 //				Shaders.SKYBOX.load();
 //				Shaders.GUI_RECT.load();
 //				Shaders.POST_COPY.load();
@@ -199,18 +201,22 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 	@Override
 	public void onResize(ResizeEvent e){
 		getCamera().calcProjection();
+		renderWorldFlag=true;
 	}
 	
 	public void render(){
 //		if(UtilL.TRUE())return;
 		
+		
 		//PREPARE
 		RENDER_FRUSTRUM=false;
 		fpsCounter.newFrame();
-		if(renderWorldFlag) renderWorld();
+		
+		if(renderWorldFlag) {
+			renderWorld();
+		}
 		renderWorldFlag=!Game.isPaused();
 		
-		Fbo.bindDefault();
 		worldFbo.copyColorToScreen();
 		
 		guiHandler.render();
@@ -218,7 +224,6 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		pointLights.clear();
 		dirLights.clear();
 		lineLights.clear();
-		
 	}
 	
 	public void renderWorld(){
@@ -292,12 +297,13 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		//RENDER
 		renderBechmark.start();
-		renderBechmark.end();
 		UtilL.doAndClear(toRender, ShaderRenderer::render);
 		glEnable(GL_LINE_SMOOTH);
 		GLUtil.DEPTH_TEST.set(false);
 		GLUtil.BLEND.set(true);
 		Shaders.LINE.renderSingle(identity, lines);
+		Shaders.ENTITY.renderSingle(identity, Fbo.FULL_SCREEN_MODEL);
+		
 		GLUtil.BLEND.set(false);
 		GLUtil.DEPTH_TEST.set(true);
 		lines.clear();
@@ -305,7 +311,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		worldFbo.process();
 		
 		particleHandler.render();
-		
+		renderBechmark.end();
 	}
 	
 	public void drawLine(IVec3fR from, IVec3fR to, IColorM color){

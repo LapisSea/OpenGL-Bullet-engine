@@ -38,31 +38,34 @@ vec4 color(RenderType type){
 		//mouseRadAlpha=mouseRadAlpha;
 		//else mouseRadAlpha*=mouseRadAlpha;
 	}
-	color=type.color;
 	int rad=int(floor(type.blurRad));
 	vec3 blurColor;
-	
-	if(rad>0&&color.a<1){
-		/////////CALC BLUR/////////
-		float pxCount=0;
-		blurColor=vec3(0,0,0);
-		for(int x=-rad;x<rad;x++){
-			for(int y=-rad;y<rad;y++){
-				float dist=length(vec2(x,y));
-				if(dist<=rad){
-					vec4 c=screen(vec2(screenUv.x+x/screenSize.x, screenUv.y+y/screenSize.y));
-					dist=type.blurRad-dist;
-					blurColor+=c.rgb*c.rgb*dist;
-					pxCount+=dist;
+	color=type.color;
+	if(color.a<1){
+		if(rad>0){
+			/////////CALC BLUR/////////
+			float pxCount=0;
+			blurColor=vec3(0,0,0);
+			for(int x=-rad;x<rad;x++){
+				for(int y=-rad;y<rad;y++){
+					float dist=length(vec2(x,y));
+					if(dist<=rad){
+						vec4 c=screen(vec2(screenUv.x+x/screenSize.x, screenUv.y+y/screenSize.y));
+						dist=type.blurRad-dist;
+						blurColor+=c.rgb*c.rgb*dist;
+						pxCount+=dist;
+					}
 				}
 			}
+			blurColor/=pxCount;
+			blurColor=sqrt(blurColor);
+			
+			color=vec4(mix(blurColor,color.rgb,type.color.a),1);
+			
+		}else{
+			color=vec4(mix(screen(screenUv).rgb,color.rgb,type.color.a),1);
 		}
-		blurColor/=pxCount;
-		blurColor=sqrt(blurColor);
-		
-	}else blurColor=screen(screenUv).rgb;
-	
-	color=vec4(mix(blurColor,color.rgb,color.a),1);
+	}
 	
 	color.a*=mouseRadAlpha;
 	return color;

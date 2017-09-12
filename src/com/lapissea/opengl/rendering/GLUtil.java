@@ -4,7 +4,9 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL20.*;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.lwjgl.opengl.OpenGLException;
@@ -140,14 +142,22 @@ public class GLUtil{
 		LogUtil.println("uniform count", id);
 	}
 	
+	public static Map<Integer,String> getAllUniforms(int program){
+		Map<Integer,String> map=new HashMap<>();
+		getAllUniforms(program, map);
+		return map;
+	}
 	public static void getAllUniforms(int program, Map<Integer,String> dest){
+		getAllUniforms(program, dest::put);
+	}
+	public static void getAllUniforms(int program, BiConsumer<Integer,String> dest){
 		glUseProgram(program);
 		
 		int id=0;
 		String name,last="";
 		while(!(name=glGetActiveUniform(program, id, 512)).isEmpty()){
 			if(last.equals(name)) break;
-			dest.put(id, last=name);
+			dest.accept(id, last=name);
 			id++;
 		}
 	}

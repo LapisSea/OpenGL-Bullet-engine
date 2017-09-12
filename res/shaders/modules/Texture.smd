@@ -1,19 +1,20 @@
 
-uniform bool MDL_TEXTURE_USED[<COUNT>];
 ////////////////////////////////////////////////
 <SPLIT>
-uniform sampler2D MDL_TEXTURE<NUM>;
+uniform sampler2D MDL_TEXTURE_<NUM>;
+uniform bool MDL_TEXTURE_USED_<NUM>;
 
 vec4 <NAME>(vec2 uv){
-	if(!MDL_TEXTURE_USED[<NUM>])return vec4(<COL>);
-	return texture(MDL_TEXTURE<NUM>, uv);
+	if(!MDL_TEXTURE_USED_<NUM>)return vec4(<COL>);
+	return texture(MDL_TEXTURE_<NUM>, uv);
 }
 ////////////////////////////////////////////////
 <SPLIT>
-uniform samplerCube MDL_TEXTURE<NUM>;
+uniform samplerCube MDL_TEXTURE_<NUM>;
+uniform bool MDL_TEXTURE_USED_<NUM>;
 
 vec4 <NAME>(vec3 uv){
-	if(!MDL_TEXTURE_USED[<NUM>])return vec4(<COL>);
-	return texture(MDL_TEXTURE<NUM>, uv);
+	if(!MDL_TEXTURE_USED_<NUM>)return vec4(<COL>);
+	return texture(MDL_TEXTURE_<NUM>, uv);
 }
 ////////////////////////////////////////////////

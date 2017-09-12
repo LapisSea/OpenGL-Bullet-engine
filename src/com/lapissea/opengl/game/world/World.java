@@ -16,7 +16,7 @@ import com.lapissea.opengl.game.terrain.IHeightMapProvider;
 import com.lapissea.opengl.rendering.Fog;
 import com.lapissea.opengl.rendering.shader.modules.ShaderModuleLight;
 import com.lapissea.opengl.util.BlackBody;
-import com.lapissea.opengl.util.RandUtil;
+import com.lapissea.opengl.util.Rand;
 import com.lapissea.opengl.util.data.OffsetArrayList;
 import com.lapissea.opengl.util.math.SimplexNoise;
 import com.lapissea.opengl.util.math.vec.Vec2i;
@@ -58,9 +58,9 @@ public class World extends PhysicsWorldJbullet{
 		};
 		for(int i=0;i<PHYSICS_CUBE_AMMOUNT;i++){
 			EntityCrazyCube c;
-			spawn(c=new EntityCrazyCube(this, new Vec3f(RandUtil.CRF(300), RandUtil.RF(20)+100, RandUtil.CRF(300))));
+			spawn(c=new EntityCrazyCube(this, new Vec3f(Rand.cf(300), Rand.f(20)+100, Rand.cf(300))));
 			if(i<ShaderModuleLight.MAX_POINT_LIGHT){
-				c.lightColor=BlackBody.fromKelvin(null, RandUtil.RI(40000));
+				c.lightColor=BlackBody.fromKelvin(null, Rand.i(40000));
 			}
 		}
 		

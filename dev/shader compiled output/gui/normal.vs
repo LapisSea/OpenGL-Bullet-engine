@@ -8,7 +8,11 @@ out vec2 uv;
 
 uniform mat4 transformMat;
 
-#include "ScreenSize.smd"
+/*MODULE_START: ScreenSize.smd*/
+uniform vec2 screenSize;
+/*MODULE_END: ScreenSize.smd*/
+
+
 
 void main(void){
 	vec4 trans=transformMat*vec4(pos,1);

@@ -1,8 +1,8 @@
 package com.lapissea.opengl.gui.guis;
 
 import com.lapissea.opengl.core.Game;
-import com.lapissea.opengl.gui.IngameDisplay;
 import com.lapissea.opengl.gui.GuiFlow.SizeCalcStatic;
+import com.lapissea.opengl.gui.IngameDisplay;
 import com.lapissea.opengl.gui.elements.GuiLabel;
 
 public class DebugDisplay extends IngameDisplay{
@@ -19,7 +19,8 @@ public class DebugDisplay extends IngameDisplay{
 	@Override
 	public void update(){
 		super.update();
-		l.setText(Game.get().renderer.getDebugInfo()+Math.random());
+		
+		l.setText(Game.get().renderer.getDebugInfo());
 		l.updateFlow();
 		l.margin.top=10;
 		l.margin.left=10;
@@ -32,9 +33,9 @@ public class DebugDisplay extends IngameDisplay{
 		l.preferedX=Align.NEGATIVE;
 		l.preferedY=Align.NEGATIVE;
 //		size.set(Game.win().getSize());
-		background.color.set(0, 0, 0, 0.2F);
+		background.color.set(0, 0, 0, 0.5F);
 		borderWidth=5;
 		border.blurRad=10;
-		border.color.set(0, 0, 0, 0.25F);
+		border.color.set(0, 0, 0, 0.5F);
 	}
 }

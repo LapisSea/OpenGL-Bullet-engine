@@ -6,7 +6,7 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Mouse;
 
-import com.bulletphysics.collision.shapes.SphereShape;
+import com.bulletphysics.collision.shapes.BoxShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
@@ -18,7 +18,7 @@ import com.lapissea.opengl.rendering.Camera;
 import com.lapissea.opengl.rendering.shader.light.PointLight;
 import com.lapissea.opengl.resources.model.ModelLoader;
 import com.lapissea.opengl.util.BlackBody;
-import com.lapissea.opengl.util.RandUtil;
+import com.lapissea.opengl.util.Rand;
 import com.lapissea.opengl.util.math.PartialTick;
 import com.lapissea.opengl.util.math.SimplexNoise;
 import com.lapissea.opengl.util.math.vec.Vec3f;
@@ -31,8 +31,9 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	private static IModel getModel0(){
 		if(MODEL==null){
+			MODEL=ModelLoader.loadAndBuild("Cubdroid.obj");
 //			MODEL=ModelLoader.loadAndBuild("FancyCube");
-			MODEL=ModelLoader.loadAndBuild("icosphere radius 0.5--triangulated.obj");
+//			MODEL=ModelLoader.loadAndBuild("icosphere radius 0.5--triangulated.obj");
 		}
 		return MODEL;
 	}
@@ -44,7 +45,7 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	public EntityCrazyCube(World world, Vec3f pos){
 		super(world, getModel0(), pos);
-		float s=RandUtil.RF()*0.5F+2;
+		float s=Rand.f()+1;
 		scale.set(s, s, s);
 		
 //		model.getMaterial(2).getDiffuse().set(177/256F, 0, 177/256F, 1);
@@ -56,8 +57,8 @@ public class EntityCrazyCube extends EntityUpd{
 		
 		if(CAM==null) CAM=this;
 		
-		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new SphereShape(scale.x), Vec3f.single(0.9F));
-//		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), Vec3f.single(0.9F));
+//		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new SphereShape(scale.x/2), Vec3f.single(0.9F));
+		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), Vec3f.single(0.9F));
 		getPhysicsObj().body.setDamping(0.15F, 0.15F);
 		getPhysicsObj().hookPos(this.pos);
 		getPhysicsObj().hookRot(rot);
@@ -113,7 +114,7 @@ public class EntityCrazyCube extends EntityUpd{
 				Vector3f vc=new Vector3f((float)(yCos*xCos*100), (float)xSin*100, (float)(ySin*xCos)*100);
 				PhysicsObjJBullet hit=world.rayTrace(new Vec3f(c.pos.x, c.pos.y, c.pos.z), new Vec3f(c.pos.x+vc.x, c.pos.y+vc.y, c.pos.z+vc.z),null);
 				if(hit!=null){
-					float siz=5F;
+					float siz=1;
 					hit.applyForce(vc.x*siz, vc.y*siz, vc.z*siz);
 				}
 			}

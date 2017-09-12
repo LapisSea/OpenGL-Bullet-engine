@@ -271,12 +271,12 @@ public class FontFamily{
 		
 		TextureLoader.reloadTexture(letters, img);
 		
-		//		File outputfile=new File("image.png");
-		//		try{
-		//			ImageIO.write(img, "png", outputfile);
-		//		}catch(IOException e){
-		//			e.printStackTrace();
-		//		}
+//		File outputfile=new File("image.png");
+//		try{
+//			ImageIO.write(img, "png", outputfile);
+//		}catch(IOException e){
+//			e.printStackTrace();
+//		}
 		
 	}
 	

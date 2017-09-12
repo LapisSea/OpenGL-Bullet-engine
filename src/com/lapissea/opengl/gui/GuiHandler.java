@@ -27,8 +27,9 @@ public class GuiHandler{
 	private Stack<Gui>					guiStack	=new Stack<>();
 	private LinkedList<IngameDisplay>	displays	=new LinkedList<>();
 	private FboRboTextured				drawFbo		=new FboRboTextured(Fbo.TEXTURE);
-	private Fbo							lastZLayer	=new Fbo(Fbo.TEXTURE);
-	private boolean						first		=true;
+	private Fbo							lastZ		=new Fbo(Fbo.TEXTURE);
+	private List<List<GuiElement>>		renderList	=new ArrayList<>();
+	private boolean first;
 	
 	public GuiHandler(){
 		Game.glCtx(()->displays.add(new DebugDisplay()));
@@ -71,46 +72,51 @@ public class GuiHandler{
 		displays.forEach(GuiElement::update);
 	}
 	
-	private List<List<GuiElement>> renderList=new ArrayList<>();
-	
 	private void render0(){
-		//		drawFbo.setRenderBufferType(false).setSample(8);
-		
+//		drawFbo.setRenderBufferType(true).setSample(4);
+		lastZ.setSize(drawFbo);
 		drawFbo.setSize(Game.win().getSize());
-		lastZLayer.setSize(Game.win().getSize());
+		
+		lastZ.bind();
+		glClearColor(0, 0, 0, 0);
+		glClear(GL_COLOR_BUFFER_BIT);
 		
 		drawFbo.bind();
 		glClearColor(0, 0, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
+		
 		GLUtil.BLEND.set(true);
-		GLUtil.DEPTH_TEST.set(true);
+		GLUtil.DEPTH_TEST.set(false);
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
 		
 		GuiRectShader rect=Shaders.GUI_RECT;
 		
+		FboRboTextured wfbo=Game.get().renderer.worldFbo;
+		
 		rect.prepareGlobal();
+		
 		first=true;
-		renderList.forEach(l->{
-			(first?Game.get().renderer.worldFbo:drawFbo).copyColorTo(lastZLayer);
-			if(first) first=false;
+		for(List<GuiElement> l:renderList){
 			drawFbo.bind();
-			
+			Fbo background=first?Game.get().renderer.worldFbo:lastZ;
 			UtilL.doAndClear(l, e->{
 				List<ITexture> tx=e.getModel().getTextures();
-				if(tx.isEmpty()) tx.add(lastZLayer.getTexture());
-				else tx.set(0, lastZLayer.getTexture());
+				if(tx.isEmpty()) tx.add(background.getTexture());
+				else tx.set(0, background.getTexture());
 				rect.renderSingleBare(e);
 			});
-		});
+			drawFbo.copyColorTo(lastZ);
+			first=false;
+		}
 		rect.unbind();
-		
-		drawFbo.bind();
 		drawFbo.process();
-		Fbo.bindDefault();
-		drawFbo.drawImg();
 		
 		GLUtil.DEPTH_TEST.set(true);
 		GLUtil.BLEND_FUNC.set(BlendFunc.NORMAL);
+		
+		Fbo.bindDefault();
+		drawFbo.drawImg();
+		
 	}
 	
 	private void addRender(GuiElement e){

@@ -1,10 +1,10 @@
 package com.lapissea.opengl.core;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.lwjgl.opengl.OpenGLException;
 
@@ -12,6 +12,7 @@ import com.lapissea.opengl.game.world.World;
 import com.lapissea.opengl.gui.Gui;
 import com.lapissea.opengl.gui.SplashScreen;
 import com.lapissea.opengl.launch.GameStart;
+import com.lapissea.opengl.rendering.Fbo;
 import com.lapissea.opengl.rendering.GLUtil;
 import com.lapissea.opengl.rendering.Renderer;
 import com.lapissea.opengl.rendering.shader.Shaders;
@@ -61,6 +62,7 @@ public class Game{
 		
 		timer=new Timer_Ver2(20, 60);
 		timer.setInfiniteFps(!win().getVSync());
+		timer.setInfiniteFps(false);
 		
 		new Thread(()->{
 			SplashScreen screen=new SplashScreen();
@@ -99,20 +101,26 @@ public class Game{
 	
 	private void render(){
 		
-		timer.setInfiniteFps(false);
-//		win().setVSync(true);
+		if(first){
+			first=false;
+			LogUtil.printWrapped("LOADED IN: "+(System.nanoTime()-GameStart.START_TIME)/1000_000_000D);
+		}
 		
 		if(win().isClosed()){
 			timer.end();
 			return;
 		}
+		
 		loadGLData();
-		win().updateInput();
-		if(first){
-			first=false;
-			LogUtil.printWrapped("LOADED IN: "+(System.nanoTime()-GameStart.START_TIME)/1000_000_000D);
-		}
-		if(win().isVisible()){
+		
+		IGLWindow win=win();
+		
+		win.updateInput();
+		
+		if(win.isVisible()){
+			
+			Fbo.bindDefault();
+			glClear(GL_COLOR_BUFFER_BIT);
 			
 			try{
 				renderer.render();
@@ -173,10 +181,6 @@ public class Game{
 	public static boolean isPaused(){
 		Gui g=get().renderer.guiHandler.getOpenGui();
 		return g!=null&&g.pausesGame();
-	}
-	
-	public static <T> void load(Supplier<T> task, Consumer<T> onLoad){
-		
 	}
 	
 	public static <T> void load(Runnable task){

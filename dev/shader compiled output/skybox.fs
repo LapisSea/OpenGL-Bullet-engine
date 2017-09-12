@@ -117,14 +117,14 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
 
 
 /*MODULE_START: Texture.smd*/
-uniform bool MDL_TEXTURE_USED[1];
 ////////////////////////////////////////////////
 
-uniform samplerCube MDL_TEXTURE0;
+uniform samplerCube MDL_TEXTURE_0;
+uniform bool MDL_TEXTURE_USED_0;
 
 vec4 cubeMainTexture(vec3 uv){
-	if(!MDL_TEXTURE_USED[0])return vec4(1);
-	return texture(MDL_TEXTURE0, uv);
+	if(!MDL_TEXTURE_USED_0)return vec4(1);
+	return texture(MDL_TEXTURE_0, uv);
 }
 ////////////////////////////////////////////////
 /*MODULE_END: Texture.smd*/

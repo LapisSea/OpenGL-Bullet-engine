@@ -24,9 +24,9 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 		}
 		
 		void upload(float blur, ColorM col, float mouse){
-			blurRad.upload(blur);
-			color.upload(col);
-			mouseRad.upload(mouse);
+			if(blurRad!=null)blurRad.upload(blur);
+			if(color!=null)color.upload(col);
+			if(mouseRad!=null)mouseRad.upload(mouse);
 		}
 		
 		public void upload(GuiElementMaterial background){
@@ -46,7 +46,7 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 	
 	@Override
 	protected void setUpUniforms(){
-		transformMat=getUniform("transformMat");
+		super.setUpUniforms();
 		size=getUniform("size");
 		
 		background=new RenderType("background");
@@ -57,18 +57,21 @@ public class GuiRectShader extends ShaderRenderer.Basic3D<GuiElement>{
 	
 	@Override
 	public void prepareGlobal(){
+//		super.prepareGlobal();
 		bind();
+//		uploadProjectionAndViewMat(getProjection(), getView());
 		modulesGlobal.forEach(ShaderModule.Global::uploadUniformsGlobal);
 		if(blurDiv!=null) blurDiv.upload(GuiHandler.BLUR_DIV);
 	}
 	
 	@Override
 	protected void prepareInstance(GuiElement renderable){
+//		LogUtil.println(renderable.getModel().getTextures());
 		super.prepareInstance(renderable);
 		background.upload(renderable.getRenderBackground());
 		border.upload(renderable.getRenderBorder());
-		size.upload(renderable.getSize());
-		borderWidth.upload(renderable.borderWidth);
+		if(size!=null)size.upload(renderable.getSize());
+		if(borderWidth!=null)borderWidth.upload(renderable.borderWidth);
 		
 	}
 }
