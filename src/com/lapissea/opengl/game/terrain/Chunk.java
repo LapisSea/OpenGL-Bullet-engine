@@ -152,7 +152,7 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 				.withIndices(indices)
 				.withMaterials(mats)
 				.generateNormals(true)
-				.killSmooth(true)
+//				.killSmooth(true)
 				.withCulface(false).withMaterialDefs(
 						new Material(0, "ground")
 						.setShineDamper(50)

@@ -58,6 +58,22 @@ public class Launch{
 //			l.set(-1, "-1");
 //			l.set(0, "0");
 //			l.set(1, "1");
+			
+//			int[] lol=new int[7];
+//			for(int i=0;i<lol.length;i++){
+//				lol[i]=i;
+//			}
+//			LogUtil.println(lol);
+//			int start=2,siz=3,swap=2;
+//
+//
+//			int[] hold=new int[siz];
+//			System.arraycopy(lol, start, hold, 0, siz);
+//
+//			for(int i=0;i<siz;i++){
+//				lol[(i+swap)%siz+start]=hold[i];
+//			}
+//			LogUtil.println(lol);
 //			System.exit(0);
 			
 			LogUtil.printWrapped("=======GAME_INIT=======");

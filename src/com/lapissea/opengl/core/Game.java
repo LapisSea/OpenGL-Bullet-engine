@@ -1,6 +1,7 @@
 package com.lapissea.opengl.core;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL32.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,11 @@ public class Game{
 	public World			world;
 	public final ILWJGLCtx	glCtx;
 	
-	private static final ForkJoinPool LOADING_POOL=new ForkJoinPool(Performance.getMaxThread(), ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, true);
+	private static final ForkJoinPool LOADING_POOL=new ForkJoinPool(Performance.getMaxThread(), ForkJoinPool.defaultForkJoinWorkerThreadFactory, (t, e)->{
+		LogUtil.println("ERROR IN:",t.getName());
+		e.printStackTrace();
+		System.exit(0);
+	}, true);
 	
 	private final List<PairM<Runnable,Exception>> openglLoadQueue=new ArrayList<>();
 	
@@ -110,6 +115,8 @@ public class Game{
 			timer.end();
 			return;
 		}
+		
+		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 		
 		loadGLData();
 		

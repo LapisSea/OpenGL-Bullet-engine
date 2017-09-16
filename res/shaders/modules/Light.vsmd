@@ -1,5 +1,5 @@
 
-out vec3 normal;
+flat out vec3 normal;
 out vec3 toCamera;
 out vec3 wPos;
 

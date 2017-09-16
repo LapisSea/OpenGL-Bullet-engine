@@ -32,13 +32,13 @@ public class DynamicModel extends Model{
 	}
 	
 	@Override
-	public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, Vbo[] vbos, ModelAttribute vertexType, ModelAttribute[] attributes, IFrustrumShape shape){
+	public IModel load(int vao, int vertexCount, int indiciesVao, int format, Vbo[] vbos, ModelAttribute vertexType, ModelAttribute[] attributes, IFrustrumShape shape){
 		if(onload!=null){
 			Consumer<IModel> onload0=onload;
 			onload=null;
-			super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributes, shape);
+			super.load(vao, vertexCount, indiciesVao, format, vbos, vertexType, attributes, shape);
 			onload=onload0;
-		}else super.load(vao, vertexCount, usesIndicies, format, vbos, vertexType, attributes, shape);
+		}else super.load(vao, vertexCount, indiciesVao, format, vbos, vertexType, attributes, shape);
 		
 		if(data==null||data.length!=vbos.length) data=new FloatBuffer[vbos.length];
 		vtIds.clear();

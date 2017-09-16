@@ -426,8 +426,8 @@ public class ModelLoader{
 				
 				int vao=glGenVertexArrays();
 				glBindVertexArray(vao);
+				int indicesId=hasIds?bindIndices(indices):-1;
 				
-				if(hasIds) bindIndices(indices);
 				putAttribute(vbos, attributes, vertexType, vertex);
 				for(int i=0;i<data.length;i++){
 					Object dataPart=data[i];
@@ -437,7 +437,7 @@ public class ModelLoader{
 				}
 				
 				unbindVao();
-				model.load(vao, hasIds?indices.length:vertex.length, hasIds, format, UtilL.array(vbos), vertexType, attributes.toArray(new ModelAttribute[attributes.size()]), shape);
+				model.load(vao, hasIds?indices.length:vertex.length, indicesId, format, UtilL.array(vbos), vertexType, attributes.toArray(new ModelAttribute[attributes.size()]), shape);
 				if(print&&!name.startsWith("Gen_")) LogUtil.println("Loaded:", model);
 			}
 		});
@@ -560,12 +560,12 @@ public class ModelLoader{
 		return normals;
 	}
 	
-	private static void bindIndices(int[] indicies){
+	private static int bindIndices(int[] indicies){
 		int vbo=glGenBuffers();
 		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, BufferUtil.store(indicies));
-		
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, BufferUtil.store(indicies), GL_DYNAMIC_DRAW);
+		return vbo;
 	}
 	
 	private static void unbindVao(){

@@ -5,6 +5,8 @@ import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.api.util.SimpleLoadable;
 import com.lapissea.opengl.window.api.util.vec.IVec2iR;
 
+import it.unimi.dsi.fastutil.floats.FloatList;
+
 public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 	
 	public static final Vec2f ZERO=new Vec2f(){
@@ -195,9 +197,15 @@ public class Vec2f implements Calculateable<Vec2f>,SimpleLoadable<Vec2f>{
 		return this;
 	}
 	
-	public double length() {
+	@Override
+	public Vec2f load(int offset, FloatList data){
+		return set(data.getFloat(offset), data.getFloat(offset+1));
+	}
+	
+	public double length(){
 		return MathUtil.length(x(), y());
 	}
+	
 	public double distanceTo(Vec2i pos){
 		return MathUtil.length(x()-pos.x(), y()-pos.y());
 	}

@@ -290,7 +290,7 @@ struct ListDirectionalLight{
 
 
 
-in vec3 normal;
+flat in vec3 normal;
 in vec3 toCamera;
 in vec3 wPos;
 
@@ -326,7 +326,11 @@ vec4 applyLighting(vec4 baseColor, float minBrightness, Material material){
 		light_diffuseTotal*material.diffuse
 	));
 	baseColor.rgb+=light_specularTotal*material.specular+material.emission;
+	vec3 unitNormal=normalize(normal);
 	
+	if(!gl_FrontFacing)unitNormal*=-1;
+	
+	// baseColor.rgb=baseColor.rgb*0.0001+(unitNormal/2+0.5);
 	return baseColor;
 }
 /*MODULE_END: Light.fsmd*/

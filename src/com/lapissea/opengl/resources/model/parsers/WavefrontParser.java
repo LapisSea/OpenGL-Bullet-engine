@@ -22,9 +22,9 @@ import com.lapissea.opengl.util.math.vec.Vec3f;
 import com.lapissea.opengl.window.api.util.MathUtil;
 import com.lapissea.opengl.window.assets.IMaterial;
 import com.lapissea.opengl.window.impl.assets.Material;
+import com.lapissea.util.LogUtil;
 
 import it.unimi.dsi.fastutil.floats.FloatList;
-import it.unimi.dsi.fastutil.ints.IntList;
 
 public class WavefrontParser extends ModelParser{
 	
@@ -81,6 +81,7 @@ public class WavefrontParser extends ModelParser{
 		});
 		
 		Map<Integer,Long> faceTypes=idsVert.stream().collect(Collectors.groupingBy(p->p.length, Collectors.counting()));
+		int faceSize;
 		if(faceTypes.size()>1){//mixed quads and triangles not allowed!
 			
 			ModelUtil.triangulateSingleNum(model.materials, idsVert);
@@ -89,33 +90,91 @@ public class WavefrontParser extends ModelParser{
 			ModelUtil.triangulate(idsNorm);
 			
 			model.format=GL_TRIANGLES;
+			faceSize=3;
 		}else{
-			model.format=faceTypes.keySet().stream().findAny().orElse(-1)==4?GL_QUADS:GL_TRIANGLES;
+			faceSize=faceTypes.keySet().stream().findAny().orElse(3);
+			
+			model.format=faceSize==4?GL_QUADS:GL_TRIANGLES;
 		}
 		
-		if(hasFlat.obj){
-			uncompress(idsVert, model.vertecies, 3);
-			uncompress(idsUv, model.uvs, 2);
-			uncompress(idsNorm, model.normals, 3);
-		}else{
+		uncompress(idsVert, model.vertecies, 3);
+		uncompress(idsUv, model.uvs, 2);
+		uncompress(idsNorm, model.normals, 3);
+		
+//		LogUtil.println(model.indices.size());
+//		LogUtil.println(model.vertecies.size()/3);
+//		LogUtil.println(model.normals.size()/3);
+//		LogUtil.println(model.uvs.size()/2);
+//		LogUtil.println(model.materials.size());
+//		LogUtil.println(hasFlat.obj);
+		try{
 			idsVert.forEach(face->{
 				for(int i:face){
 					model.indices.add(i);
 				}
 			});
 			
-			compressedToIndexed(idsUv, model.indices, model.uvs);
-			compressedToIndexed(idsNorm, model.indices, model.normals);
+			int vtcount=0;
+			for(int i:model.indices){
+				vtcount=Math.max(vtcount, i);
+			}
+			vtcount++;
+			
+			//compress data
+			float[] oldVert=model.vertecies.toFloatArray();
+			int[] oldMat=model.materials.toIntArray();
+			float[] oldNorm=model.normals.toFloatArray();
+			float[] oldUv=model.uvs.toFloatArray();
+			
+			model.vertecies.size(vtcount*3);
+			if(!model.materials.isEmpty()) model.materials.size(vtcount);
+			if(!model.normals.isEmpty()) model.normals.size(vtcount*3);
+			if(!model.uvs.isEmpty()) model.uvs.size(vtcount*2);
+			
+			for(int i=0;i<vtcount;i++){
+//			int id=model.indices.getInt(i);
+				int unindexedPos=-1;
+				for(int j=0;j<model.indices.size();j++){
+					if(model.indices.getInt(j)==i){
+						unindexedPos=j;
+						break;
+					}
+				}
+				int indexedPos=i;
+				model.vertecies.set(indexedPos*3+0, oldVert[unindexedPos*3+0]);
+				model.vertecies.set(indexedPos*3+1, oldVert[unindexedPos*3+1]);
+				model.vertecies.set(indexedPos*3+2, oldVert[unindexedPos*3+2]);
+				
+				if(!model.materials.isEmpty()) model.materials.set(indexedPos, oldMat[unindexedPos]);
+				
+				if(!model.normals.isEmpty()){
+					model.normals.set(indexedPos*3+0, oldNorm[unindexedPos*3+0]);
+					model.normals.set(indexedPos*3+1, oldNorm[unindexedPos*3+1]);
+					model.normals.set(indexedPos*3+2, oldNorm[unindexedPos*3+2]);
+				}
+				
+				if(!model.uvs.isEmpty()){
+					model.uvs.set(indexedPos*2+0, oldUv[unindexedPos*2+0]);
+					model.uvs.set(indexedPos*2+1, oldUv[unindexedPos*2+1]);
+				}
+			}
+			if(hasFlat.obj){
+				//flat model
+				ModelUtil.fixIndexedFlatShading(model, faceSize, idsVert, oldVert, oldMat, oldNorm, oldUv);
+			}
+			
+		}catch(Throwable e){
+			e.printStackTrace();
+			System.exit(0);
 		}
-//		if(model.name.startsWith("icosphere ")){
-//			LogUtil.println(model.name);
-//		}
+		if(model.name.startsWith("test plane")){
+			LogUtil.printlnEr(model.indices);
+			for(int i=0;i<model.vertecies.size();i+=3){
+				LogUtil.printlnEr(i/3, new Vec3f().load(i, model.vertecies));
+			}
+//			System.exit(0);
+		}
 		return model.compile();
-	}
-	
-	private void compressedToIndexed(List<int[]> faces, IntList indices, FloatList data){
-		data.size(indices.size());
-		
 	}
 	
 	private void uncompress(List<int[]> faces, FloatList data, int perPart){

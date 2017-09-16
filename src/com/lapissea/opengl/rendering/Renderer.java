@@ -154,8 +154,8 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		if(e.action==Action.DOWN){
 			if(Shaders.ENTITY!=null){
-//				Shaders.ENTITY.load();
-//				Shaders.TERRAIN.load();
+				Shaders.ENTITY.load();
+				Shaders.TERRAIN.load();
 //				Shaders.SKYBOX.load();
 //				Shaders.GUI_RECT.load();
 //				Shaders.POST_COPY.load();
@@ -279,7 +279,7 @@ public class Renderer implements InputEvents,Updateable,WindowEvents{
 		
 		//
 		
-		moon.getMaterial(0).getEmission().set(0.4F, 0.4F, 0.5F, 1);
+		if(moon.isLoaded())moon.getMaterial(0).getEmission().set(0.4F, 0.4F, 0.5F, 1);
 		Matrix4f mat=new Matrix4f();
 		mat.translate(moonRot.clone().mul(25).add(PartialTick.calc(new Vec3f(), camera.prevPos, camera.pos)));
 		Shaders.ENTITY.renderSingle(mat, moon);

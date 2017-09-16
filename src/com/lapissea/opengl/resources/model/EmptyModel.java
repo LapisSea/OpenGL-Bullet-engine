@@ -15,7 +15,7 @@ class EmptyModel extends Model{
 	}
 	
 	@Override
-	public IModel load(int vao, int vertexCount, boolean usesIndicies, int format, Vbo[] vbos, ModelAttribute vertexType, ModelAttribute[] attributeIds, IFrustrumShape shape){
+	public IModel load(int vao, int vertexCount, int indiciesVao, int format, Vbo[] vbos, ModelAttribute vertexType, ModelAttribute[] attributeIds, IFrustrumShape shape){
 		throw new UnsupportedOperationException();
 	}
 	

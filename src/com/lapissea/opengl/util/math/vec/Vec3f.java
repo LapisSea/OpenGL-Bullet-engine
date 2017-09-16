@@ -10,6 +10,8 @@ import com.lapissea.opengl.window.api.util.vec.IRotation;
 import com.lapissea.opengl.window.api.util.vec.IVec3fR;
 import com.lapissea.opengl.window.api.util.vec.IVec3fW;
 
+import it.unimi.dsi.fastutil.floats.FloatList;
+
 public class Vec3f extends Vector3f implements IVec3fR,IVec3fW,Interpolateble<Vec3f>,IRotation,SimpleLoadable<Vec3f>{
 	
 	private static final Quat4 ROTATION_QUAT=new Quat4();
@@ -163,6 +165,11 @@ public class Vec3f extends Vector3f implements IVec3fR,IVec3fW,Interpolateble<Ve
 	@Override
 	public Vec3f load(int offset, float[] data){
 		return setThis(data[offset], data[offset+1], data[offset+2]);
+	}
+	
+	@Override
+	public Vec3f load(int offset, FloatList data){
+		return setThis(data.getFloat(offset), data.getFloat(offset+1), data.getFloat(offset+2));
 	}
 	
 	@Override
@@ -423,5 +430,17 @@ public class Vec3f extends Vector3f implements IVec3fR,IVec3fW,Interpolateble<Ve
 		if(obj==null||!(obj instanceof IVec3fR)) return false;
 		IVec3fR o=(IVec3fR)obj;
 		return x()==o.x()&&y()==o.y()&&y()==o.y();
+	}
+	
+	public void put(FloatList dest){
+		dest.add(x());
+		dest.add(y());
+		dest.add(z());
+	}
+	
+	public void write(int destPos, FloatList dest){
+		dest.set(destPos+0, x());
+		dest.set(destPos+1, y());
+		dest.set(destPos+2, z());
 	}
 }

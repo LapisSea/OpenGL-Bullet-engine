@@ -6,7 +6,7 @@ import javax.vecmath.Vector3f;
 
 import org.lwjgl.input.Mouse;
 
-import com.bulletphysics.collision.shapes.BoxShape;
+import com.bulletphysics.collision.shapes.SphereShape;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
@@ -31,9 +31,9 @@ public class EntityCrazyCube extends EntityUpd{
 	
 	private static IModel getModel0(){
 		if(MODEL==null){
-			MODEL=ModelLoader.loadAndBuild("Cubdroid.obj");
+//			MODEL=ModelLoader.loadAndBuild("Cubdroid.obj");
 //			MODEL=ModelLoader.loadAndBuild("FancyCube");
-//			MODEL=ModelLoader.loadAndBuild("icosphere radius 0.5--triangulated.obj");
+			MODEL=ModelLoader.loadAndBuild("icosphere radius 0.5--triangulated.obj");
 		}
 		return MODEL;
 	}
@@ -57,8 +57,8 @@ public class EntityCrazyCube extends EntityUpd{
 		
 		if(CAM==null) CAM=this;
 		
-//		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new SphereShape(scale.x/2), Vec3f.single(0.9F));
-		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), Vec3f.single(0.9F));
+		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new SphereShape(scale.x/2), Vec3f.single(0.9F));
+//		getPhysicsObj().init(massKg, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(pos.x, pos.y, pos.z), 0.5F)), new BoxShape(new Vector3f(scale.x/2, scale.y/2, scale.z/2)), Vec3f.single(0.9F));
 		getPhysicsObj().body.setDamping(0.15F, 0.15F);
 		getPhysicsObj().hookPos(this.pos);
 		getPhysicsObj().hookRot(rot);

@@ -50,9 +50,12 @@ public class ModelDataBuilder{
 	
 	public ModelBuilder compile(){
 		
-		ModelBuilder compiled=new ModelBuilder().withName(name).withVertecies(vertecies).withFormat(format);
+		ModelBuilder compiled=new ModelBuilder()
+				.withName(name)
+				.withVertecies(vertecies)
+				.withFormat(format)
+				.withNormals(normals);
 		
-		if(!normals.isEmpty()) compiled.withNormals(normals);
 		if(!uvs.isEmpty()) compiled.withUvs(uvs);
 		if(!indices.isEmpty()) compiled.withIndices(indices);
 		
