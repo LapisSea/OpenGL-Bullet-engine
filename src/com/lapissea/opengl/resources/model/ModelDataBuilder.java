@@ -15,7 +15,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 
 public class ModelDataBuilder{
 	
-	public FloatList	vertecies	=new FloatArrayList();
+	public FloatList	vertices	=new FloatArrayList();
 	public FloatList	uvs			=new FloatArrayList();
 	public FloatList	normals		=new FloatArrayList();
 	public IntList		materials	=new IntArrayList();
@@ -32,9 +32,9 @@ public class ModelDataBuilder{
 	}
 	
 	public void addVertex(Vec3f vec){
-		vertecies.add(vec.x());
-		vertecies.add(vec.y());
-		vertecies.add(vec.z());
+		vertices.add(vec.x());
+		vertices.add(vec.y());
+		vertices.add(vec.z());
 	}
 	
 	public void addNormal(Vec3f vec){
@@ -52,7 +52,7 @@ public class ModelDataBuilder{
 		
 		ModelBuilder compiled=new ModelBuilder()
 				.withName(name)
-				.withVertecies(vertecies)
+				.withVertecies(vertices)
 				.withFormat(format)
 				.withNormals(normals);
 		

@@ -29,7 +29,7 @@ void main(void){
 	Material m=getMaterial(materialId=materialIdIn);
 	
 	vec3 pos0=pos;
-	float jelly=m.jelly;
+	float jelly=m.jelly-10;
 	if(jelly>0){
 		vec3 v=(transformMat*vec4(pos0,1)).xyz;
 		float vt=gl_VertexID+v.x/5+v.y/2+v.z/5;

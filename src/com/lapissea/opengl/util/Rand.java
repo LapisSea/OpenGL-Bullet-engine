@@ -92,4 +92,8 @@ public class Rand{
 	public static LongStream ls(long streamSize){
 		return RAND.longs(streamSize);
 	}
+	
+	public static <T> T pick(T[] data){
+		return data[i(data.length)];
+	}
 }

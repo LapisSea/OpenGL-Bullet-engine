@@ -1,5 +1,7 @@
 package com.lapissea.opengl.game.terrain;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
@@ -12,6 +14,7 @@ import com.lapissea.opengl.game.physics.jbullet.PhysicsObjJBullet;
 import com.lapissea.opengl.game.world.World;
 import com.lapissea.opengl.rendering.ModelTransformed;
 import com.lapissea.opengl.resources.model.ModelBuilder;
+import com.lapissea.opengl.resources.model.ModelDataBuilder;
 import com.lapissea.opengl.resources.model.ModelLoader;
 import com.lapissea.opengl.resources.model.ModelUtil;
 import com.lapissea.opengl.util.Rand;
@@ -27,11 +30,6 @@ import com.lapissea.opengl.window.assets.IModel;
 import com.lapissea.opengl.window.impl.assets.Material;
 import com.lapissea.util.LogUtil;
 
-import it.unimi.dsi.fastutil.floats.FloatArrayList;
-import it.unimi.dsi.fastutil.floats.FloatList;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
-
 public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	
 	protected static final Matrix4f	TRANSFORM	=new Matrix4f();
@@ -43,7 +41,7 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	}
 	
 	public static final float	SIZE		=100;
-	public static int			RESOLUTION	=18,GRASS_MIN=20,GRASS_RAND=30;
+	public static int			RESOLUTION	=18,GRASS_MIN=120,GRASS_RAND=30;
 	
 	public final IVec2iR	pos;
 	public final IVec3fR	spacePos;
@@ -88,20 +86,19 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 	
 	private void generateModel(IHeightMapProvider hMap){
 		int r1=RESOLUTION+1;
-		int gridX=pos.x(), gridZ=pos.y();
-		FloatList vertices=new FloatArrayList(r1*r1);
-		IntList mats=new IntArrayList(),indices=new IntArrayList();
+		int gridX=pos.x(),gridZ=pos.y();
+		ModelDataBuilder modelBuild=new ModelDataBuilder("Gen_Chunk-"+gridX+"_"+gridZ);
 		
 		float mul=SIZE/RESOLUTION;
 		for(int z=0;z<r1;z++){
 			for(int x=0;x<r1;x++){
-				vertices.add(x*mul);
-				vertices.add((float)hMap.getHeightAt(x+gridX*RESOLUTION, z+gridZ*RESOLUTION));
-				vertices.add(z*mul);
-				mats.add(0);
+				modelBuild.vertices.add(x*mul);
+				modelBuild.vertices.add((float)hMap.getHeightAt(x+gridX*RESOLUTION, z+gridZ*RESOLUTION));
+				modelBuild.vertices.add(z*mul);
+				modelBuild.materials.add(0);
 			}
 		}
-		this.hMap=vertices.toFloatArray();
+		this.hMap=modelBuild.vertices.toFloatArray();
 		
 		for(int z=0;z<RESOLUTION;z++){
 			for(int x=0;x<RESOLUTION;x++){
@@ -113,17 +110,17 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 				int p2=x0+z1*r1;
 				int p3=x1+z1*r1;
 				
-				indices.add(p3);
-				indices.add(p1);
-				indices.add(p0);
+				modelBuild.indices.add(p3);
+				modelBuild.indices.add(p1);
+				modelBuild.indices.add(p0);
 				
-				indices.add(p0);
-				indices.add(p2);
-				indices.add(p3);
+				modelBuild.indices.add(p0);
+				modelBuild.indices.add(p2);
+				modelBuild.indices.add(p3);
 			}
 		}
 		
-		init(0, new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(spacePos.x(), spacePos.y(), spacePos.z()), 1)), new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(this.hMap, indices.toIntArray()), true), new Vec3f());
+		init(0, new Transform(new javax.vecmath.Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(spacePos.x(), spacePos.y(), spacePos.z()), 1)), new BvhTriangleMeshShape(UtilM.verticesToPhysicsMesh(this.hMap, modelBuild.indices.toIntArray()), true), new Vec3f());
 		
 		world.addRigidBody(this);
 		
@@ -137,23 +134,31 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 			q.set(rot.setThis(0, Rand.f(Math.PI*2), Rand.cf(0.2F)));
 			
 			float scale=0.7F+Rand.f(0.3);
-			ModelUtil.iterate(GRASS_MODELS[Rand.i(GRASS_MODELS.length)].vertices, iterator, v->{
+			int start=modelBuild.vertices.size()/3;
+			ModelBuilder mdl=Rand.pick(GRASS_MODELS);
+			
+			ModelUtil.iterate(mdl.vertices, iterator, v->{
 				q.rotate(vRot.set(v));
-				indices.add(vertices.size()/3);
-				vertices.add(vRot.x()*scale+xOnChunk);
-				vertices.add(vRot.y()*scale+y);
-				vertices.add(vRot.z()*scale+zOnChunk);
-				mats.add(1);
+				modelBuild.vertices.add(vRot.x()*scale+xOnChunk);
+				modelBuild.vertices.add(vRot.y()*scale+y);
+				modelBuild.vertices.add(vRot.z()*scale+zOnChunk);
+				modelBuild.materials.add(1);
 			});
+			for(int id:mdl.indices){
+				modelBuild.indices.add(start+id);
+			}
 		}
-		model=ModelLoader.buildModel(new ModelBuilder()
-				.withName("Gen_Chunk-"+gridX+"_"+gridZ)
-				.withVertecies(vertices)
-				.withIndices(indices)
-				.withMaterials(mats)
+		
+		ModelUtil.fixIndexedFlatShading(modelBuild, 3,
+				ModelUtil.uncompress(modelBuild.vertices, modelBuild.indices, 3),
+				ModelUtil.uncompress(modelBuild.materials, modelBuild.indices, 1),
+				new float[0], new float[0]);
+		
+		model=ModelLoader.buildModel(modelBuild.compile()
+				.withFormat(GL_TRIANGLES)
 				.generateNormals(true)
-//				.killSmooth(true)
-				.withCulface(false).withMaterialDefs(
+				.withCulface(true)
+				.withMaterialDefs(
 						new Material(0, "ground")
 						.setShineDamper(50)
 						.setDiffuse(0.2F, 1, 0.25F, 1)
@@ -162,6 +167,7 @@ public class Chunk extends PhysicsObjJBullet implements ModelTransformed{
 						new Material(1, "grass")
 						.setDiffuse(0.2F, 1, 0.25F, 1)
 						.setLightTroughput(0.5F)
+						.setSpecular(0, 0, 0, 0)
 						.setJelly(0.3F)));
 		
 	}

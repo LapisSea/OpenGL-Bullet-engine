@@ -97,7 +97,7 @@ public class WavefrontParser extends ModelParser{
 			model.format=faceSize==4?GL_QUADS:GL_TRIANGLES;
 		}
 		
-		uncompress(idsVert, model.vertecies, 3);
+		uncompress(idsVert, model.vertices, 3);
 		uncompress(idsUv, model.uvs, 2);
 		uncompress(idsNorm, model.normals, 3);
 		
@@ -121,12 +121,12 @@ public class WavefrontParser extends ModelParser{
 			vtcount++;
 			
 			//compress data
-			float[] oldVert=model.vertecies.toFloatArray();
+			float[] oldVert=model.vertices.toFloatArray();
 			int[] oldMat=model.materials.toIntArray();
 			float[] oldNorm=model.normals.toFloatArray();
 			float[] oldUv=model.uvs.toFloatArray();
 			
-			model.vertecies.size(vtcount*3);
+			model.vertices.size(vtcount*3);
 			if(!model.materials.isEmpty()) model.materials.size(vtcount);
 			if(!model.normals.isEmpty()) model.normals.size(vtcount*3);
 			if(!model.uvs.isEmpty()) model.uvs.size(vtcount*2);
@@ -141,9 +141,9 @@ public class WavefrontParser extends ModelParser{
 					}
 				}
 				int indexedPos=i;
-				model.vertecies.set(indexedPos*3+0, oldVert[unindexedPos*3+0]);
-				model.vertecies.set(indexedPos*3+1, oldVert[unindexedPos*3+1]);
-				model.vertecies.set(indexedPos*3+2, oldVert[unindexedPos*3+2]);
+				model.vertices.set(indexedPos*3+0, oldVert[unindexedPos*3+0]);
+				model.vertices.set(indexedPos*3+1, oldVert[unindexedPos*3+1]);
+				model.vertices.set(indexedPos*3+2, oldVert[unindexedPos*3+2]);
 				
 				if(!model.materials.isEmpty()) model.materials.set(indexedPos, oldMat[unindexedPos]);
 				
@@ -160,7 +160,7 @@ public class WavefrontParser extends ModelParser{
 			}
 			if(hasFlat.obj){
 				//flat model
-				ModelUtil.fixIndexedFlatShading(model, faceSize, idsVert, oldVert, oldMat, oldNorm, oldUv);
+				ModelUtil.fixIndexedFlatShading(model, faceSize, oldVert, oldMat, oldNorm, oldUv);
 			}
 			
 		}catch(Throwable e){
@@ -169,8 +169,8 @@ public class WavefrontParser extends ModelParser{
 		}
 		if(model.name.startsWith("test plane")){
 			LogUtil.printlnEr(model.indices);
-			for(int i=0;i<model.vertecies.size();i+=3){
-				LogUtil.printlnEr(i/3, new Vec3f().load(i, model.vertecies));
+			for(int i=0;i<model.vertices.size();i+=3){
+				LogUtil.printlnEr(i/3, new Vec3f().load(i, model.vertices));
 			}
 //			System.exit(0);
 		}
