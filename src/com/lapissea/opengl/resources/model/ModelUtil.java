@@ -22,7 +22,7 @@ public class ModelUtil{
 			
 			//rotate faces to increase indexing efficiency
 			boolean success=false;
-			int rotCount=1;// no need to check position 0 because that's already chacked above
+			int rotCount=1;// no need to check position 0 because that's already checked above
 			for(;rotCount<face.length;rotCount++){
 				int rotCount0=rotCount;
 				if(faces.stream().limit(faceNum).noneMatch(fac->fac[0]==face[rotCount0])){//
