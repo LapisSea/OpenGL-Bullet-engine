@@ -1,3 +1,5 @@
+Note: this project is currently abandoned in order to develop a more advanced vulkan/opengl engine
+
 ### What is this?
 A "home made" game engine basend on OpenGL 3.2+ compatability and ragdoll physics all in pure Java. (exluding GPU side computing, that's glsl)
 ________________
